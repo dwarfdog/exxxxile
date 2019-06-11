@@ -6123,6 +6123,14 @@ def rankingplayers(request):
             cursor.execute("SELECT count(1) FROM vw_players WHERE true "+searchby, {'searchbyA':searchbyA, 'searchbyN':searchbyN})
             res = cursor.fetchone()
             size = res[0]
+            if size > request.session.get('stat_players', 0):
+                cursor.execute('SELECT int4(count(1)), (SELECT int4(count(1)) FROM vw_players WHERE score >= %s) FROM vw_players', [gcontext['exile_user'].score])
+                res2 = cursor.fetchone()
+                if res2:
+                    request.session['stat_players'] = res2[0]
+                    request.session['stat_rank'] = res2[1]
+                    gcontext['stat_rank'] = request.session.get('stat_rank', 0)
+                    gcontext['stat_players'] = request.session.get('stat_players', 0)
             nb_pages = int(size/displayed)
             if nb_pages*displayed < size:
                 nb_pages += 1
