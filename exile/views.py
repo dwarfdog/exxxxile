@@ -2528,6 +2528,8 @@ def fleetshandler(request):
                         fleet['p'] = re[14]
                         fleet['relation'] = re[17]
                         fleet['planetname'] = getPlanetName(re[17], re[35], re[16], re[11])
+                        if not fleet['planetname']:
+                            fleet['planetname'] = re[16]
                     # Assign fleet destination planet
                     fleet['t_planetid'] = 0
                     fleet['t_g'] = 0
