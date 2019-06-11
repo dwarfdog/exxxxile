@@ -176,13 +176,13 @@
 		{% if msg.type == 302 %}Les dirigeants de la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> ont décidé de se rallier à nous.{% endif %}
 		{% if msg.type == 310 %}Les coûts d'entretien et de fonctionnement concernant la dernière période s'élèvent à <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16"> {{ msg.credits }}.<br/><br/>
 		<table class=clear>
-		<tr><td><img src="{% static 'exile/assets/interface/upkeep_commander.gif' %}" class="res" width="16" height="16">Commandants: {{ upkeep_commanders }}</td></tr>
-		<tr><td><img src="{% static 'exile/assets/interface/planet.gif' %}" class="res" width="16" height="16">Planètes: {{ upkeep_planets }}</td></tr>
-		<tr><td><img src="{% static 'exile/assets/interface/scientists.gif' %}" class="res" width="16" height="16">Scientifiques: {{ upkeep_scientists }}</td></tr>
-		<tr><td><img src="{% static 'exile/assets/interface/soldiers.gif' %}" class="res" width="16" height="16">Soldats: {{ upkeep_soldiers }}</td></tr>
-		<tr><td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class="res" width="16" height="16">Vaisseaux: {{ upkeep_ships }}</td></tr>
-		<tr><td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class="res" width="16" height="16">Vaisseaux en position: {{ upkeep_ships_in_position }}</td></tr>
-		<tr><td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class="res" width="16" height="16">Vaisseaux posés: {{ upkeep_ships_parked }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/upkeep_commander.gif' %}" class="res" width="16" height="16">Commandants: {{ msg.upkeep_commanders }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/planet.gif' %}" class="res" width="16" height="16">Planètes: {{ msg.upkeep_planets }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/scientists.gif' %}" class="res" width="16" height="16">Scientifiques: {{ msg.upkeep_scientists }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/soldiers.gif' %}" class="res" width="16" height="16">Soldats: {{ msg.upkeep_soldiers }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class="res" width="16" height="16">Vaisseaux: {{ msg.upkeep_ships }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class="res" width="16" height="16">Vaisseaux en position: {{ msg.upkeep_ships_in_position }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class="res" width="16" height="16">Vaisseaux posés: {{ msg.upkeep_ships_parked }}</td></tr>
 		</table><br/><br/>
 		Nos infrastructures ont généré <img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ msg.scientists }} et <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16"> {{ msg.soldiers }}{% endif %}
 		{% if msg.type == 311 %}Le commerce entre nos planètes et celles de nos alliés nous a rapporté <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16"> {{ msg.credits }}.{% endif %}
