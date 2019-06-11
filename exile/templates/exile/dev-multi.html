@@ -1,0 +1,22 @@
+{% load static %}{% load tz %}
+<form method="get" action="?">
+    <table class="default">
+        <tr class="title"><td colspan="4">Multi-compte</td></tr>
+        {% for i,it in item.items %}
+            <tr class="item{% if it.samebrowserid or it.samefingerprint %}del{% endif %}">
+                <td>
+                    [{{ it.alliance1 }}] <a href="{% url 'exile:nation' %}?name={{ it.login }}">{{ it.login }}</a> [<a href="{% url 'exile:devplayas' %}?player={{ it.login }}">I</a>]{% if it.can_ban_multi %} [<a href="{% url 'exile:devoptions' %}?action=ban&reason=Multicompte&reasonpublic=Suspension+pour+multicompte&submit=Envoyer&userid={{ it.userid }}&close=1" target=_blank>multi</a>] [<a href="{% url 'exile:devoptions' %}?action=ban&reason=Exploit&reasonpublic=Suspension+pour+exploitation+de+bug&submit=Envoyer&userid={{ it.userid }}&close=1" target=_blank>exploit</a>]{% endif %}<br/><a href="https://www.dnsstuff.com/tools/tracert.ch?ip={{ it.address }}" target=_blank>{{ it.address }}</a>/{{ it.forwarded_address }} ({{ it.browserid }})<br/>[[USERAGENT]] {{ it.browser }}<br/>[[FINGERP]] {{ it.fingerprint }}<br/>Reg: {{ it.regdate|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}<br/>Email: {{ it.email }}{% if it.samealliance %}<br/>[[ALLIANCE]] don: {{ it.given1 }} / pris: {{ it.taken1 }}{% endif %}<br/>FROM: {{ it.timestamp|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} {% if it.disconnected %}TO {{ it.disconnected|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}{% endif %}
+                </td>
+                <td>
+                    &gt; {% if it.sent_to %}{{ it.sent_to }}{% else %}0{% endif %}<br/>&lt; {% if it.received_from %}{{ it.received_from }}{% else %}0{% endif %}<br/><a href="{% url 'exile:devconnections' %}?u1={{ it.userid }}&u2={{ it.userid2 }}">Compare</a>
+                </td>
+                <td>
+                    [{{ it.alliance2 }}] <a href="{% url 'exile:nation' %}?name={{ it.login2 }}">{{ it.login2 }}</a> [<a href="{% url 'exile:devplayas' %}?player={{ it.login2 }}">I</a>]{% if it.can_ban_multi2 %} [<a href="{% url 'exile:devoptions' %}?action=ban&reason=Multicompte&reasonpublic=Suspension+pour+multicompte&submit=Envoyer&userid={{ it.userid2 }}&close=1" target=_blank>multi</a>] [<a href="{% url 'exile:devoptions' %}?action=ban&reason=Exploit&reasonpublic=Suspension+pour+exploitation+de+bug&submit=Envoyer&userid={{ it.userid2 }}&close=1" target=_blank>exploit</a>]{% endif %}<br/><a href="https://www.dnsstuff.com/tools/tracert.ch?ip={{ it.address2 }}" target=_blank>{{ it.address2 }}</a>/{{ it.forwarded_address2 }} ({{ it.browserid2 }})<br/>[[USERAGENT]] {{ it.browser2 }}<br/>[[FINGERP]] {{ it.fingerprint2 }}<br/>Reg: {{ it.regdate2|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}<br/>Email: {{ it.email2 }}{% if it.samealliance %}<br/>[[ALLIANCE]] don: {{ it.given2 }} / pris: {{ it.taken2 }}{% endif %}<br/>FROM: {{ it.timestamp2|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} {% if it.disconnected2 %}TO {{ it.disconnected2|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}{% endif %}
+                </td>
+                <td>
+                    {% if it.samepassword %}Même password{% endif %}{% if it.samealliance %}<br/>Même alliance{% endif %}<br/>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</form>

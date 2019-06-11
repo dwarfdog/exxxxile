@@ -1,0 +1,367 @@
+{% load static %}{% load tz %}
+<script>function LinkFleet(id, name){ if(id != "") document.write('<a href="{% url 'exile:fleet' %}?id=' + id + '">'+name+'</a>'); else document.write(name); }</script>
+
+<div id="reports">
+
+	<div>
+		<ul class="htabs">
+			{% for cat in tabnav.items %}
+				{% if cat.0 == '000' %}
+					<li {% if cat.1.selected %}class="active"{% endif %}><a href="?cat=0">Tout{% if cat.1.new %}&nbsp;({{ cat.1.new.total_newreports }}){% endif %}</a></li>
+				{% endif %}
+				{% if cat.0 == '100' %}
+					<li {% if cat.1.selected %}class="active"{% endif %}><a href="?cat=1">Alliance{% if cat.1.new %}&nbsp;({{ cat.1.new.cat_newreports }}){% endif %}</a></li>
+				{% endif %}
+				{% if cat.0 == '200' %}
+					<li {% if cat.1.selected %}class="active"{% endif %}><a href="?cat=2">Combats{% if cat.1.new %}&nbsp;({{ cat.1.new.cat_newreports }}){% endif %}</a></li>
+				{% endif %}
+				{% if cat.0 == '300' %}
+					<li {% if cat.1.selected %}class="active"{% endif %}><a href="?cat=3">Développement{% if cat.1.new %}&nbsp;({{ cat.1.new.cat_newreports }}){% endif %}</a></li>
+				{% endif %}
+				{% if cat.0 == '400' %}
+					<li {% if cat.1.selected %}class="active"{% endif %}><a href="?cat=4">Flottes{% if cat.1.new %}&nbsp;({{ cat.1.new.cat_newreports }}){% endif %}</a></li>
+				{% endif %}
+				{% if cat.0 == '500' %}
+					<li {% if cat.1.selected %}class="active"{% endif %}><a href="?cat=5">Echanges{% if cat.1.new %}&nbsp;({{ cat.1.new.cat_newreports }}){% endif %}</a></li>
+				{% endif %}
+				{% if cat.0 == '600' %}
+					<li {% if cat.1.selected %}class="active"{% endif %}><a href="?cat=6">Colonisations{% if cat.1.new %}&nbsp;({{ cat.1.new.cat_newreports }}){% endif %}</a></li>
+				{% endif %}
+				{% if cat.0 == '700' %}
+					<li {% if cat.1.selected %}class="active"{% endif %}><a href="?cat=7">Événements{% if cat.1.new %}&nbsp;({{ cat.1.new.cat_newreports }}){% endif %}</a></li>
+				{% endif %}
+				{% if cat.0 == '800' %}
+					<li {% if cat.1.selected %}class="active"{% endif %}><a href="?cat=8">Mercenaires{% if cat.1.new %}&nbsp;({{ cat.1.new.cat_newreports }}){% endif %}</a></li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+	</div>
+
+<table class="default" width="100%">
+{% for k,msg in messages.items %}
+	<tr class="item{% if msg.new %}highlight{% endif %}">
+		<td width="1%" valign="top"><img src="{% static 'exile/assets/reports/' %}{{ msg.type }}.jpg" width="64" height="64" class="report"></td>
+		<td width="90%" valign="top">
+		<div class="subject">{{ msg.date|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}{% if msg.nation %} | <a href="{% url 'exile:nation' %}?name={{ msg.nation }}">{{ msg.nation }}</a>{% endif %} |
+		{% if msg.type == 100 %}Invitation d'alliance.{% endif %}
+		{% if msg.type == 110 %}Demande de financement.{% endif %}
+		{% if msg.type == 111 %}Modification de la demande de financement.{% endif %}
+		{% if msg.type == 112 %}Annulation de la demande de financement.{% endif %}
+		{% if msg.type == 120 %}Invitation d'un nouveau membre.{% endif %}
+		{% if msg.type == 122 %}Invitation déclinée.{% endif %}
+		{% if msg.type == 130 %}Invitation acceptée.{% endif %}
+		{% if msg.type == 131 %}Départ de membre.{% endif %}
+		{% if msg.type == 132 %}Exclusion de membre.{% endif %}
+		{% if msg.type == 133 %}Changement de la taxe.{% endif %}
+		{% if msg.type == 150 %}Impossibilité de payer le tribut.{% endif %}
+		{% if msg.type == 151 %}Tribut non payé.{% endif %}
+		{% if msg.type == 160 %}Nous entrons en guerre !{% endif %}
+		{% if msg.type == 161 %}Demande de fin de guerre.{% endif %}
+		{% if msg.type == 162 %}Guerre terminée.{% endif %}
+		{% if msg.type == 163 %}Guerre annulée.{% endif %}
+		{% if msg.type == 171 %}PNA rompu.{% endif %}
+		{% if msg.type == 200 %}Rapport de bataille.{% endif %}
+		{% if msg.type == 201 %}Rapport de bataille (vainqueur).{% endif %}
+		{% if msg.type == 202 %}Rapport de bataille.{% endif %}
+		{% if msg.type == 210 %}Invasion ennemie : perte d'une planète.{% endif %}
+		{% if msg.type == 211 %}Invasion ennemie repoussée !{% endif %}
+		{% if msg.type == 212 %}Invasion repoussée.{% endif %}
+		{% if msg.type == 213 %}Résistance éliminée{% endif %}
+		{% if msg.type == 214 %}Invasion réussie !{% endif %}
+		{% if msg.type == 220 %}Prime de destruction{% endif %}
+		{% if msg.type == 300 %}Eurêka !{% endif %}
+		{% if msg.type == 302 %}Ralliement d'une planète.{% endif %}
+		{% if msg.type == 310 %}Production et coût d'entretien.{% endif %}
+		{% if msg.type == 311 %}Commerce intra-alliance.{% endif %}
+		{% if msg.type == 320 %}Un commandant a récemment eu une augmentation{% endif %}
+		{% if msg.type == 400 %}Flotte arrivée à destination.{% endif %}
+		{% if msg.type == 401 %}Récolteurs pleins.{% endif %}
+		{% if msg.type == 402 %}Plus de matériau à recycler.{% endif %}
+		{% if msg.type == 403 %}Détection d'une flotte.{% endif %}
+		{% if msg.type == 500 %}Vente effectuée.{% endif %}
+		{% if msg.type == 501 %}Cargaison reçue.{% endif %}
+		{% if msg.type == 502 %}Versement reçu.{% endif %}
+		{% if msg.type == 503 %}Vente effectuée.{% endif %}
+		{% if msg.type == 504 %}Vente effectuée sur planète alliée.{% endif %}
+		{% if msg.type == 505 %}Achat effectué sur une de nos planètes.{% endif %}
+		{% if msg.type == 510 %}Vente de la production.{% endif %}
+		{% if msg.type == 600 %}Nouvelle planète.{% endif %}
+		{% if msg.type == 601 %}Abandon de planète.{% endif %}
+		{% if msg.type == 602 %}Soulèvement.{% endif %}
+		{% if msg.type == 700 %}Vaisseaux marchands détruits.{% endif %}
+		{% if msg.type == 701 %}Vaisseaux marchands détruits.{% endif %}
+		{% if msg.type == 702 %}Inventaire des stocks après vente.{% endif %}
+		{% if msg.type == 710 %}Bulletin d'alerte : tempête solaire !{% endif %}
+		{% if msg.type == 711 %}Fin d'alerte : tempête solaire.{% endif %}
+		{% if msg.type == 720 %}Vol de ressources.{% endif %}
+		{% if msg.type == 721 %}Des émeutes éclatent.{% endif %}
+		{% if msg.type == 722 %}Un accident est survenu sur un chantier.{% endif %}
+		{% if msg.type == 723 %}Une expérience a mal tourné.{% endif %}
+		{% if msg.type == 724 %}Flotte retardée par une avarie.{% endif %}
+		{% if msg.type == 725 %}Soulèvement !{% endif %}
+		{% if msg.type == 726 %}Un bâtiment s'est effondré !{% endif %}
+		{% if msg.type == 730 %}Perte du signal d'une flotte !{% endif %}
+		{% if msg.type == 731 %}Rétablissement du contact avec une flotte.{% endif %}
+		{% if msg.type == 750 %}Baby-boom !{% endif %}
+		{% if msg.type == 751 %}Baby-boom terminé.{% endif %}
+		{% if msg.type == 752 %}Découverte de riches filons de minerai !{% endif %}
+		{% if msg.type == 753 %}Épuisement des filons de minerai.{% endif %}
+		{% if msg.type == 754 %}Découverte de riches gisements d'hydrocarbure !{% endif %}
+		{% if msg.type == 755 %}Épuisement des gisements d'hydrocarbure.{% endif %}
+		{% if msg.type == 790 %}Séisme.{% endif %}
+		{% if msg.type == 791 %}Ver de sable.{% endif %}
+		{% if msg.type == 795 %}Gestion du budget de la nation.{% endif %}
+		{% if msg.type == 796 %}Gestion du budget de la nation.{% endif %}
+		{% if msg.type == 797 %}Gestion du budget de la nation.{% endif %}
+		{% if msg.type == 798 %}Gestion du budget de la nation.{% endif %}
+		{% if msg.type == 800 %}Contre-espionnage : tentative d'espionnage.{% endif %}
+		{% if msg.type == 801 %}Contre-espionnage : notre Nation est espionnée !{% endif %}
+		{% if msg.type == 802 %}Contre-espionnage : nos Flottes sont espionnées !{% endif %}
+		{% if msg.type == 803 %}Contre-espionnage : une de nos planètes est espionnée !{% endif %}
+		{% if msg.type == 810 %}Rapport d'espionnage : nation.{% endif %}
+		{% if msg.type == 820 %}Rapport d'espionnage : flottes.{% endif %}
+		{% if msg.type == 830 %}Rapport d'espionnage : planète.{% endif %}
+		</div>
+		
+		<div class="body">
+		{% if msg.type == 100 %}L'alliance <a href="{% url 'exile:alliance' %}?tag={{ msg.alliancetag }}">[{{ msg.alliancetag }}] {{ msg.alliancename }}</a> nous propose de les rejoindre.<br/>
+		Vous devriez réfléchir à cette offre et répondre en accédant à <a href="{% url 'exile:allianceinvitations' %}">cette page</a>.
+		{% endif %}
+		{% if msg.type == 110 %}La nation <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a> a formulé une demande de financement s'élevant à <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ msg.credits }} crédits<script>var d='{{ msg.description|escapejs }}'; if(d!='') document.write(' pour la raison suivante : '+d);</script>.<br/>
+		Vous pouvez accéder à toutes les demandes en cours sur <a href="{% url 'exile:alliancewallet' %}?cat=2">cette page</a>.{% endif %}
+		{% if msg.type == 111 %}La nation <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a> a modifié sa demande de financement et demande désormais <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16">  {{ msg.credits }} crédits<script>var d='{{ msg.description|escapejs }}'; if(d!='') document.write(' pour la raison suivante : '+d);</script>.<br/>
+		Vous pouvez accéder à toutes les demandes en cours sur <a href="{% url 'exile:alliancewallet' %}?cat=2">cette page</a>.{% endif %}
+		{% if msg.type == 112 %}La nation <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a> a annulé sa demande de financement.{% endif %}
+		{% if msg.type == 120 %}Le recruteur <a href="{% url 'exile:nation' %}?name={{ msg.nation }}">{{ msg.nation }}</a> a invité la nation <a href="{% url 'exile:nation' %}?name={{ msg.invitedusername }}">{{ msg.invitedusername }}</a> à rejoindre notre alliance.{% endif %}
+		{% if msg.type == 121 %}L'invitation de la nation <a href="{% url 'exile:nation' %}?name={{ msg.invitedusername }}">{{ msg.invitedusername }}</a> à rejoindre notre alliance a été retirée par <a href="{% url 'exile:nation' %}?name={{ msg.nation }}">{{ msg.nation }}</a>.{% endif %}
+		{% if msg.type == 122 %}La nation <a href="{% url 'exile:nation' %}?name={{ msg.nation }}">{{ msg.nation }}</a> a décliné notre invitation.{% endif %}
+		{% if msg.type == 130 %}La nation <a href="{% url 'exile:nation' %}?name={{ msg.nation }}">{{ msg.nation }}</a> a rejoint notre alliance.{% endif %}
+		{% if msg.type == 131 %}La nation <a href="{% url 'exile:nation' %}?name={{ msg.nation }}">{{ msg.nation }}</a> a décidé de quitter notre alliance.{% endif %}
+		{% if msg.type == 132 %}La nation <a href="{% url 'exile:nation' %}?name={{ msg.nation }}">{{ msg.nation }}</a> va être exclue de l'alliance<script>if('{{ msg.username|escapejs }}'!='') document.write(' (action décidée par <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a>)');</script>.{% endif %}
+		{% if msg.type == 133 %}La nation <a href="{% url 'exile:nation' %}?name={{ msg.nation }}">{{ msg.nation }}</a> a modifié la taxe notre alliance.{% endif %}
+		{% if msg.type == 150 %}Notre alliance n'a pas pu honorer son contrat et payer les <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ msg.credits }} crédits à l'alliance <a href="{% url 'exile:alliance' %}?tag={{ msg.alliancetag }}">[{{ msg.alliancetag }}] {{ msg.alliancename }}</a>.{% endif %}
+		{% if msg.type == 151 %}Il semblerait que l'alliance <a href="{% url 'exile:alliance' %}?tag={{ msg.alliancetag }}">[{{ msg.alliancetag }}] {{ msg.alliancename }}</a> ait oublié de nous verser les <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16">  {{ msg.credits }} crédits prévus.{% endif %}
+		{% if msg.type == 160 %}L'alliance <a href="{% url 'exile:alliance' %}?tag={{ msg.alliancetag }}">[{{ msg.alliancetag }}] {{ msg.alliancename }}</a> vient de nous déclarer la guerre.{% endif %}
+		{% if msg.type == 161 %}L'alliance <a href="{% url 'exile:alliance' %}?tag={{ msg.alliancetag }}">[{{ msg.alliancetag }}] {{ msg.alliancename }}</a> propose d'arrêter la guerre.{% endif %}
+		{% if msg.type == 162 %}L'alliance <a href="{% url 'exile:alliance' %}?tag={{ msg.alliancetag }}">[{{ msg.alliancetag }}] {{ msg.alliancename }}</a> a décidé de mettre un terme à la guerre.{% endif %}
+		{% if msg.type == 163 %}La nation <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a> a annulée la guerre avec l'alliance <a href="{% url 'exile:alliance' %}?tag={{ msg.alliancetag }}">[{{ msg.alliancetag }}] {{ msg.alliancename }}</a>.{% endif %}
+		{% if msg.type == 171 %}L'alliance <a href="{% url 'exile:alliance' %}?tag={{ msg.alliancetag }}">[{{ msg.alliancetag }}] {{ msg.alliancename }}</a> a décidé de rompre le pacte de non-aggression que nous avions.{% endif %}
+		{% if msg.type == 200 %}Une bataille a eu lieu près de la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.<br/>
+		Vous pouvez accéder au <a href="{% url 'exile:battle' %}?id={{ msg.battleid }}&v={{ msg.ownerid }}">rapport du combat</a>.
+		{% endif %}
+		{% if msg.type == 201 %}Une bataille a eu lieu près de la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.<br/>
+		Vous pouvez accéder au <a href="{% url 'exile:battle' %}?id={{ msg.battleid }}&v={{ msg.ownerid }}">rapport du combat</a>.
+		{% endif %}
+		{% if msg.type == 202 %}Une bataille a eu lieu près de la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>. La bataille s'est déroulée très rapidement et nous n'avons pu établir une quelconque évaluation des forces ennemies en présence.
+		Vous pouvez accéder au <a href="{% url 'exile:battle' %}?id={{ msg.battleid }}&v={{ msg.ownerid }}">rapport des pertes</a>.
+		{% endif %}
+		{% if msg.type == 210 %}Une flotte ennemie de <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a> s'est emparée d'une de nos planètes. Elle est désormais connue sous le nom de <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.<br/>
+		Vous pouvez accéder au <a href="{% url 'exile:invasion' %}?id={{ msg.invasionid }}">rapport d'invasion</a>.
+		{% endif %}
+		{% if msg.type == 211 %}Une flotte ennemie de <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a> a tenté d'envahir notre planète <a href="{% url 'exile:training' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, mais nos vaillantes troupes l'ont repoussée !<br/>
+		Vous pouvez accéder au <a href="{% url 'exile:invasion' %}?id={{ msg.invasionid }}">rapport d'invasion</a>.
+		{% endif %}
+		{% if msg.type == 212 %}Notre tentative pour prendre la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> a lamentablement échoué.<br/>
+		Vous pouvez accéder au <a href="{% url 'exile:invasion' %}?id={{ msg.invasionid }}">rapport d'invasion</a> que nous avons pu établir suite aux indications de nos soldats tombés vaillament au combat.
+		{% endif %}
+		{% if msg.type == 213 %}Nous avons exterminé toute résistance ennemie sur la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.<br/>
+		Vous pouvez accéder au <a href="{% url 'exile:invasion' %}?id={{ msg.invasionid }}">rapport d'invasion</a>.
+		{% endif %}
+		{% if msg.type == 214 %}Nous avons pris la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> !<br/>
+		Vous pouvez accéder au <a href="{% url 'exile:invasion' %}?id={{ msg.invasionid }}">rapport d'invasion</a>.
+		{% endif %}
+		{% if msg.type == 220 %}La destruction récente de flottes de fossoyeur nous a rapporté la somme de <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16"> {{ msg.credits }}.{% endif %}
+		{% if msg.type == 300 %}Nos scientifiques ont terminé la recherche sur "{{ msg.researchname }}".<br/>
+		Ils sont prêts pour de <a href="{% url 'exile:research' %}">nouvelles recherches</a>.{% endif %}
+		{% if msg.type == 302 %}Les dirigeants de la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> ont décidé de se rallier à nous.{% endif %}
+		{% if msg.type == 310 %}Les coûts d'entretien et de fonctionnement concernant la dernière période s'élèvent à <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16"> {{ msg.credits }}.<br/><br/>
+		<table class=clear>
+		<tr><td><img src="{% static 'exile/assets/interface/upkeep_commander.gif' %}" class="res" width="16" height="16">Commandants: {{ upkeep_commanders }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/planet.gif' %}" class="res" width="16" height="16">Planètes: {{ upkeep_planets }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/scientists.gif' %}" class="res" width="16" height="16">Scientifiques: {{ upkeep_scientists }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/soldiers.gif' %}" class="res" width="16" height="16">Soldats: {{ upkeep_soldiers }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class="res" width="16" height="16">Vaisseaux: {{ upkeep_ships }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class="res" width="16" height="16">Vaisseaux en position: {{ upkeep_ships_in_position }}</td></tr>
+		<tr><td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class="res" width="16" height="16">Vaisseaux posés: {{ upkeep_ships_parked }}</td></tr>
+		</table><br/><br/>
+		Nos infrastructures ont généré <img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ msg.scientists }} et <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16"> {{ msg.soldiers }}{% endif %}
+		{% if msg.type == 311 %}Le commerce entre nos planètes et celles de nos alliés nous a rapporté <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16"> {{ msg.credits }}.{% endif %}
+		{% if msg.type == 320 %}Le commandant {{ msg.commandername }} s'est récemment distingué et a obtenu une promotion. Vous devriez vous rendre sur la page de gestion des commandants afin de lui attribuer son nouveau point de compétence.{% endif %}
+		{% if msg.type == 400 %}La flotte <script>LinkFleet('{{ msg.fleetid }}','{{ msg.fleetname }}')</script> est arrivée aux alentours de la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.{% endif %}
+		{% if msg.type == 401 %}Les récolteurs de la flotte <script>LinkFleet('{{ msg.fleetid }}','{{ msg.fleetname }}')</script> ne peuvent plus recycler car leurs soutes sont pleines. Videz leurs soutes avant de recycler à nouveau.{% endif %}
+		{% if msg.type == 402 %}La flotte <script>LinkFleet('{{ msg.fleetid }}','{{ msg.fleetname }}')</script> a terminé le recyclage aux coordonnées suivantes <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, il n'y a plus de ressources dans les parages.{% endif %}
+		{% if msg.type == 403 %}Une flotte de la nation <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a> vient d'être détectée à proximité de notre planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.{% endif %}
+		{% if msg.type == 500 %}Le commerçant venu acheter nos ressources mises en vente sur <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> est arrivé à sa destination sans rencontrer de problème.<br/>
+		Pour rappel, <script>if({{ msg.ore }} > 0){ document.write('{{ msg.ore }} unités de minerai'); if({{ msg.hydrocarbon }} > 0) document.write(" et {{ msg.hydrocarbon }} unités d'hydrocarbure");} else document.write("{{ msg.hydrocarbon }} unités d'hydrocarbure")</script> ont été vendues pour un total de <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ msg.credits }} crédits.<br/>Nous venons de recevoir la seconde moitié du paiement (la première moitié a été payée à la vente).
+		{% endif %}
+		{% if msg.type == 501 %}Une flotte de <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a> vient de décharger des ressources sur notre planète <a href="{% url 'exile:buildings' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.<br/>
+		<script>if({{ msg.ore }} > 0 || {{ msg.hydrocarbon }} > 0) {
+		document.write('Nos stocks ont augmenté de '); if({{ msg.ore }} > 0){ document.write('{{ msg.ore }} unités de minerai'); if({{ msg.hydrocarbon }} > 0) document.write(" et de {{ msg.hydrocarbon }} unités d'hydrocarbure");} else document.write("{{ msg.hydrocarbon }} unités d'hydrocarbure"); document.write('.<br/>'); }
+		if({{ msg.scientists }}>0 || {{ msg.soldiers }}>0 || {{ msg.workers }} > 0) {
+			document.write('Nous notons'+(({{ msg.ore }}>0 || {{ msg.hydrocarbon }}>0)?' aussi':'') +' l\'arrivée de personnel : ');
+			if({{ msg.scientists }}>0) document.write('{{ msg.scientists }} scientifiques, ');
+			if({{ msg.soldiers }}>0) document.write('{{ msg.soldiers }} soldats, ');
+			if({{ msg.workers }}>0) document.write('{{ msg.workers }} travailleurs, ');
+			document.write('ils se sont parfaitement intégrés et travaillent désormais sous nos ordres.');
+			}
+		</script>
+		{% endif %}
+		{% if msg.type == 502 %}Vous avez reçu la somme de <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ msg.credits }} crédits par messagerie de la part de <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a>.{% endif %}
+		{% if msg.type == 503 %}Suite au dépôt de 
+		<script>
+			var s = "";
+
+			if({{ msg.ore }} > 0) s += '{{ msg.ore }} unités de minerai';
+			if({{ msg.hydrocarbon }} > 0) s += (s!=''?', ':'')+'{{ msg.hydrocarbon }} unités d\'hydrocarbure'; 
+			
+			if({{ msg.scientists }} > 0) s += (s!=''?', ':'')+'{{ msg.scientists }} scientifiques';
+			if({{ msg.soldiers }} > 0) s += (s!=''?', ':'')+'{{ msg.soldiers }} soldats';
+			if({{ msg.workers }} > 0) s += (s!=''?', ':'')+'{{ msg.workers }} travailleurs';
+			document.write(s);
+		</script> 
+		
+		sur une de leurs planètes, les marchands nous ont payé la somme de <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ msg.credits }} crédits.{% endif %}
+		{% if msg.type == 504 %}Suite au dépôt de 
+		<script>
+			var s = "";
+
+			if({{ msg.ore }} > 0) s += '{{ msg.ore }} unités de minerai';
+			if({{ msg.hydrocarbon }} > 0) s += (s!=''?', ':'')+'{{ msg.hydrocarbon }} unités d\'hydrocarbure'; 
+			
+			if({{ msg.scientists }} > 0) s += (s!=''?', ':'')+'{{ msg.scientists }} scientifiques';
+			if({{ msg.soldiers }} > 0) s += (s!=''?', ':'')+'{{ msg.soldiers }} soldats';
+			if({{ msg.workers }} > 0) s += (s!=''?', ':'')+'{{ msg.workers }} travailleurs';
+			document.write(s);
+		</script>
+		sur la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, nous avons été payé la somme de <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ msg.credits }} crédits.{% endif %}
+		{% if msg.type == 505 %}Une flotte de <a href="{% url 'exile:nation' %}?name={{ msg.username }}">{{ msg.username }}</a> vient de décharger des ressources sur notre planète <a href="{% url 'exile:buildings' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.<br/>
+		<script>if({{ msg.ore }} > 0 || {{ msg.hydrocarbon }} > 0) {
+		document.write('Nos stocks ont augmenté de '); if({{ msg.ore }} > 0){ document.write('{{ msg.ore }} unités de minerai'); if({{ msg.hydrocarbon }} > 0) document.write(" et de {{ msg.hydrocarbon }} unités d'hydrocarbure");} else document.write("{{ msg.hydrocarbon }} unités d'hydrocarbure"); document.write('.<br/>'); }
+		if({{ msg.scientists }}>0 || {{ msg.soldiers }}>0 || {{ msg.workers }} > 0) {
+			document.write('Nous notons'+(({{ msg.ore }}>0 || {{ msg.hydrocarbon }}>0)?' aussi':'') +' l\'arrivée de personnel : ');
+			if({{ msg.scientists }}>0) document.write('{{ msg.scientists }} scientifiques, ');
+			if({{ msg.soldiers }}>0) document.write('{{ msg.soldiers }} soldats, ');
+			if({{ msg.workers }}>0) document.write('{{ msg.workers }} travailleurs, ');
+			document.write('ils se sont parfaitement intégrés et travaillent désormais sous nos ordres.');
+			}
+		</script>
+		Nous avons payé la somme de <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ msg.credits }} crédits.
+		{% endif %}
+		{% if msg.type == 510 %}La production de la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> a rapporté la somme de <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ msg.credits }} crédits.{% endif %}
+		{% if msg.type == 600 %}Nous occupons désormais la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.<br/>
+		Nous devrions vérifier les installations et <a href="{% url 'exile:buildings' %}?planet={{ msg.planetid }}">construire les bâtiments</a> dont nous avons besoin.
+		{% endif %}
+		{% if msg.type == 601 %}
+		Suite à votre ordre, la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> a été abandonnée. Il y a eu quelques mouvements de foules mais finalement la décision a été acceptée par la majorité.<br/>
+		Bien qu'une partie infime de la population soit restée sur la planète, la plupart de la population a préféré partir vers d'autres planètes proches. Tous les bâtiments ont pu être détruit sans résistance de la part de la population.<br/>
+		Nous perdons 20 points de contrôle sur toutes nos planètes.
+		{% endif %}
+		{% if msg.type == 602 %}
+		Suite à votre ordre, nous avons essayé d'abandonner la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, malheureusement, d'importantes manifestations se sont déclarées dans toute la colonie pour montrer leur indignation face à cette décision.<br/>
+		Les travailleurs qui étaient censés détruire les bâtiments de la colonie ont été arrêtés avant même de commencer. Il s'en est suivi un coup d'état et une déclaration d'indépendance émanant des dirigeants temporaires de la planète.<br/>
+		Nous ne contrôlons plus la planète et les bâtiments sont restés fonctionnels ! Une autre nation pourrait s'en emparer et s'en servir contre nous.<br/>
+		Nous perdons 20 points de contrôle sur toutes nos planètes.
+		{% endif %}
+		{% if msg.type == 700 %}
+		La flotte de vaisseaux marchands venue prendre nos ressources a disparu de nos radars. La guilde des marchands parle d'une avarie dans un des moteurs des vaisseaux qui aurait fait exploser toute la flotte. Celle-ci se refuse par la même occasion à payer les <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> <script>document.write({{ msg.credits }}/2);</script> crédits restant de la vente.
+		{% endif %}
+		{% if msg.type == 701 %}
+		La flotte de vaisseaux marchands venue prendre nos ressources a disparu de nos radars. La guilde des marchands parle d'une attaque de pirates. Celle-ci se refuse par la même occasion à payer les <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> <script>document.write({{ msg.credits }}/2);</script> crédits restant de la vente.
+		{% endif %}
+		{% if msg.type == 702 %}
+		Un rapide inventaire a été effectué et il semblerait que le vaisseau marchand ait oublié une partie de sa cargaison sur la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.<br/>Après vérification, nous avons retrouvé <script>
+		if({{ msg.ore }} > 0){
+			document.write('{{ msg.ore }} unités de minerai'); 
+			if({{ msg.hydrocarbon }} > 0) document.write(" et {{ msg.hydrocarbon }} unités d'hydrocarbure.");
+		}
+		else
+			document.write(" {{ msg.hydrocarbon }} unités d'hydrocarbure.");</script>
+		{% endif %}
+		{% if msg.type == 710 %}De violentes éruptions solaires provoquent des orages électromagnétiques sur la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>. Ces orages chargent le sol et des courts-circuits peuvent se produire entre les appareils électriques et la terre. Afin d'éviter tout accident, nous sommes obligés de baisser notre production d'environ 60% jusqu'à ce que ces éruptions se terminent.
+		{% endif %}
+		{% if msg.type == 711 %}Les éruptions solaires ont cessé sur <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>. Nous reprenons une activité normale.
+		{% endif %}
+		{% if msg.type == 720 %}
+		Une intrusion a eu lieu dans nos entrepôts de <a href="{% url 'exile:training' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>. Après inventaire des stocks, il semblerait <script>
+		if({{ msg.ore }} > 0 || {{ msg.hydrocarbon }} > 0) {
+			if({{ msg.ore }} > 0){
+				document.write('que {{ msg.ore }} unités de minerai'); 
+				if({{ msg.hydrocarbon }} > 0) document.write(" et {{ msg.hydrocarbon }} unités d'hydrocarbure");
+			}
+			else
+				document.write("que {{ msg.hydrocarbon }} unités d'hydrocarbure");
+
+			document.write(" aient été volées.<br/>Nous ");
+		}
+		else
+			document.write("que rien n'ait été volé.<br/>Cependant, nous "); </script>
+		devrions augmenter nos effectifs de <a href="{% url 'exile:training' %}?planet={{ msg.planetid }}">soldats</a> afin de prévenir ce genre d'agissement dans le futur.<br/>Nous perdons 3 points de contrôle sur cette planète.
+		{% endif %}
+		{% if msg.type == 721 %}
+		Des rassemblements se sont formés sur <a href="{% url 'exile:training' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> pour manifester contre le manque de sécurité et ont dégénéré en émeutes générales. Les gens sont devenus incontrôlables et s'en sont pris aux bâtiments administratifs.
+		<script>
+		if({{ msg.scientists }} > 0 || {{ msg.soldiers }} > 0 || {{ msg.workers }} > 0) {
+			document.write("Il y a eu beaucoup de blessés dont plusieurs morts. Il y a à déplorer la mort de ");
+
+			if({{ msg.scientists }} > 0){
+				document.write("{{ msg.scientists }} scientifiques"); 
+				if({{ msg.soldiers }} > 0) document.write(", {{ msg.soldiers }} soldats");
+				if({{ msg.workers }} > 0) document.write(" et {{ msg.workers }} travailleurs");
+			}
+			else
+			if({{ msg.soldiers }} > 0){
+				document.write("{{ msg.soldier }} soldats");
+				if({{ msg.workers }} > 0) document.write(" et {{ msg.workers }} travailleurs");
+			}
+			else
+			if({{ msg.workers }} > 0) document.write("{{ msg.workers }} travailleurs");
+
+			document.write(".<br/>La population est encore sous le choc.");
+		}
+		else
+		{
+			document.write("Il y a eu beaucoup de blessés mais heureusement aucun mort n'est à déplorer.");
+		}
+		</script><br/>Nous perdons 17 points de contrôle sur cette planète et 2 points sur toutes les autres planètes.
+		{% endif %}
+		{% if msg.type == 722 %}
+		Une mauvaise manoeuvre sur un chantier ..
+		{% endif %}
+		{% if msg.type == 723 %}
+		Un accident est survenu dans un laboratoire de recherche sur <a href="{% url 'exile:training' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.<br/>
+		Plusieurs <a href="{% url 'exile:training' %}?planet={{ msg.planetid }}"> scientifiques</a> ont été blessés dont {{ msg.scientists }} mortellement.
+		{% endif %}
+		{% if msg.type == 724 %}La flotte <script>LinkFleet('{{ msg.fleetid }}','{{ msg.fleetname }}')</script> a subi une avarie. Le temps que les techniciens de bord réparent les vaisseaux endommagés, la flotte a perdu une heure sur l'horaire prévu.{% endif %}
+		{% if msg.type == 725 %}Excédé par le peu de soutien et d'attention que vous pretez à la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, les dirigeants de la colonie ont décidé de déclarer leur indépendance !<br/>Nous n'avons désormais plus aucun contrôle sur cette planète.{% endif %}
+		{% if msg.type == 726 %}Le bâtiment "{{ msg.building }}"{% endif %}
+		{% if msg.type == 730 %}Nous venons de perdre le contact avec la flotte {{ msg.fleetname }} ! Nos techniciens ne sont pas en mesure de nous en expliquer la cause et nous n'avons reçu aucun signalement de cette flotte à propos d'un quelconque problème.{% endif %}
+		{% if msg.type == 731 %}Une flotte connue sous le nom de {{ msg.fleetname }} vient de nous transmettre qu'elle vient d'arriver à destination ! Nous avions perdu le contact avec cette flotte précédemment.{% endif %}
+		{% if msg.type == 750 %}La population de <a href="{% url 'exile:planet' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> est contente et la croissance de la population augmente.{% endif %}
+		{% if msg.type == 751 %}Le baby-boom sur <a href="{% url 'exile:planet' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a> est terminé et la croissance de la population est revenue à son niveau normal.{% endif %}
+		{% if msg.type == 752 %}De riches filons de minerai ont été découverts sur <a href="{% url 'exile:planet' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, la production de minerai est augmentée.{% endif %}
+		{% if msg.type == 753 %}Nous avons épuisé les filons de minerai que nous avions localisés sur <a href="{% url 'exile:planet' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, la production de minerai est redescendue au niveau normal.{% endif %}
+		{% if msg.type == 754 %}De riches gisements d'hydrocarbure ont été découverts sur <a href="{% url 'exile:planet' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, la production en hydrocarbure est augmentée.{% endif %}
+		{% if msg.type == 755 %}Nous avons épuisé les riches gisements d'hydrocarbure que nous avions localisés sur <a href="{% url 'exile:planet' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, la production en hydrocarbure est redescendue au niveau normal.{% endif %}
+		{% if msg.type == 780 %}Un de nos hommes a récemment obtenu le grade de commandant.<br/>Le commandant {{ msg.commandername }} a juré fidélité et se tient prêt à vous servir.<br/>Vous devriez inspecter <a href="{% url 'exile:commanders' %}">ses compétences</a> et l'affecter à une place qui lui conviendrait.{% endif %}
+		{% if msg.type == 790 %}D'importants séismes ont eu lieu sur la planète <a href="{% url 'exile:buildings' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>. Beaucoup de bâtiments ont souffert et le bâtiment "{{ msg.building }}" s'est effondré. Nous déplorons la mort de {{ msg.workers }} travailleurs. Nous perdons 100 points de contrôle sur cette planète.{% endif %}
+		{% if msg.type == 791 %}Un énorme ver de sable a été aperçu près de la colonie de la planète <a href="{% url 'exile:buildings' %}?planet={{ msg.planetid }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>, il s'est attaqué à plusieurs bâtiments avant de se focaliser sur le bâtiment "{{ msg.building }}" puis il est reparti.<br/>Les ruines du bâtiment sont en train d'être déblayées, les autres bâtiments sont encore fonctionnels et sont en train d'être réparés.<br/> Les personnes sur place ont pu être évacuées à temps et aucun mort n'est à déplorer.<br/>Nous perdons 20 points de contrôle sur cette planète.{% endif %}
+		{% if msg.type == 795 %}Le ministère des finances n'approuve pas vos dépenses et vous le fait savoir.{% endif %}
+		{% if msg.type == 796 %}Le ministère des finances prévoit une banqueroute prochainement si le déficit n'est pas comblé d'ici quelques jours.{% endif %}
+		{% if msg.type == 797 %}L'opposition dénonce publiquement votre pitoyable gestion de l'argent de la nation.{% endif %}
+		{% if msg.type == 798 %}Cette situation n'est plus tenable, vous devez réagir très rapidement. Vos propres partisans commencent à se désolidariser de vous.{% endif %}
+		{% if msg.type == 800 %}Nos services de contre-espionnage ont repéré un espion et l'ont maîtrisé. Malheureusement, celui-ci s'est suicidé en cellule avant de pouvoir nous révéler le nom de son employeur.{% endif %}
+		{% if msg.type == 801 %}Nos services de contre-espionnage ont capté un message codé provenant certainement d'un espion, destiné à <a href="{% url 'exile:nation' %}?name={{ msg.description }}">{{ msg.description }}</a>, contenant des informations sur l'ensemble de notre nation.{% endif %}
+		{% if msg.type == 802 %}Nos services de contre-espionnage ont capté un message codé provenant certainement d'un espion, destiné à <a href="{% url 'exile:nation' %}?name={{ msg.description }}">{{ msg.description }}</a>, contenant des données tactiques sur l'ensemble de nos flottes. Nous devrions les redéployer discrètement afin que l'ennemi ait des informations périmées.{% endif %}
+		{% if msg.type == 803 %}Nos services de contre-espionnage ont capté un message codé provenant certainement d'un espion, destiné à <a href="{% url 'exile:nation' %}?name={{ msg.description }}">{{ msg.description }}</a>, contenant des informations capitales sur la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>. Il est possible que l'ennemi connaisse nos forces de défenses.{% endif %}
+		{% if msg.type == 810 %}L'espion de la Compagnie des Pirates de la Fosse est revenu avec <a href="{% url 'exile:spyreport' %}?id={{ msg.spyid }}&key={{ msg.spykey }}" title="Rapport">son rapport</a> sur la nation <a href="{% url 'exile:nation' %}?name={{ msg.description }}">{{ msg.description }}</a>.{% endif %}
+		{% if msg.type == 820 %}L'espion de la Compagnie des Pirates de la Fosse est revenu avec <a href="{% url 'exile:spyreport' %}?id={{ msg.spyid }}&key={{ msg.spykey }}" title="Rapport">son rapport</a> sur les flottes de <a href="{% url 'exile:nation' %}?name={{ msg.description }}">{{ msg.description }}</a>.{% endif %}
+		{% if msg.type == 830 %}L'espion de la Compagnie des Pirates de la Fosse est revenu avec <a href="{% url 'exile:spyreport' %}?id={{ msg.spyid }}&key={{ msg.spykey }}" title="Rapport">son rapport</a> sur la planète <a href="{% url 'exile:map' %}?g={{ msg.g }}&s={{ msg.s }}">{{ msg.planetname }} ({{ msg.g }}.{{ msg.s }}.{{ msg.p }})</a>.{% endif %}
+		</div>
+		</td>
+	</tr>
+{% endfor %}
+{% if noreports %}
+	<tr class="header" ><td colspan="2">Aucun rapport</td></tr>
+{% endif %}
+</table>
+</div>

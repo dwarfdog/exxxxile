@@ -1,0 +1,106 @@
+{% load static %}{% load exile_extras %}{% load tz %}
+<div id="battle">
+
+    <table width="100%" class="default">
+        <tr class="title">
+            <td colspan="5">Combat à proximité de {{ planet }} [{{ g }}.{{ s }}.{{ p }}] - {{ time|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} en {{ rounds }}&nbsp;round(s)</td>
+        </tr>
+
+        <tr class="header">
+            <td>Flotte</td>
+            <td>Vaisseaux</td>
+            <td>Perdus</td>
+            <td>Détruits</td>
+            <td>Après combat</td>
+        </tr>
+
+        {% for i,op in opponent.items %}
+            <tr class="category {% if op.self %}self{% endif %}{% if op.friend %}friend{% endif %}{% if op.ally %}ally{% endif %}{% if op.enemy %}enemy{% endif %}">
+                <td>{% if op.attack %}<img src="{% static 'exile/assets/interface/stance_attack.gif' %}" alt="Attaque" class="stance">{% endif %}{% if op.defend %}<img src="{% static 'exile/assets/interface/stance_defend.gif' %}" alt="Rispote" class="stance">{% endif %}<a href="?id={{ battleid }}&v={{ view }}{% if op.public %}&by={{ userid }}&key={{ key }}{% endif %}" class="{% if op.self %}self{% endif %}{% if op.friend %}friend{% endif %}{% if op.ally %}ally{% endif %}{% if op.enemy %}enemy{% endif %}">{% if op.alliance %}[{{ op.alliancetag }}] {% endif %}{{ op.opponent }}{% if op.won %} (vainqueur){% endif %}</a></td>
+                <td>{{ op.ships }}</td>
+                <td>{{ op.lost }}</td>
+                <td>{{ op.killed }}</td>
+                <td>{{ op.after }}</td>
+            </tr>
+            {% for j,fl in op.fleet.items %}
+                <tr class="category {% if fl.self %}self{% endif %}{% if fl.friend %}friend{% endif %}{% if fl.ally %}ally{% endif %}{% if fl.enemy %}enemy{% endif %}">
+                    <td>{{ fl.fleet }} (B:{{ fl.mod_shield }} M:{{ fl.mod_handling }} C:{{ fl.mod_tracking_speed }} D:{{ fl.mod_damage }})</td>
+                    <td>{{ fl.ships }}</td>
+                    <td>{{ fl.lost }}</td>
+                    <td>{{ fl.killed }}</td>
+                    <td>{{ fl.after }}</td>
+                </tr>
+                {% for k,ships in fl.category.items %}
+                    <tr class="smallitem">
+                        <td>
+                            <span class="dot">&middot;</span>
+                            {% if k == 10 %}Vaisseaux utilitaires{% endif %}
+                            {% if k == 11 %}Vaisseaux de déploiement{% endif %}
+                            {% if k == 15 %}Vaisseaux tactiques{% endif %}
+                            {% if k == 20 %}Vaisseaux légers{% endif %}
+                            {% if k == 30 %}Corvettes{% endif %}
+                            {% if k == 40 %}Frégates{% endif %}
+                            {% if k == 50 %}Croiseurs{% endif %}
+                            {% if k == 60 %}Dreadnought{% endif %}
+                            {% if k == 80 %}Titan{% endif %}
+                            {% if k == 90 %}Plateforme de défense{% endif %}
+                            <br/>
+                            {% for l,sh in ships.items %}
+                                <span class="dot">&nbsp;&nbsp;&middot;</span>
+                                {% if sh.name %}{{ sh.label }}{% else %}modèle inconnu{% endif %}
+                                <br/>
+                            {% endfor %}
+                            <br/>
+                        </td>
+                        <td>
+                            <br/>
+                            {% for l,sh in ships.items %}
+                                {{ sh.ships }}
+                                <br/>
+                            {% endfor %}
+                            <br/>
+                        </td>
+                        <td>
+                            <br/>
+                            {% for l,sh in ships.items %}
+                                {{ sh.lost }}
+                                <br/>
+                            {% endfor %}
+                            <br/>
+                        </td>
+                        <td>
+                            <br/>
+                            {% for l,sh in ships.items %}
+                                {% for m,ki in sh.killed.items %}{{ ki.killed_name }} x{{ ki.killed_count }}<br/>{% endfor %}
+                                {% if sh.killed_total %}Total: {{ sh.killed_total }}<br/>{% endif %}{% if sh.killed_zero %}0<br/>{% endif %}
+                            {% endfor %}
+                            <br/>
+                        </td>
+                        <td>
+                        <br/>
+                            <br/>
+                            {% for l,sh in ships.items %}
+                                {{ sh.after }}
+                                <br/>
+                            {% endfor %}
+                            <br/>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+            <tr class="smallitem">
+                <td colspan=5>&nbsp;</td>
+            </tr>
+        {% endfor %}
+        {% if publiclink %}
+            <tr class="title">
+                <td colspan="5">
+                    <p>Un rapport de ce combat est visible par tous à cette adresse publique:<br/>
+                    <a href="https://{% settings_value 'DOMAIN' %}{% url 'exile:battleview' %}?id={{ battleid }}&by={{ userid }}&v={{ userid }}&key={{ key }}">https://{% settings_value 'DOMAIN' %}{% url 'exile:battleview' %}?id={{ battleid }}&by={{ userid }}&v={{ userid }}&key={{ key }}</a></p>
+                    <p class=error>Veillez à ne pas laisser l'ennemi s'en emparer.</p>
+                </td>
+            </tr>
+        {% endif %}
+    </table>
+
+</div>

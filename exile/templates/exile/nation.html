@@ -1,0 +1,85 @@
+{% load static %}{% load tz %}{% load bbcode_tags %}
+<form method="get" action="{% url 'exile:nation' %}">
+<table class="default">
+
+<tr class="title">
+	<td colspan="2"><b>Saisissez le nom d'une nation :</b>&nbsp;
+		<input type="text" size="14" maxlength="14" name="name" value=""><br/>
+	</td>
+</tr>
+
+<tr class="item">
+	<td align="center" colspan="2">
+		<table class="clear">
+			<tr>
+				<td>
+					{% if avatar %}<img src="{{ avatar_url }}" width=64 height=64 class="avatar">{% endif %}
+					{% if noavatar %}<img src="{% static 'exile/assets/interface/noavatar.gif' %}" width=64 height=64 class="avatar">{% endif %}
+				</td>
+				<td valign="top">{% if alliance %}<a href="alliance.asp?tag={{ alliancetag }}" class="{% if alliance.self %}self{% endif %}{% if alliance.ally %}ally{% endif %}{% if alliance.friend %}friend{% endif %}{% if alliance.enemy %}enemy{% endif %}">[{{ alliancetag }}]</a>&nbsp;{% endif %}<span class="{% if alliance.self %}self{% endif %}{% if alliance.ally %}ally{% endif %}{% if alliance.friend %}friend{% endif %}{% if alliance.enemy %}enemy{% endif %}">{{ name }}</span>, 
+				{% if alliance %}{{ rank_label|escape }}{% endif %}{% if noalliance %}indépendant{% endif %}
+				<br/>
+				Date d'arrivée:&nbsp;{{ regdate|timezone:"Europe/Paris"|date:"d/m/Y" }}<br/>
+				<br/>
+				{% if sendmail %}<a href="/game/mails.asp?a=new&b={{ name }}" title="Nouveau message à {{ name }}">Envoyer un message</a>{% endif %}
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+
+{% if description %}<tr class="item"><td colspan="2"><p>{{ description|bbcode|safe }}</p></td></tr>{% endif %}
+
+{% if alliances %}
+<tr class="category"><td>Alliance</td><td>Rallié</td></tr>
+{% for i,item in alliances.items %}
+	<tr class="item"><td>[{{ item.history_tag|escape }}] {{ item.history_name|escape }}</td><td>De {{ item.joined|timezone:"Europe/Paris"|date:"d/m/Y" }} à {{ item.left|timezone:"Europe/Paris"|date:"d/m/Y" }}</td></tr>
+{% endfor %}
+{% endif %}
+
+{% if allied %}
+	<tr class="category"><td>Planètes colonisées</td><td>Flottes</td></tr>
+	<tr class="item" valign="top">
+		<td>
+			<table class="clear">
+			{% for i,pla in allied.planet.items %}
+				<tr>
+					<td><a href="{% url 'exile:map' %}?g={{ pla.g }}&s={{ pla.s }}" title="Localiser la planète {{ pla.planetname }}">{{ pla.planetname }}&nbsp;({{ pla.g }}.{{ pla.s }}.{{ pla.p }})</a></td>
+				</tr>
+			{% endfor %}
+			{% if allied.noplanets %}
+			<tr>
+				<td>Aucune planète</td>
+			</tr>
+			{% endif %}
+			</table>
+		</td>
+		<td>
+			<table class="clear" width="100%">
+			{% for i,fle in allied.fleet.items %}
+				<tr>
+					<td nowrap>{% if fle.owned %}<a href="fleet.asp?id={{ fle.fleetid }}">{% endif %}{% if fle.ally %}<span class="ally">{% endif %}{{ fle.fleetname }}{% if fle.owned %}</a>{% endif %}{% if fle.ally %}</span>{% endif %}&nbsp;({{ fle.signature }})</td>
+					<td><script>putplanet("{{ fle.planetid }}","{{ fle.planetname }}","{{ fle.g }}","{{ fle.s }}","{{ fle.p }}",{{ fle.relation }});</script></td>
+					<td nowrap>
+					{% if fle.recycling %}
+					Recyclage - (<script>putcountdown1({{ fle.time }}, 'Cycle terminé', '{% url 'exile:nation' %}?')</script>)
+					{% endif %}
+					{% if fle.patrolling %}En patrouille{% endif %}
+					{% if fle.fighting %}En combat{% endif %}
+					{% if fle.moving %}En transit vers <script>putplanet("{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }});</script> - (<script>putcountdown1({{ fle.time }}, 'Arrivé', '{% url 'exile:nation' %}')</script>)
+					{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+			{% if allied.nofleets %}
+				<tr>
+					<td>Aucune flotte</td>
+				</tr>
+			{% endif %}
+			</table>
+		</td>
+	</tr>
+{% endif %}
+
+</table>
+</form>

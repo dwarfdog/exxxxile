@@ -1,0 +1,41 @@
+{% load static %}
+<table class="default" width="600">
+
+<tr class="header">
+<td><a href="?col=7[[r7]]&r=7[/r7]][[search_params]]&a={param_a}[/search_params]]">Tag</a>&nbsp;<a href="?col=1[[r1]]&r=1[/r1]][[search_params]]&a={param_a}[/search_params]]">Alliance</a></td>
+{% if hide %}
+<td><a href="?col=2[[r2]]&r=2[/r2]][[search_params]]&a={param_a}[/search_params]]">Score</a></td>
+<td><a href="?col=5[[r5]]&r=5[/r5]][[search_params]]&a={param_a}[/search_params]]">Moyenne</a></td>
+{% endif %}
+<td><a href="?col=3[[r3]]&r=3[/r3]][[search_params]]&a={param_a}[/search_params]]">Membres</a></td>
+<td><a href="?col=4[[r4]]&r=4[/r4]][[search_params]]&a={param_a}[/search_params]]">Colonies</a></td>
+<td><a href="?col=6[[r6]]&r=6[/r6]][[search_params]]&a={param_a}[/search_params]]">Date de création</a></td>
+</tr>
+
+{% if nav %}
+    <tr class="nav">
+        <td colspan=4 align=left>Page {{ page_displayed }}, Alliances {{ page_first }}-{{ page_last }}. Aller à
+        {% for k,p in nav.p.items %}&nbsp;{% if p.link %}<a href="?start={{ p.page_link }}{% if p.search_params %}&a={{ param_a }}{% endif %}&col={{ p.sort_column }}{% if p.reversed %}&r=1{% endif %}">{% endif %}{% if p.selected %}<span class="selected">{% endif %}{{ p.page_id }}{% if p.selected %}</span>{% endif %}{% if p.link %}</a>{% endif %}{% endfor %}
+        </td>
+    </tr>
+{% endif %}
+{% if noresult %}<tr><td colspan=4 align=center>Aucune alliance trouvée.</td></tr>{% endif %}
+{% for k,alli in alliances.items %}
+    <tr class="{% if alli.playeralliance %}ranking_alliance{% endif %}{% if alli.nap %}ranking_nap{% endif %}{% if alli.war %}ranking_war{% endif %}">
+    	<td>{{ alli.place }}. <a href="{% url 'exile:alliance' %}?tag={{ alli.tag }}">[{{ alli.tag }}] {{ alli.name }}</a></td>
+    	{% if hide %}
+            <td align="right">{{ alli.score }}<br/><span class="{% if alli.plus %}plus{% endif %}{% if alli.minus %}minus{% endif %}"">{% if alli.plus %}+{% endif %}{{ alli.score_delta }}</span></td><td align=right>{{ alli.score_average }}</td>
+        {% endif %}
+    	<td align=right>{{ alli.members }} / {{ alli.max_members }}</td>
+    	<td align=right>{{ alli.stat_colonies }}</td>
+    	<td>{{ alli.created }}</td>
+    </tr>
+{% endfor %}
+{% if nav %}
+    <tr class="nav">
+        <td colspan=4 align=left>Page {{ page_displayed }}, Alliances {{ page_first }}-{{ page_last }}. Aller à
+        {% for k,p in nav.p.items %}&nbsp;{% if p.link %}<a href="?start={{ p.page_link }}{% if p.search_params %}&a={{ param_a }}{% endif %}&col={{ p.sort_column }}{% if p.reversed %}&r=1{% endif %}">{% endif %}{% if p.selected %}<span class="selected">{% endif %}{{ p.page_id }}{% if p.selected %}</span>{% endif %}{% if p.link %}</a>{% endif %}{% endfor %}
+        </td>
+    </tr>
+{% endif %}
+</table>

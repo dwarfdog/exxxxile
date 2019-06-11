@@ -1,0 +1,62 @@
+{% load static %}
+<div id=upkeep>
+<table class=default width=600>
+<tr class=header><td>Élément</td><td colspan=2>Coût</td>{% if t %}<td>Multiplicateur</td>{% endif %}<td>Coût estimé</td></tr>
+
+<tr class=smallitem>
+	<td><img src="{% static 'exile/assets/interface/upkeep_commander.gif' %}" class=res title="commandant" width=16 height=16>Commandants ({{ upkeep.commanders_quantity }})</td>
+	<td colspan=2 align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.commanders_salary }}</td>
+{% if t %}	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.commanders_cost }}</td>{% endif %}
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.commanders_estimated_cost }}</td>
+</tr>
+<tr class=smallitem>
+	<td><img src="{% static 'exile/assets/interface/planet.gif' %}" class=res title="Colonie" width=16 height=16>Colonies ({{ upkeep.planets_quantity }})</td>
+	<td colspan=2 align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.planets_cost }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.planets_estimated_cost }}</td>
+</tr>
+
+<tr class=clear><td colspan=4></td></tr>
+<tr class=header><td>Élément</td><td>Effectif</td><td>Multiplicateur</td><td>Coût estimé</td></tr>
+
+<tr class=smallitem>
+	<td><img src="{% static 'exile/assets/interface/scientists.gif' %}" class=res title="Scientifiques" width=16 height=16>Scientifiques</td>
+	<td align=right>{{ upkeep.scientists_quantity }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.scientists_cost }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.scientists_estimated_cost }}</td>
+</tr>
+
+<tr class=smallitem>
+	<td><img src="{% static 'exile/assets/interface/soldiers.gif' %}" class=res title="Soldats" width=16 height=16>Soldats</td>
+	<td align=right>{{ upkeep.soldiers_quantity }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.soldiers_cost }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.soldiers_estimated_cost }}</td>
+</tr>
+
+<tr class=clear><td colspan=4></td></tr>
+<tr class=header><td>Élément</td><td>Coût</td><td>Multiplicateur</td><td>Coût estimé</td></tr>
+
+<tr class=smallitem>
+	<td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class=res title="Vaisseaux" width=16 height=16>Vaisseaux</td>
+	<td align=right>{{ upkeep.ships_signature }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.ships_cost }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.ships_estimated_cost }}</td>
+</tr>
+
+<tr class=smallitem>
+	<td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class=res title="Vaisseaux en position" width=16 height=16>Vaisseaux en position</td>
+	<td align=right>{{ upkeep.ships_in_position_signature }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.ships_in_position_cost }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.ships_in_position_estimated_cost }}</td>
+</tr>
+
+<tr class=smallitem>
+	<td><img src="{% static 'exile/assets/interface/fleets.gif' %}" class=res title="Vaisseaux posés" width=16 height=16>Vaisseaux posés</td>
+	<td align=right>{{ upkeep.ships_parked_signature }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.ships_parked_cost }}</td>
+	<td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.ships_parked_estimated_cost }}</td>
+</tr>
+
+<tr class=smallitem><td colspan=3></td><td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16>{{ upkeep.total_estimation }}</td></tr>
+
+</table>
+</div>

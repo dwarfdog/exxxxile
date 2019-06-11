@@ -1,0 +1,17 @@
+{% load static %}{% load tz %}
+<div id=mails align=center>
+
+<form method=post action='?a=unignorelist'>
+    {% csrf_token %}
+    <table class=default width=450 id=ignorelist>
+        <tr class=title><td colspan=3>Nations dont les messages sont ignorés</td></tr>
+        <tr class=header><td>Nation</td><td>Bloqués</td><td>Ignoré depuis</td></tr>
+        {% for i,na in ignorednation.items %}
+            <tr><td nowrap><input type=checkbox class=checkbox id=check_{{ na.index }} name=unignore value="{{ na.userid }}"/><label for=check_{{ na.index }}>{{ na.name }}</label></td><td width='1%' align=right>{{ na.blocked }}</td><td width='1%' nowrap>{{ na.added|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td></tr>
+        {% endfor %}
+        {% if noignorednations %}<tr><td align=center colspan=3>Aucune nation</td></tr>{% endif %}
+        <tr><td align=center colspan=3><input type=submit value="Retirer"/></td></tr>
+    </table>
+</form>
+
+</div>

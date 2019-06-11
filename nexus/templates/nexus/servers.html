@@ -1,0 +1,79 @@
+<script type="text/javascript">
+var selectedServerId = null;
+
+function selectServer(id, remember) {
+	if(selectedServerId != null) {
+		$('sp'+selectedServerId).hide();
+		$('item'+selectedServerId).removeClassName('selected');
+		selectedServerId = null;
+	}
+
+	var item = $('item'+id);
+
+	if(item != null) {
+		item.addClassName('selected');
+		selectedServerId = id;
+
+		var srv = servers[id];
+		$('sp'+id).show();
+
+		new Ajax.Request('{% url "nexus:servers" %}', {
+			method: 'get',
+			parameters: {getstats:id},
+			onSuccess: function(transport) {
+				var data = transport.responseText.evalJSON();
+				result = data.result;
+				if(result.players) {
+					$('sp'+id+'stats-players').innerHTML = 'players='+result.players;
+					$('sp'+id+'stats-players').style.display = 'block';
+
+					$('sp'+id+'stats-online').innerHTML = 'players online='+result.players_online;
+					$('sp'+id+'stats-online').style.display = 'block';
+				}
+			},
+			onFailure: function() {
+				console.log('failure');
+			}
+		});
+
+	}
+
+	return false;
+}
+</script>
+<table id="servers">
+	<tr><td colspan="2" class="title">Selectionnez un serveur dans la liste</td></tr>
+	<tr>
+		<td class="server-list">
+			<table>
+			{% for server in servers %}
+			<tr id="item{{ server.id }}" onclick="return selectServer({{ server.id }}, true)">
+				<td align="left"><a href="#" onclick="return false">{{ server.name }}</a></td>
+				<td align="right">{% if server.start_time and server.stop_time %}Par round{% else %}Continue{% endif %}</td>
+			</tr>
+			{% endfor %}
+			</table>
+		</td>
+		{% for server in servers %}
+		<td class="server-panel" valign="top">
+			<div id="sp{{ server.id }}" style="display:none">
+				<div id="server-description">{{ server.description }}</div>
+				<div id="server-starttime">start={{ server.start_time }}</div>
+				<div id="server-stoptime">{% if server.stop_time %}stop={{ server.stop_time }}{% endif %}</div>
+				<div id="sp{{ server.id }}stats-players"></div>
+				<div id="sp{{ server.id }}stats-online"></div>
+				<div id="connectt"><a id="connect-link" href="{{ server.url }}/connect" target="_top">Se connecter</a></div>
+			</div>
+		</td>
+		{% endfor %}
+	</tr>
+</table>
+<br/>
+<div><small>
+Continue: Serveur de type classique<br/>
+Par round: Serveur rapide à durée limitée, le Game Over est définitif et tous les joueurs commencent en même temps.
+</small>
+</div>
+<script type="text/javascript">
+selectServer({{ user.last_universeid }}, false);
+</script>

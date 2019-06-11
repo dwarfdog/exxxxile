@@ -1,0 +1,163 @@
+{% load static %}{% load exile_extras %}{% load tz %}
+<script type="text/javascript" src="{% static 'exile/scripts/cookies.js' %}"></script>
+
+<script type="text/javascript">
+function toggle_elt(uid){
+	var d = new Date();
+	d = new Date(d.getFullYear()+1, d.getMonth(), d.getDay());
+
+	var obj = $(uid);
+	if (obj != undefined)
+	{
+		if(obj.className == "")
+		{
+			obj.className = "hidden";
+			SetCookie('display_' + uid, 0, d);
+		} else
+		{
+			obj.className = "";
+			SetCookie('display_' + uid, 1, d);
+		}
+	}
+}
+function restore_elt(uid){
+	var obj = $(uid);
+	if (obj == undefined) return;
+
+	if (GetCookie('display_' + uid) != 0)
+		$(uid).className = "";
+	else
+		$(uid).className = "hidden";
+}
+
+function sig(signature){
+	if(signature > 0)
+		document.write('('+formatnumber(signature)+')');
+	else
+		document.write('(indéterminé)');
+}
+</script>
+
+{% if exile_user.alliance %}
+<div id="motd">
+<table class="default" width="100%">
+<tr class="category"><td onclick="toggle_elt('motd_content')">Annonce de l'alliance - 
+{% if exile_user.alliance.defcon == 5 %}<b>DEFCON 5</b> : Préparation normale en temps de paix
+{% elif exile_user.alliance.defcon == 4 %}<b>DEFCON 4</b> : Préparation normale, mais renseignement accru et mesures de sécurité renforcées
+{% elif exile_user.alliance.defcon == 3 %}<b>DEFCON 3</b> : Accroissement de la préparation des forces au-dessus de la préparation normale
+{% elif exile_user.alliance.defcon == 2 %}<b>DEFCON 2</b> : Accroissement supplémentaire dans la préparation des forces
+{% elif exile_user.alliance.defcon == 1 %}<b>DEFCON 1</b> : Préparation maximale des forces (état de guerre)
+{% endif %}</td></tr>
+<tr id="motd_content" class="item">
+<td>
+	{{ exile_user.alliance.announce|rnreplace|safe }}
+</td>
+</tr>
+</table>
+</div>
+{% endif %}
+
+<div id="stats">
+<table class="default" width="100%">
+<tr class="category"><td onclick="toggle_elt('stats_content')">Statistiques de votre empire - {% timezone "Europe/Paris" %}{% now "j F Y H:i" %}{% endtimezone %}</td></tr>
+<tr id="stats_content" class="item" valign="top">
+<td>
+	<table class="clear" width="100%">
+	<tr><td nowrap>
+	<div><span class="label">Nation: </span><span class="value">{% if exile_user.orientation == 1 %}Marchand{% elif exile_user.orientation == 2 %}Militaire{% elif exile_user.orientation == 3 %}Scientifique{% endif %} {{ exile_user.login }}</span></div>
+	<div><span class="label">Grade: </span><span class="value">{% if exile_user.alliance_rank %}{{ exile_user.alliance_rank.label }} de <a href="{% url 'exile:alliance' %}?tag={{ exile_user.alliance.tag }}">[{{ exile_user.alliance.tag }}] {{ exile_user.alliance.name }}</a>{% else %}Indépendant{% endif %}</span></div>
+	<div><span class="label">Trésorerie: </span><span class="value"><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="res" width=16 height=16>{{ stat_credits }}</span></div>
+	<div><span class="label">Score de développement: </span><span class="value">{{ stat_score }}&nbsp;<span class="{% if stat_score_delta > 0 %}plus{% elif stat_score_delta < 0 %}minus{% endif %}">{% if stat_score_delta > 0 %}+{% endif %}{{ stat_score_delta }}</span>&nbsp;(<a href="{% url 'exile:rankingplayers' %}">rang: {{ stat_rank }}/{{ stat_players }}</a>)</span></div>
+	</td><td>
+	<div><span class="label">Nombre de colonies: </span><span class="value">{{ stat_colonies }} / {{ stat_maxcolonies }}</span></div>
+	<div><span class="label">Minerai par heure: </span><span class="value">{{ stat_prod_ore }}</span></div>
+	<div><span class="label">Hydrocarbure par heure: </span><span class="value">{{ stat_prod_hydrocarbon }}</span></div>
+	<div><span class="label">Score de prestige: </span><span class="value">{{ stat_score_battle }} (<a href="{% url 'exile:rankingplayers' %}?col=4">rang: {{ stat_rank_battle }}/{{ stat_players }}</a>)</span></div>
+	</td><td>
+	<div><span class="label">Travailleurs: </span><span class="value">{{ stat_workers }}</span></div>
+	<div><span class="label">Scientifiques: </span><span class="value">{{ stat_scientists }}</span></div>
+	<div><span class="label">Soldats: </span><span class="value">{{ stat_soldiers }}</span></div>
+	<div><span class="label">Points de prestige: </span><span class="value">{{ stat_victory_marks }}</span></div>
+	</td></tr>
+	</table>
+</td>
+</tr>
+</table>
+</div>
+
+<div id="fleetsmoving">
+<table class="default" width="100%">
+<tr class="category"><td><b>Mouvements en cours</b></td></tr>
+<tr class="item">
+<td>
+	{% for ind,fleet in fleets.items %}
+		<div>
+		{% if fleet.owned %}Votre flotte {% if fleet.owned == 'attack' %}<img src="{% static 'exile/assets/interface/stance_attack.gif' %}" class="stance" alt="Attaque" width=10 height=10>{% else %}<img src="{% static 'exile/assets/interface/stance_defend.gif' %}" class="stance" alt="Riposte" width=10 height=10>{% endif %}<a href="{% url 'exile:fleet' %}?id={id}" class="self">{{ fleet.name }}</a>{% endif %}
+		{% if fleet.ally %}Une flotte alliée de <a href="{% url 'exile:mails' %}?to={{ fleet.name }}" class="ally" title="Envoyer un message à {{ fleet.name }}">{{ fleet.name }}</a>{% endif %}
+		{% if fleet.friend %}Une flotte amie de <a href="{% url 'exile:mails' %}?to={{ fleet.name }}" class="friend" title="Envoyer un message à {{ fleet.name }}">{{ fleet.name }}</a>{% endif %}
+		{% if fleet.hostile %}Une flotte hostile de <a href="{% url 'exile:nation' %}?name={{ fleet.name }}" class="enemy" title="Envoyer un message à {{ fleet.name }}">{{ fleet.name }}</a>{% endif %}
+		<script>sig({{ fleet.signature }})</script> est en transit{% if fleet.movingfrom %} de <script>putplanet("{{ fleet.f_planetid }}","{{ fleet.f_planetname }}","{{ fleet.f_g }}","{{ fleet.f_s }}","{{ fleet.f_p }}",{{ fleet.f_relation }});</script>{% else %} d'une planète inconnue{% endif %} vers <script>putplanet("{{ fleet.t_planetid }}","{{ fleet.t_planetname }}","{{ fleet.t_g }}","{{ fleet.t_s }}","{{ fleet.t_p }}",{{ fleet.t_relation }});</script> - (<script>putcountdown1({{ fleet.time }}, "Terminé", "{% url 'exile:overview' %}");</script>)
+		</div>
+	{% endfor %}
+	{% ifequal fleets|length 0 %}
+	<div>Aucun mouvement en cours</div>
+	{% endifequal %}
+</td>
+</tr>
+</table>
+</div>
+
+<div id="researchesunderway">
+<table class="default" width="100%">
+<tr class="category"><td>Recherche en cours</td></tr>
+<tr class="item">
+<td>
+	{% for rid, re in research.items %}
+		<div><a href="{% url 'exile:research' %}#{{ re.researchid }}">{{ re.research }}</a> (<script>putcountdown1({{ re.time }}, "Terminé", "{% url 'exile:research' %}");</script>)</div>
+	{% endfor %}
+	{% ifequal research|length 0 %}<div><a href="{% url 'exile:research' %}" title="Voir le laboratoire de recherches">Aucune recherche en cours</a></div>{% endifequal %}
+</td>
+</tr>
+</table>
+</div>
+
+<div id="buildingsunderconstruction">
+<table class="default" width="100%">
+<tr class="category"><td>Bâtiments en construction</td><td>Vaisseaux en construction</td></tr>
+<tr class="item" valign="top">
+<td width="50%">
+	{% for pid, planet in constructionyards.items %}
+		<table class="clear" cellpadding="0" cellspacing="0">
+		<tr valign="top"><td><a href="{% url 'exile:buildings' %}?planet={{ planet.planetid }}">{{ planet.planetname }} ({{ planet.galaxy }}.{{ planet.sector }}.{{ planet.planet }}) : </a></td><td>
+			{% for bid, building in planet.buildings.items %}
+				<div>{% if building.destroy %}<span class="destroy">Destruction de {% endif %}{{ building.building }} (<script>putcountdown1({{ building.time }}, "Terminé", "{% url 'exile:buildings' %}?planet={{ planet.planetid }}#{{ building.buildingid }}");</script>){% if building.destroy %}</span>{% endif %}</div>
+			{% endfor %}
+			{% ifequal planet.buildings|length 0 %}
+			<div><a href="{% url 'exile:buildings' %}?planet={{ planet.planetid }}" title="Voir les infrastructures">Aucune construction en cours</a></div>
+			{% endifequal %}
+		</td></tr>
+		</table>
+	{% endfor %}
+	&nbsp;
+</td>
+<td width="50%">
+	{% for pid, planet in shipyards.items %}
+		<table class="clear" cellpadding="0" cellspacing="0">
+		<tr valign="top"><td><a href="{% url 'exile:shipyard' %}?planet={{ planet.planetid }}">{{ planet.planetname }} ({{ planet.galaxy }}.{{ planet.sector }}.{{ planet.planet }}) : </a></td><td>
+			{% if planet.ship %}
+			<div>{% if planet.recycle %}Recyclage de {% endif %}{{ planet.ship }} (<script>putcountdown1({{ planet.time }}, "Terminé", "{% url 'exile:shipyard' %}?planet={{ planet.planetid }}&f=0#{{ planet.shipid }}");</script>)</div>
+			{% elif planet.suspended %}
+			<div><a href="{% url 'exile:shipyard' %}?planet={{ planet.planetid }}" title="Voir le chantier spatial">En pause</a></div>
+			{% elif planet.waiting_resources %}
+			<div>{{ planet.waiting_ship }} (<span class="error">en attente de ressources</span>)</a></div>
+			{% else %}
+			<div><a href="{% url 'exile:shipyard' %}?planet={{ planet.planetid }}" title="Voir le chantier spatial">Aucune construction en cours</a></div>
+			{% endif %}
+		</td></tr>
+		</table>
+	{% endfor %}
+	&nbsp;
+</td>
+</tr>
+</table>
+</div>

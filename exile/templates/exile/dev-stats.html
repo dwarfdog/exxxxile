@@ -1,0 +1,88 @@
+{% load static %}{% load tz %}
+<div id="adminstats">
+
+{% if tabnav %}
+    <div style="width:650px">
+        <ul class="htabs">
+            {% if tabnav.0 %}<li {% if tabnav.0.selected %}class="active"{% endif %}><a href="?cat=0">Galaxies</a></li>{% endif %}
+            {% if tabnav.1 %}<li {% if tabnav.1.selected %}class="active"{% endif %}><a href="?cat=1">Général</a></li>{% endif %}
+            {% if tabnav.2 %}<li {% if tabnav.2.selected %}class="active"{% endif %}><a href="?cat=2">Alliances production</a></li>{% endif %}
+            {% if tabnav.3 %}<li {% if tabnav.3.selected %}class="active"{% endif %}><a href="?cat=3">Stats serveur</a></li>{% endif %}
+        </ul>
+    </div>
+{% endif %}
+
+{% if galaxies %}
+    <div id="stats">
+        <table class="default" width="650">
+            <tr class="header"><td>galaxie</td><td>Colonies</td><td>vortex</td></tr>
+            {% for i,gal in galaxies.items %}
+                <tr class="smallitem"><td>{{ gal.galaxy }}</td><td nowrap>{{ gal.colonies }} / {{ gal.planets }} ({{ gal.colonies_pct }}%)</td><td nowrap>{{ gal.vortex }}</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endif %}
+
+{% if general %}
+    <div id="stats">
+        <table class="default" width="650">
+            <tr class="smallitem"><td><span class="label">Joueurs: </span><span class="value">{{ players }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Joueurs récemment connectés: </span><span class="value">{{ recent_players }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Colonies: </span><span class="value">{{ colonies }} / {{ planets }} : {{ colonized }}%</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Moyenne de colonies par joueur: </span><span class="value">{{ colonies_per_player }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Joueur avec le plus de colonies: </span><span class="value">{{ max_colonies }} - <a href="/game/nations.asp?name={{ max_colonies_playername }}">{{ max_colonies_playername }}</a></span></td></tr>
+            <tr class="smallitem"><td><span class="label">Bâtiments: </span><span class="value">{{ buildings }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Moyenne de bâtiments par colonie: </span><span class="value">{{ buildings_average }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Constructions en cours: </span><span class="value">{{ buildings_pending }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Moyenne de constructions en cours par planète: </span><span class="value">{{ buildings_pending_average }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Scientifiques: </span><span class="value">{{ scientists }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Soldats: </span><span class="value">{{ soldiers }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Travailleurs: </span><span class="value">{{ workers }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Flottes: </span><span class="value">{{ fleets }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Vaisseaux: </span><span class="value">{{ ships }} ({{ ships_signature }})</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Moyenne de vaisseaux par flotte: </span><span class="value">{{ ships_average }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Vaisseaux non affectés: </span><span class="value">{{ ships_not_in_fleet }} ({{ ships_not_in_fleet_signature }}) : {{ ships_not_in_fleet_percent }}% des vaisseaux</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Flottes en patrouille: </span><span class="value">{{ fleets_patrolling }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Flottes en déplacement: </span><span class="value">{{ fleets_moving }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Flottes en train de recycler: </span><span class="value">{{ fleets_recycling }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Combats aujourd'hui: </span><span class="value">{{ battles }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Invasions aujourd'hui: </span><span class="value">{{ invasions }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Alertes aujourd'hui: </span><span class="value">{{ alerts }}</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Pubs affichées: </span><span class="value">{{ displayed_ads }} : {{ ads_pct }}%</span></td></tr>
+            <tr class="smallitem"><td><span class="label">Pages affichées: </span><span class="value">{{ displayed_pages }}</span></td></tr>
+        <tr class="smallitem"><td><span class="label">Joueurs bloquant les pubs: </span><span class="value">{{ players_blocking_ads }}/{{ players }} : {{ players_blocking_ads_pct }}%</span></td></tr>
+        </table>
+    </div>
+{% endif %}
+
+{% if alliances_production %}
+    <div id="stats">
+    <table class="default" width="650">
+    <tr class="header"><td>Alliance</td><td>Minerai</td><td>Hydrocarbure</td></tr>
+    {% for i,ally in alliances_production.items %}
+        <tr class="smallitem"><td>[{{ ally.tag }}] {{ ally.name }}</td><td nowrap>{{ ally.ore }} ({{ ally.ore_pct }}%)</td><td nowrap>{{ ally.hydrocarbon }} ({{ ally.hydrocarbon_pct }}%)</td></tr>
+    {% endfor %}
+    </table>
+    </div>
+{% endif %}
+
+{% if server %}
+    <table class="default" width="650">
+        <tr class="category"><td>Cache refresh</td></tr>
+        <tr class="smallitem"><td><span class="label">db_buildings: </span><span class="value">{{ db_buildings|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} - {{ db_buildings_lastupdate|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</span></td></tr>
+        <tr class="smallitem"><td><span class="label">db_buildings_req: </span><span class="value">{{ db_buildings_req|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} - {{ db_buildings_req_lastupdate|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</span></td></tr>
+        <tr class="smallitem"><td><span class="label">db_buildings_req_r: </span><span class="value">{{ db_buildings_req_r|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} - {{ db_buildings_req_r_lastupdate|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</span></td></tr>
+        <tr class="smallitem"><td><span class="label">db_ships: </span><span class="value">{{ db_ships|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} - {{ db_ships_lastupdate|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</span></td></tr>
+        <tr class="smallitem"><td><span class="label">db_ships_req: </span><span class="value">{{ db_ships_req|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} - {{ db_ships_req_lastupdate|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</span></td></tr>
+        <tr class="smallitem"><td><span class="label">db_ships_req_r: </span><span class="value">{{ db_ships_req_r|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} - {{ db_ships_req_r_lastupdate|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</span></td></tr>
+        <tr class="smallitem"><td><span class="label">db_research: </span><span class="value">{{ db_research|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} - {{ db_research_lastupdate|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</span></td></tr>
+        </table>
+        <table class="default" width="650">
+        <tr class="category"><td colspan="4">Update procedures</td></tr>
+        {% for i, proc in server.items %}
+            <tr class="item{% if proc.error %}del{% endif %}"><td nowrap>{% if proc.disabled %}<s>{% endif %}{{ proc.procedure }}{% if proc.disabled %}</s>{% endif %}</td><td nowrap>{{ proc.last_runtime }}</td><td nowrap>{{ proc.last_result }}&nbsp;</td><td nowrap>{{ proc.average_executetime }}</td></tr>
+        {% endfor %}
+    </table>
+{% endif %}
+
+</div>

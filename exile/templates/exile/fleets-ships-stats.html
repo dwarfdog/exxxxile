@@ -1,0 +1,41 @@
+{% load static %}
+<div id="fleets_ships_stats">
+	<table class="default" width="800">
+		<tr class="header"><td>Vaisseau</td><td width=100>Détruits</td><td width=100>Perdus</td></tr>
+
+		{% if no_ship %}
+			<tr><td colspan="3"><p class="error">Vous n'avez détruit et/ou perdu aucun vaisseau.</p></td></tr>
+		{% endif %}
+
+		{% for i,cat in category.items %}
+			<tr class="category">
+				<td colspan="3">
+				{% if i == 10 %}Vaisseaux utilitaires{% endif %}
+				{% if i == 11 %}Vaisseaux de déploiement{% endif %}
+				{% if i == 15 %}Vaisseaux tactiques{% endif %}
+				{% if i == 20 %}Vaisseaux légers{% endif %}
+				{% if i == 30 %}Corvettes{% endif %}
+				{% if i == 40 %}Frégates{% endif %}
+				{% if i == 50 %}Croiseurs{% endif %}
+				{% if i == 60 %}Dreadnought{% endif %}
+				{% if i == 80 %}Titan{% endif %}
+				{% if i == 90 %}Plateforme de défense{% endif %}
+				&nbsp;
+				</td>
+			</tr>
+
+			{% for j,sh in cat.ship.items %}
+				<tr align="right" class="item">
+				<td nowrap align="left"><a href="{% url 'exile:help' %}?cat=ships#{{ sh.id }}"><b>{{ sh.name }}</b></a></td>
+				<td align="right">{{ sh.killed }}</td>
+				<td align="right">{{ sh.losses }}</td>
+				</tr>
+			{% endfor %}
+			<tr align="right" class="item"><td class="clear">Total</td><td align="right">{{ cat.killed }}</td><td align="right">{{ cat.losses }}</td></tr>
+		{% endfor %}
+
+		{% if category %}
+			<tr><td class="clear">&nbsp;</td><td align="right">{{ total.killed }}</td><td align="right">{{ total.losses }}</td></tr>
+		{% endif %}
+	</table>
+</div>

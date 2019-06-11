@@ -1,0 +1,122 @@
+{% load static %}{% load tz %}{% load bbcode_tags %}
+<script>
+var senders=new Array();
+{% for i,m in mail.items %}{% if m.reply %}senders.push(new Array('{{ m.from|escapejs }}',{{ m.index }},{% if m.ignore %}false{% endif %}{% if m.ignored %}true{% endif %}));{% endif %}{% endfor %}
+
+function updatebg(index, event) {
+	var list = document.getElementsByName("checked_mails");
+	var obj = list[index];
+	document.getElementById("mail"+index).className = (obj.checked?"itemdel":"item");
+}
+function check(index, event) {
+	var list = document.getElementsByName("checked_mails");
+
+	if(event.ctrlKey)
+	{
+		for(;index<list.length;index++)
+		{
+			var obj=list[index];
+			obj.checked=true;
+			updatebg(index);
+		}
+	}
+	else
+	{
+		var obj=list[index];
+		obj.checked=!obj.checked;
+		updatebg(index);
+	}
+}
+function donotclick(index, event){ updatebg(index, event); event.cancelBubble = true; }
+
+function ignore(name){
+	if(confirm('Êtes-vous sûr de vouloir bloquer les messages en provenance du joueur "' + name + '" ?'))
+		openURL("{% url 'exile:mails' %}?a=ignore&user="+name, evalResponse);
+	return false;
+}
+function unignore(name){
+	openURL("{% url 'exile:mails' %}?a=unignore&user="+name, evalResponse);
+	return false;
+}
+{% if comment %}// reset ignored status of senders{% endif %}
+function resetIgnoredUsers(){ for(var i=0;i<senders.length;i++) senders[i][2] = false; }
+
+{% if comment %}//set the status of a user to ignored{% endif %}
+function setIgnored(name){ for(var i=0;i<senders.length;i++) if(senders[i][0] == name) senders[i][2] = true; }
+
+function updateUsers() {
+	var i,obj;
+
+	for(i=0;i<senders.length;i++)
+	{
+		obj = document.getElementById("ignore_"+senders[i][1]);
+		if(obj) obj.className = (senders[i][2]?"hidden":"");
+
+		obj = document.getElementById("ignored_"+senders[i][1]);
+		if(obj) obj.className = (senders[i][2]?"":"hidden");
+	}
+}
+
+function keydown(event) {
+	if(document.all)
+		var x = window.event.keyCode;
+	else
+		var x = event.keyCode;
+	if(x == 46) document.getElementById("delbtn").click();
+}
+document.onkeydown = keydown;
+</script>
+
+<div id="mails">
+<form method="post" action="?start={{ offset }}" id="mailsform">
+	{% csrf_token %}
+	<table class="default" width="100%">
+
+		<tr class="title"><td colspan=3>Messages reçus</td></tr>
+
+		{% if nav %}<tr class="nav"><td colspan=3 align=left>Page {{ page_display }}, Messages {{ min }}-{{ max }}. Aller à
+		{% for i,p in nav.p.items %}&nbsp;{% if p.link %}<a href="?start={{ p.page_link }}">{% endif %}{% if p.selected %}<span class="selected">{% endif %}{{ p.page_id }}{% if p.selected %}</span>{% endif %}{% if p.link %}</a>{% endif %}{% endfor %}.
+		</td></tr>{% endif %}
+
+		{% for i,p in mail.items %}
+			<tr id="mail{{ p.index }}" class="item{% if p.new_mail %}highlight{% endif %}">
+				<td width="1%" rowspan=1 align=center valign=top onclick="check({{ p.index }},event)">
+					<input type="checkbox" class="checkbox" name="checked_mails" value="{{ p.mailid }}" onclick="donotclick({{ p.index }},event)">
+				</td>
+				<td width="1%" rowspan=1 align=center valign=top nowrap>
+				{% if p.reply %}<a href="{% url 'exile:nation' %}?name={{ p.from }}" title="Informations sur {{ p.from }}">{% endif %}
+				{% if p.avatar %}<img src="{{ p.avatar_url }}" width=64 height=64 class="avatar">{% endif %}
+				{% if p.noavatar %}<img src="{% static 'exile/assets/interface/noavatar.gif' %}" width=64 height=64 class="avatar">{% endif %}
+				<br/><b>{{ p.from }}</b>
+				{% if p.reply %}</a>
+					{% if p.alliance %}<br/><a href="{% url 'exile:alliance' %}?tag={{ p.alliancetag }}">[{{ p.alliancetag }}]</a><br/>{% endif %}
+					<div id="ignore_{{ p.index }}"{% if p.reply.ignored %} class=hidden{% endif %}><a href="#" onclick="return ignore('{{ p.from|escapejs }}')" title="Bloque les futurs messages provenant de ce joueur">Bloquer</a></div>
+					<div id="ignored_{{ p.index }}"{% if p.reply.ignore %} class=hidden{% endif %}><a href="#" onclick="return unignore('{{ p.from|escapejs }}')"><span class=error>Bloqué</span></a></div>
+				{% endif %}
+				{% if p.admin %}
+					<div><a href="{% url 'exile:devplayas' %}?player={{ p.from }}">Impersonate</a></div>
+				{% endif %}
+				</td>
+				<td valign="top">
+				<div class="subject">
+				{{ p.date|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} | {{ p.subject|escape }}{% if p.money %} | Somme reçue : <img src="{PATH_IMAGES}/interface/credits.gif" title="Crédits" class="icon" width=16 height=16> {{ p.moneyamount }}{% endif %} {% if p.to_admins %}(Aux administrateurs){% endif %}{% if p.to_alliance %}(À l'alliance){% endif %}</div>
+				<div class="body{% if p.from_admin %}{% endif %}">{% if p.html %}{{ p.body|safe }}{% endif %}{% if p.bodybb %}{{ p.body|bbcode|safe }}{% endif %}</div>
+				<hr/><a href="?a=reply&mailid={{ p.mailid }}" title="Répondre à {{ p.from }}">Répondre</a>
+				</td>
+			</tr>
+		{% endfor %}
+		{% if nomails %}<tr><td colspan=3 align=center>Aucun</td></tr>{% endif %}
+
+		<tr>
+			<td colspan=3 class=buttons>
+				<input type="submit" class="button100" name="delete" value="Supprimer" id="delbtn">&nbsp;<input type="button" class="button100" name="compose" value="Nouveau >" onclick="javascript:window.location.href='?a=new'">
+			</td>
+		</tr>
+
+		{% if nav %}<tr class="nav"><td colspan=3 align=left>Page {{ page_display }}, Messages {{ min }}-{{ max }}. Aller à
+		{% for i,p in nav.p.items %}&nbsp;{% if p.link %}<a href="?start={{ p.page_link }}">{% endif %}{% if p.selected %}<span class="selected">{% endif %}{{ p.page_id }}{% if p.selected %}</span>{% endif %}{% if p.link %}</a>{% endif %}{% endfor %}.
+		</td></tr>{% endif %}
+
+	</table>
+</form>
+</div>

@@ -1,0 +1,40 @@
+<div id="register">
+	{% if error %}
+	<b>
+		<fieldset>
+		<legend class="error">&nbsp;Erreur&nbsp;</legend>
+		<div>
+			<p class="error">{{ error }}</p>
+		</div>
+		</fieldset>
+	</b>
+	{% endif %}
+
+	<fieldset>
+	<legend>&nbsp;Inscription en ligne à Exile&nbsp;</legend>
+	<div>
+	<p>L'inscription vous accordera l'accès au jeu Exile, vous pourrez modifier les options de votre compte dans la partie Options. Pour toute question, contactez l'administrateur.</p>
+	<p>Ci-dessous le formulaire à remplir afin de vous inscrire. Après vous êtres inscrit, vous recevrez un e-mail contenant le mot de passe à utiliser pour commencer à jouer.</p>
+	</div>
+	<p class="warning">Nous vous rappelons qu'il est interdit de posséder plus d'un compte.<br/>En cas d'infraction les comptes seront supprimés sans avertissement.</p>
+	</fieldset>
+
+	<form method="post" action="{% url 'nexus:register' %}">
+		{% csrf_token %}
+
+	<fieldset>
+	<legend>&nbsp;Saisissez les informations de votre compte&nbsp;</legend>
+	<div>
+		<table>
+		<tr><td align="right"><label for="username">Votre nom d'utilisateur: </label></td><td><input type="text" class="registerinput" name="username" id="username" value="{{ username }}" maxlength="12"/></td></tr>
+		<tr><td align="right"><label for="email">Votre adresse e-mail: </label></td><td><input type="text" class="registerinput" name="email" id="email" value="{{ email }}" maxlength="64"/></td></tr>
+		<tr><td></td><td><input class="checkbox" type="checkbox" name="conditions" id="conditions" value="1" {% if conditions %}checked="checked"{% endif %}/><label for="conditions">J'ai lu et j'accepte les </label><a href="{% url 'nexus:conditions' %}" title="Conditions générales" target="_blank">conditions générales.</a></td></tr>
+		</table>
+	</div>
+	<p class="submit">
+		<input type="submit" name="create" class="button" value="Valider"/>
+	</p>
+	</fieldset>
+
+	</form>
+</div>

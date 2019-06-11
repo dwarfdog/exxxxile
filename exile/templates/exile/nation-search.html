@@ -1,0 +1,18 @@
+{% load static %}
+<table class="default">
+    <tr class="title">
+        <td colspan="2"><b>Saisissez le nom d'une nation :</b>&nbsp;
+            <input type="text" size="14" maxlength="14" name="name" value="{{ s_nation }}"><br/>
+        </td>
+    </tr>
+    <tr><td></td><td></td></tr>
+    <tr><td></td><td></td></tr>
+    <tr class="title">
+        <td colspan="2">
+            Résultats de recherche : Nations</b>
+        </td>
+    </tr>
+    {% for i,n in nation.items %}
+        <tr><td colspan="2"><a href="?name={{ n.nation }}">{{ n.nation }}</a></td></tr>
+    {% endfor %}
+</table>

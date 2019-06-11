@@ -1,0 +1,3 @@
+resetIgnoredUsers();
+{% for i,na in ignored_user.items %}setIgnored('{{ user|escapejs }}');{% endfor %}
+updateUsers();

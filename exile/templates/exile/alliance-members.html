@@ -1,0 +1,154 @@
+{% load static %}{% load tz %}
+{% if members %}
+	<script>
+	{% for i,member in members.items %}
+		{% if member.recruit %}
+			function showKick(name)
+			{
+				$("kick"+name).style.display = "none";
+				$("kickConfirm"+name).style.display = "block";
+				$("kickConfirm"+name).style.visibility = "visible";
+				return false;
+			}
+		{% endif %}
+	{% endfor %}
+
+	var ranks = new Array();
+	{% for i,rank in  members.rank.items %}
+		ranks[{{ rank.rank_id }}] = '{{ rank.rank_label|escapejs }}';
+	{% endfor %}
+
+	function showSubmit(){ $("SubmitChanges").className = "item"; }
+
+	function displayStatus(id,rank,manage,kick){
+		var s = '';
+
+		if(!manage)
+			s = ranks[rank];
+		else
+		{
+			s = '<select name="player'+id+'" onchange="showSubmit()">';
+			for(var x in ranks){
+				s += '<option value="'+x+'"'+(rank==x?' selected':'')+'>'+ranks[x]+'</option>';
+			}
+			s += '</select>';
+		}
+
+		document.write(s);
+	}
+	</script>
+{% endif %}
+
+<table width="850" cellpadding="0" cellspacing="0">
+<tr>
+<td align=center>
+	{% if nav %}
+		<div>
+		<ul class="htabs">
+			{% if nav.cat1 %}<li {% if nav.cat1.selected %}class="active"{% endif %}><a href="?cat=1">Membres</a></li>{% endif %}
+			{% if nav.cat2 %}<li {% if nav.cat2.selected %}class="active"{% endif %}><a href="?cat=2">Invitations</a></li>{% endif %}
+		</ul>
+		</div>
+	{% endif %}
+	<div>
+
+{% if members %}
+	<form action="?cat={{ cat }}" method="post">
+		{% csrf_token %}
+		<table class="default" width="100%">
+		<tr class="title"><td colspan="7">Nations ralliées</td></tr>
+		<tr class="header">
+		<td><a href="?cat={{ cat }}&col=1{% if r1 %}&r=1{% endif %}">Nation</a></td>
+		<td><a href="?cat={{ cat }}&col=2{% if r2 %}&r=2{% endif %}">Développement</a></td>
+		<td><a href="?cat={{ cat }}&col=3{% if r3 %}&r=3{% endif %}">Colonies</a></td>
+		<td><a href="?cat={{ cat }}&col=4{% if r4 %}&r=4{% endif %}">Crédits</a></td>
+		<td><a href="?cat={{ cat }}&col=5{% if r5 %}&r=5{% endif %}">Dernière activité</a></td>
+		<td><a href="?cat={{ cat }}&col=6{% if r6 %}&r=6{% endif %}">Date de ralliement</a></td>
+		<td><a href="?cat={{ cat }}&col=7{% if r7 %}&r=7{% endif %}">Statut</a></td>
+		</tr>
+
+		{% for i,member in members.items %}
+			{% if member.player %}
+				<tr><td nowrap>{% if member.avatar %}<img src="{{ member.avatar }}" width="64" height="64" class="avatar" style="vertical-align:middle">{% else %}<img src="{% static 'exile/assets/interface/noavatar.gif' %}" width=64 height=64 class="avatar" style="vertical-align:middle">{% endif %}{{ member.place }}. <a href="{% url 'exile:nation' %}?name={{ member.name }}" title="Afficher les infos sur {{ member.name }}">{{ member.name }}</a>&nbsp;-&nbsp;<span class="grey">{% if member.player.orientation1 %}Marchand{% endif %}{% if member.player.orientation2 %}Militaire{% endif %}{% if member.player.orientation3 %}Scientifique{% endif %}{% if member.player.orientation4 %}Seigneur de guerre{% endif %}</span></td>
+				<td align="right">
+				{% if member.score %}{{ member.score }}<br/><span {% if member.player.score.plus %}class="plus"{% endif %}{% if member.player.score.minus %}class="minus"{% endif %}>{% if member.player.score.plus %}+{% endif %}{{ member.score_delta }}</span>{% endif %}
+				{% if member.player.score_na %}<span class="grey">Non publié</span>{% endif %}
+				</td>
+				<td align="right">{{ member.stat_colonies }}</td>
+				<td align="right"><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="res" width="16" height="16">{% if member.player.lowcredits %}<span class="low">{% endif %}{{ member.credits }}{% if member.player.lowcredits %}</span>{% endif %}</td>
+				<td align="right">
+				{% if member.player.banned %}<span class="banned">Compte suspendu</span>{% endif %}
+				{% if member.player.onholidays %}<span class="onholidays">En vacances</span>{% endif %}
+				{% if member.player.online %}<span class="recent">En ligne</span>{% endif %}
+				{% if member.player.less1h %}<span class="recent">&lt; 1 heure</span>{% endif %}
+				{% if member.player.hours %}<span class="recent">{{ member.hours }} heure(s)</span>{% endif %}
+				{% if member.player.days %}<span class="fewdays">{{ member.days }} jour(s) {{ member.hours }} heure(s)</span>{% endif %}
+				{% if member.player.1weekplus %}<span class="fewweeks">&gt;1 semaine</span>{% endif %}
+				{% if member.player.2weeksplus %}<span class="fewweeks">&gt;2 semaines</span>{% endif %}
+				</td>
+				<td>{{ member.joined|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td>
+				<td id="statusref{{ member.id }}">
+				<script>displayStatus({{ member.id }},{{ member.rank }},0{% if member.player.manage %}1{% endif %},0{% if member.player.kick %}1{% endif %});</script>
+				{% if member.player.kick %} - <span id="kick{{ member.id }}" onclick="return showKick({{ member.id }});"><a href="?#">Exclure</a></span><span id="kickConfirm{{ member.id }}" class="hidden">Coût: <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="res" width="16" height="16">{{ member.kick_price }}&nbsp;<a href="?cat={{ cat }}&a=kick&name={{ member.name }}">Confirmer</a></span>{% endif %}
+				{% if member.player.leaving %}&nbsp;<span class="warning">Quitte: <script>putcountdown1({{ member.player.leaving_time }}, "Terminé", "?cat={{ cat }}");</script></span>{% endif %}
+				</td>
+				</tr>
+			{% endif %}
+		{% endfor %}
+
+		<tr>
+		<td>Total</td>
+		<td align="right">{% if member.score %}{{ total_score }}<br/><span {% if member.score.plus %}class="plus"{% endif %}{% if member.score.minus %}class="minus"{% endif %}>{% if member.score.plus %}+{% endif %}{{ total_score_delta }}</span>{% endif %}
+		{% if member.score_na %}<span class="grey">Non publié</span>{% endif %}
+		</td>
+		<td align="right">{{ total_colonies }}</td>
+		<td align="right"><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="res" width="16" height="16">{{ total_credits }}</td>
+		<td colspan="3" class="justhidden"></td>
+		</tr>
+
+		<tr id="SubmitChanges" class="hidden"><td colspan="6" align="center"><input type="submit" name="submit" value="Valider changements"></td></tr>
+		</table>
+	</form>
+{% endif %}
+
+{% if invitations %}
+	<form action="?cat={{ cat }}" method="post">
+		{% csrf_token %}
+		<table class="default" width="100%">
+		<tr class=title><td>Inviter une nation à rallier notre alliance</td></tr>
+		<tr class=item align=center><td>Nation <input type="text" name="name" value="{{ player }}"><br/><br/>
+		<input type="submit" name="submit" value="Rallier"></td></tr>
+		{% if invitations.message %}<tr><td class="error">
+		{% if invitations.message.ok %}Nation invitée{% endif %}
+		{% if invitations.message.norights %}Vous n'êtes pas en droit de rallier de nouvelles nations{% endif %}
+		{% if invitations.message.unknown %}Aucune nation répondant à ce nom n'a été trouvée{% endif %}
+		{% if invitations.message.already_member %}Cette nation est déjà membre de notre alliance !{% endif %}
+		{% if invitations.message.already_invited %}Cette nation a déjà été invitée récemment{% endif %}
+		{% if invitations.message.impossible %}Cette nation ne peut être invitée{% endif %}
+		</td></tr>
+		{% endif %}
+		</table>
+	</form>
+
+	<br/>
+
+	<table class="default" width="100%">
+	<tr class="title"><td colspan=4>Invitations de ralliement en cours...</td></tr>
+	<tr class="header"><td>Nation</td><td>Date d'invitation</td><td>Invité par</td><td>Réponse</td></tr>
+
+	{% for i,invit in invitations.inv.items %}
+		<tr class="smallitem"><td>{{ invit.name }}</td><td>{{ invit.date|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td><td>{{ invit.recruiter }}&nbsp;</td><td>{% if invit.waiting %}En attente{% endif %}{% if invit.declined %}Refusée{% endif %}</td></tr>
+	{% endfor %}
+
+	{% if invitations.noinvitations %}
+		<tr><td colspan=4 align=center>Aucune invitation</td></tr>
+	{% endif %}
+
+	</table>
+{% endif %}
+
+	</div>
+
+</td>
+</tr>
+</table>

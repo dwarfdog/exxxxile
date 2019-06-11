@@ -1,0 +1,209 @@
+{% load static %}
+<script type="text/javascript" src="{% static 'exile/scripts/third-party/tooltip.js' %}?v=1"></script>
+<script>
+tipname = "hint";
+tipwidth = 450;
+tiptext = $("hinttext");
+</script>
+
+<table width="600">
+<tr>
+<td align="center">
+
+	<div>
+	<ul class="htabs">
+		<li {% if nav.cat1 %}class="active"{% endif %}><a href="?cat=1">Vue d'ensemble</a></li>
+		<li {% if nav.cat2 %}class="active"{% endif %}><a href="?cat=2">Fonctionnement</a></li>
+		<li {% if nav.cat3 %}class="active"{% endif %}><a href="?cat=3">Transfert d'énergie</a></li>
+	</ul>
+	</div>
+
+	{% if overview %}
+	<div id="productionoverview">
+	<table width="100%" class=default>
+	<tr class=title><td colspan=3>Abondance</td></tr>
+	<tr class=header><td>Elément</td><td>Minerai</td><td>Hydrocarbure</td></tr>
+	<tr><td width='50%'>Planète</td><td width='25%' align=right>{{ overview.a_ore }}%</td><td width='25%' align=right>{{ overview.a_hydrocarbon }}%</td></tr>
+	<tr class="clear"><td colspan=3>&nbsp;</td></tr>
+	</table>
+
+	<table width="100%" class=default>
+
+	<tr class=title><td colspan=4>Production</td></tr>
+	<tr><td width='50%'>Effectifs</td><td width='50%' colspan=3 nowrap>{{ overview.workers }} / {{ overview.workers_required }} requis, {{ overview.production }}%</td></tr>
+	<tr><td>Condition des installations</td><td colspan=3 nowrap>{% if overview.condition_excellent %}Excellente{% endif %}{% if overview.condition_good %}Bonne{% endif %}{% if overview.condition_fair %}Passable{% endif %}{% if overview.condition_bad %}Mauvaise{% endif %}{% if overview.condition_catastrophic %}Catastrophique{% endif %}, {% if overview.repairing %}réparation en cours{% endif %}{% if overview.decaying %}en détérioration{% endif %}</td></tr>
+	<tr><td>Estimation de la production </td><td colspan=3 nowrap>{{ overview.final_production }}%</td></tr>
+	{% if overview.malus.itemms %}
+		<tr class="title"><td colspan="4">Malus</td></tr>
+		{% for key,item in overview.malus.itemms.items %}
+			<script>
+			var description2{{ item.id }}='{{ item.description|escapejs }}';
+			</script>
+			<tr class="item" align=right>
+			<td align="left">
+				{% if item.building %}<a href="{% url 'exile:help' %}?cat=buildings#{{ item.id }}" onMouseover="ddrivetip(description2{{ item.id }})" onMouseout="hideddrivetip()"><b>{{ item.name }}</b></a>{% endif %}
+				{% if item.commander %}<img src="{% static 'exile/assets/interface/commander.gif' %}" width=10 height=6 class="smallicon" title="Commandant"><a href="{% url 'exile:commanders' %}#{{ item.id }}" title="Informations sur {{ item.name }}"><b>{{ item.name }}</b></a>{% endif %}
+				{% if item.research %}<a href="{% url 'exile:help' %}?cat=research#{{ item.id }}" onMouseover="ddrivetip(description2{{ item.id }})" onMouseout="hideddrivetip()"><b>{{ item.name }}</b></a> nv{{ item.level }}{% endif %}
+				{% if item.context %}<a href="#" onclick="return false;" onMouseover="ddrivetip(description2{{ item.id }})" onMouseout="hideddrivetip()"><b>{{ item.name }}</b></a>{% endif %}
+			</td>
+			<td colspan=3 align="left">
+				<span class={% if item.ore_positive %}plus{% endif %}{% if item.ore_negative %}minus{% endif %}>{{ item.mod_production_ore }}%</span>
+			</td>
+			</tr>
+		{% endfor %}
+	{% endif %}
+	<tr class="clear"><td colspan=4>&nbsp;</td></tr>
+
+
+	<tr class="header"><td>Elément</td><td>Minerai</td><td>Hydrocarbure</td><td>Energie</td></tr>
+
+	<tr class="category"><td colspan=4>Bâtiments</td></tr>
+	{% for key,building in overview.buildings.items %}
+	<script>
+	var description{{ building.id }}='{{ building.description|escapejs }}';
+	</script>
+
+	<tr class="item" align=right>
+	<td align="left"><a href="{% url 'exile:help' %}?cat=buildings#{{ building.id }}" onMouseover="ddrivetip(description{{ building.id }})" onMouseout="hideddrivetip()"><b>{{ building.name }}</b></a> x{{ building.quantity }}</td>
+	<td>{{ building.production_ore }}</td>
+	<td>{{ building.production_hydrocarbon }}</td>
+	<td>{{ building.production_energy }}</td>
+	</tr>
+	{% endfor %}
+	{% if overview.subtotal %}
+	<tr class="item" align="right">
+	<td align="left">Sous total</td>
+	<td><img src="{% static 'exile/assets/interface/ore.gif' %}" class="icon" title="Minerai" width=16 height=16> {{ overview.subtotal.production_ore }}</td>
+	<td><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" class="icon" title="Hydrocarbure" width=16 height=16> {{ overview.subtotal.production_hydrocarbon }}</td>
+	<td><img src="{% static 'exile/assets/interface/energy.gif' %}" class="icon" title="Energie" width=16 height=16> {{ overview.subtotal.production_energy }}</td>
+	</tr>
+	{% endif %}
+	<tr class="clear"><td colspan="4">&nbsp;</td></tr>
+	{% if overview.bonus.itemms %}
+		<tr class="category"><td colspan="4">Bonus</td></tr>
+		{% for key,item in overview.bonus.itemms.items %}
+			<script>
+			var description2{{ item.id }}='{{ item.description|escapejs }}';
+			</script>
+			<tr class="item" align=right>
+			<td align="left">
+				{% if item.building %}<a href="{% url 'exile:help' %}?cat=buildings#{{ item.id }}" onMouseover="ddrivetip(description2{{ item.id }})" onMouseout="hideddrivetip()"><b>{{ item.name }}</b></a>{% endif %}
+				{% if item.commander %}<img src="{% static 'exile/assets/interface/commander.gif' %}" width=10 height=6 class="smallicon" title="Commandant"><a href="{% url 'exile:commanders' %}#{{ item.id }}" title="Informations sur {{ item.name }}"><b>{{ item.name }}</b></a>{% endif %}
+				{% if item.research %}<a href="{% url 'exile:help' %}?cat=research#{{ item.id }}" onMouseover="ddrivetip(description2{{ item.id }})" onMouseout="hideddrivetip()"><b>{{ item.name }}</b></a> nv{{ item.level }}{% endif %}
+				{% if item.context %}<a href="#" onclick="return false;" onMouseover="ddrivetip(description2{{ item.id }})" onMouseout="hideddrivetip()"><b>{{ item.name }}</b></a>{% endif %}
+			</td>
+			<td>
+				<span class={% if item.ore_positive %}plus{% endif %}{% if item.ore_negative %}minus{% endif %}>{{ item.mod_production_ore }}%</span>
+			</td>
+			<td>
+				<span class={% if item.hydrocarbon_positive %}plus{% endif %}{% if item.hydrocarbon_negative %}minus{% endif %}>{{ item.mod_production_hydrocarbon }}%</span>
+			</td>
+			<td>
+				<span class={% if item.energy_positive %}plus{% endif %}{% if item.energy_negative %}minus{% endif %}>{{ item.mod_production_energy }}%</span>
+			</td>
+			</tr>
+		{% endfor %}
+		<tr class="item" align="right">
+		<td align="left">Sous total</td>
+		<td><img src="{% static 'exile/assets/interface/ore.gif' %}" class="icon" title="Minerai" width=16 height=16> {{ overview.bonus.production_ore }}</td>
+		<td><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" class="icon" title="Hydrocarbure" width=16 height=16> {{ overview.bonus.production_hydrocarbon }}</td>
+		<td><img src="{% static 'exile/assets/interface/energy.gif' %}" class="icon" title="Energie" width=16 height=16> {{ overview.bonus.production_energy }}</td>
+		</tr>
+		<tr class="clear"><td colspan=4>&nbsp;</td></tr>
+	{% endif %}
+	<tr class="item" align="right">
+	<td align="left">Production totale</td>
+	<td><img src="{% static 'exile/assets/interface/ore.gif' %}" class="icon" title="Minerai" width=16 height=16> {{ overview.production_ore }}</td>
+	<td><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" class="icon" title="Hydrocarbure" width=16 height=16> {{ overview.production_hydrocarbon }}</td>
+	<td><img src="{% static 'exile/assets/interface/energy.gif' %}" class="icon" title="Energie" width=16 height=16> {{ overview.production_energy }}</td>
+	</tr>
+	</table>
+	</div>
+	{% endif %}
+
+	{% if manage %}
+	<div id="productionmanage">
+	<form method="post" action="?cat={{ cat }}&a=submit">
+		{% csrf_token %}
+	<table width="100%" class="default">
+	<tr class="title"><td colspan="5">Consommation énergétique</td></tr>
+	<tr class="header"><td colspan="2">Bâtiment</td><td>Utilisation</td><td>Actif</td><td>Utilisation totale</td></tr>
+	{% for key,building in manage.buildings.items %}
+	<tr class="item{% if building.not_all_enabled %}del{% endif %}">
+		<td width="1%"><img src="{% static 'exile/assets/buildings/' %}{{ building.id }}.jpg" title="{building}" class="building" width="64" height="64"></td>
+		<td>{{ building.building }}</td>
+		<td><table class="clear" width="70">
+			<tr><td width="1%"><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Coût de fonctionnement" width="16" height="16"></td><td align="right">{{ building.upkeep }}</td></tr>
+			<tr><td width="1%"><img src="{% static 'exile/assets/interface/energy_available.gif' %}" title="Energie" width="12" height="12"></td><td align="right">{{ building.energy }}</td></tr>
+			<tr><td width="1%"><img src="{% static 'exile/assets/interface/workers.gif' %}" title="Maintenance" width="16" height="16"></td><td align="right">{{ building.maintenance }}</td></tr>
+		</table>
+		</td>
+		<td align="center">
+			<select name="enabled{{ building.id }}">
+				{% for i in building.range %}<option value="{{ i }}" {% ifequal building.enabled i %}selected="selected"{% endifequal %}>{{ i }}/{{ building.quantity }}</option>{% endfor %}
+			</select></td>
+		<td><table class="clear" width="70">
+			<tr><td width="1%"><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Coût de fonctionnement total" width="16" height="16"></td><td align="right">{{ building.upkeep_total }}</td></tr>
+			<tr><td width="1%"><img src="{% static 'exile/assets/interface/energy_available.gif' %}" title="Energie totale" width="12" height="12"></td><td align="right">{{ building.energy_total }}</td></tr>
+			<tr><td width="1%"><img src="{% static 'exile/assets/interface/workers.gif' %}" title="Maintenance totale" width="16" height="16"></td><td align="right">{{ building.maintenance_total }}</td></tr>
+		</table>
+		</td></tr>
+	{% endfor %}
+	<tr><td colspan="5" align="center"><input type="submit" value="Valider changements"></td></tr>
+	</table>
+	</form>
+	</div>
+	{% endif %}
+
+	{% if sendreceive %}
+	<div id="energytransfer">
+	<form method="post" action="?cat={{ cat }}&a=submit">
+		{% csrf_token %}
+	<table class="default" width="100%">
+	<tr class="title"><td colspan="3">Energie reçue ({{ sendreceive.antennas_receive_used }}/{{ sendreceive.antennas_receive_total }})</td></tr>
+	<tr class="header"><td width="1%">Source</td><td>Energie</td><td>Reçue (perte)</td></tr>
+	{% if sendreceive.receiving_none %}
+	<tr class="smallitem"><td align="center" colspan="3">Aucun lien énergétique établi.</td></tr>
+	{% endif %}
+	{% if sendreceive.receive_no_antenna %}
+	<tr class="smallitem"><td align="center" colspan="3">Aucun récepteur d'énergie construit sur la planète.</td></tr>
+	{% endif %}
+	{% if sendreceive.cant_receive_when_sending %}
+	<tr class="smallitem"><td class="error" colspan="3">Impossible de recevoir quand de l'énergie est envoyée.</td></tr>
+	{% endif %}
+	{% for key,rec in sendreceive.received.items %}
+	<tr class="smallitem"><td align="center" nowrap><script>putplanet({{ rec.planetid }},'{{ rec.name }}',{{ g }},{{ s }},{{ p }},{{ rel }});</script></td><td align="center">{{ rec.energy }}</td><td align="center">{{ rec.effective_energy }} (perte: {{ rec.loss }}%) <a href="?cat={{ cat }}&a=cancel&from={{ rec.planetid }}">rompre</a></td></tr>
+	{% endfor %}
+	<tr class="clear"><td colspan="3">&nbsp;</td></tr>
+	<tr class="title"><td colspan="3">Energie envoyée ({{ sendreceive.antennas_send_used }}/{{ sendreceive.antennas_send_total }})</td></tr>
+	<tr class="header"><td>Cible</td><td>Energie</td><td>Reçue (perte)</td></tr>
+	{% if sendreceive.send_no_antenna %}
+	<tr class="smallitem"><td align="center" colspan="3">Aucun émetteur d'énergie construit sur la planète.</td></tr>
+	{% endif %}
+	{% if sendreceive.cant_send_when_receiving %}
+	<tr class="smallitem"><td class="error" colspan="3">Impossible d'envoyer quand de l'énergie est reçue.</td></tr>
+	{% endif %}
+	{% for key,sen in sendreceive.sent.items %}
+	<tr class="smallitem">
+		<td align="center" nowrap><input type="checkbox" class="checkbox" name="enabled_{{ sen.planetid }}" value="1" {% if sen.enabled %}checked="checked"{% endif %}><script>putplanet({{ sen.planetid }},'{{ sen.name }}',{{ sen.g }},{{ sen.s }},{{ sen.p }},{{ sen.rel });</script></td>
+		<td align="center"><input type="text" name="energy_{{ sen.planetid }}" value="{{ sen.energy }}" maxlength="6" size="6"></td>
+		<td align="center">{{ sen.effective_energy }} (perte: {{ sen.loss }}%) <a href="?cat={{ cat }}&a=cancel&to={{ sen.planetid }}">retirer</a></td>
+	</tr>
+	{% endfor %}
+	{% for sen in sendreceive.send %}
+	<tr class="smallitem">
+		<td align="center" nowrap><input type="text" name="to_g" maxlength="2" size="2" value="">.<input type="text" maxlength="2" size="2" name="to_s" value="">.<input type="text" maxlength="2" size="2" name="to_p" value=""></td>
+		<td align="center"><input type="text" name="energy" maxlength="6" size="6" value="0"></td>
+		<!--<td align="center">{{ sen.effective_energy }} (perte: {{ sen.loss }}%)</td>-->
+	</tr>
+	{% endfor %}
+	{% if sendreceive.submit %}
+	<tr><td colspan="3" align="center"><input type="submit" name="submit" value="Valider"></td></tr>
+	{% endif %}
+	</table>
+	</form>
+	</div>
+	{% endif %}
+</td>
+</tr>
+</table>

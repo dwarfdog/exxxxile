@@ -1,0 +1,35 @@
+{% load static %}
+<div id="fleets">
+	<table class="default" width="450">
+		<tr class="header">
+			<td>Planète</td><td>Vaisseaux</td>
+		</tr>
+
+		{% for i,pla in planet.items %}
+			<tr class="smallitem">
+				<td><b><a href="{% url 'exile:orbit' %}?planet={{ pla.planetid }}">{{ pla.planetname }}</a>&nbsp;<a href="{% url 'exile:map' %}?g={{ pla.g }}&s={{ pla.s }}&p={{ pla.p }}">({{ pla.g }}.{{ pla.s }}.{{ pla.p }})</a></b></td>
+				<td align=left>{% for j,sh in pla.ship.items %}<div>{{ sh.ship }} x{{ sh.quantity }}
+				{% if t %}
+				[[category10]]Vaisseaux utilitaires[/category10]]
+				[[category11]]Vaisseaux de déploiement[/category11]]
+				[[category15]]Vaisseaux tactiques[/category15]]
+				[[category20]]Vaisseaux légers[/category20]]
+				[[category30]]Corvettes[/category30]]
+				[[category40]]Frégates[/category40]]
+				[[category50]]Croiseurs[/category50]]
+				[[category60]]Dreadnought[/category60]]
+				[[category80]]Titan[/category80]]
+				[[category90]]Plateforme de défense[/category90]]
+				{% endif %}
+				</div>
+				{% endfor %}
+				</td>
+			</tr>
+		{% endfor %}
+		{% if noships %}
+			<tr class="smallitem">
+				<td colspan="3" align="center">Aucun vaisseau en attente</td>
+			</tr>
+		{% endif %}
+	</table>
+</div>

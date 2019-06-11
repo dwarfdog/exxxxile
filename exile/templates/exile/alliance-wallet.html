@@ -1,0 +1,34 @@
+{% load static %}
+<table width=750>
+<tr>
+<td align=center>
+	<div>
+	<table class="default">
+	<tr class="item"><td>
+	<table class="clear">
+		<tr>
+			<td align=left rowspan=4><img src="{% static 'exile/assets/interface/wallet.jpg' %}" class="wallet" width=64 height=64></td>
+			<td>Solde: {{ credits }}</td>
+		</tr>
+		<tr><td>Dernière 24 heures: {{ last24h }}</td></tr>
+		<tr><td>Taxes: {{ tax }}%{% if notax %} (exonéré){% endif %}</td></tr>
+	</table>
+	</td></tr>
+	</table>
+	</div>
+
+	<ul class="htabs">
+		{% if cat1 %}<li {% if cat1.selected %}class="active"{% endif %}><a href="?cat=1">Journal</a></li>{% endif %}
+		{% if cat2 %}<li {% if cat2.selected %}class="active"{% endif %}><a href="?cat=2">Financement</a></li>{% endif %}
+		{% if cat3 %}<li {% if cat3.selected %}class="active"{% endif %}><a href="?cat=3">Don</a></li>{% endif %}
+		{% if cat4 %}<li {% if cat4.selected %}class="active"{% endif %}><a href="?cat=4">Taxes</a></li>{% endif %}
+		{% if cat5 %}<li {% if cat5.selected %}class="active"{% endif %}><a href="?cat=5">Historique</a></li>{% endif %}
+	</ul>
+	</div>
+
+	<div>
+	{{ content2 }}
+	</div>
+</td>
+</tr>
+</table>

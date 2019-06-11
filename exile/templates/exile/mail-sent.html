@@ -1,0 +1,37 @@
+{% load static %}{% load tz %}
+<div id="mails">
+<table class="default" width="100%">
+
+	<tr class="title"><td colspan=2>Messages envoyés</td></tr>
+
+	{% if mail %}
+		{% if nav %}<tr class="nav"><td colspan=3 align=left>Page {{ page_display }}, Messages {{ min }}-{{ max }}. Aller à
+				{% for i,p in nav.p.items %}&nbsp;{% if p.link %}<a href="?start={{ p.page_link }}">{% endif %}{% if p.selected %}<span class="selected">{% endif %}{{ p.page_id }}{% if p.selected %}</span>{% endif %}{% if p.link %}</a>{% endif %}{% endfor %}.
+				</td></tr>{% endif %}
+
+		{% for i,p in mail.items %}
+			<tr id="mail{{ p.index }}" class="item{% if p.new_mail %}highlight{% endif %}">
+				<td width="1%" rowspan=1 align=center valign=top nowrap>
+				{% if p.reply %}<a href="?to={{ p.sent_to }}" title="Nouveau message à {{ p.sent_to }}">{% endif %}
+				{% if p.avatar %}<img src="{{ p.avatar_url }}" width=64 height=64 class="avatar">{% endif %}
+				{% if p.noavatar %}<img src="{% static 'exile/assets/interface/noavatar.gif' %}" width=64 height=64 class="avatar">{% endif %}<br><b>{% if p.admins %}Administrateurs{% endif %}{% if p.alliance %}Alliance{% endif %}{% if p.nation %}{{ p.sent_to }}{% endif %}</b>
+				{% if p.reply %}</a>
+				{% if p.alliance %}<br/><a href="{% url 'exile:alliance' %}?tag={{ p.alliancetag }}">[{{ p.alliancetag }}]</a><br/>{% endif %}{% endif %}
+				</td>
+				<td width="90%" valign=top>
+				<div class="subject">
+				{{ p.date|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} | {{ p.subject }}{% if p.money %} | Somme envoyée : <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width=16 height=16> {{ p.moneyamount }}{% endif %}</div>
+				<div class="body">{% if p.html %}{{ p.body|safe }}{% endif %}{% if p.bbcode|safe %}{{ p.bodybb }}{% endif %}</div>
+				</td>
+			</tr>
+		{% endfor %}
+
+		{% if nav %}<tr class="nav"><td colspan=3 align=left>Page {{ page_display }}, Messages {{ min }}-{{ max }}. Aller à
+				{% for i,p in nav.p.items %}&nbsp;{% if p.link %}<a href="?start={{ p.page_link }}">{% endif %}{% if p.selected %}<span class="selected">{% endif %}{{ p.page_id }}{% if p.selected %}</span>{% endif %}{% if p.link %}</a>{% endif %}{% endfor %}.
+				</td></tr>{% endif %}
+	{% endif %}
+
+	{% if nomails %}<tr><td colspan=2 align=center>Aucun</td></tr>{% endif %}
+
+</table>
+</div>

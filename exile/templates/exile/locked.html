@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">
+		<meta http-equiv="pragma" content="no-cache">
+
+		<title>Exxxxile</title>
+
+		<link rel="stylesheet" href="{% static 'exile/assets/styles/s_transparent/style.css' %}" type="text/css" media="all">
+
+		<script>var timers_enabled=true;</script>
+
+		<script type="text/javascript" src='{% static 'exile/scripts/lang.js' %}''></script>
+		<script type="text/javascript" src='{% static 'exile/scripts/time.js' %}''></script>
+	</head>
+
+	<body>
+		<div align="center">
+		<div id="container">
+
+		<div id="gameover">Compte suspendu</div>
+		<div id="playername">{{ exile_user.login }}</div>
+		<br/>
+		Votre compte a été suspendu suite à une sanction prise par un des administrateurs de l'univers de jeu.<br/>
+		{% if reason %}
+			<br/>
+			<b>La raison donnée est:</b> {{ reason }}<br/>
+		{% endif %}
+		<br/>
+		Pour plus de renseignements ou contestation, vous pouvez contacter directement l'administrateur qui vous a sanctionné à cette adresse:<div align=center><a href="mailto:{{ admin_email }}?subject=Compte suspendu ({{ config.universe }}/{{ exile_user.login }})">{{ admin_email }}</a></div>Dans ce cas, vérifiez que le nom du serveur (s00, s01, ...) et le nom de votre compte apparaissent bien dans le sujet de votre email.<br/>Par exemple: Compte suspendu ({{ config.universe }}/{{ exile_user.login }}).<br/>
+		<br/>
+		<div align="center">
+		<br/>
+		{% if unlock %}
+		<form method="post" action="?">
+			{% csrf_token %}
+			<input type="submit" name="unlock" value="Débloquer">
+		</form>
+		{% endif %}
+		{% if cant_unlock %}
+			Temps restant avant déblocage: <script>putcountdown1({{ remaining_time_before_unlock }},"", "");</script><br/>
+			<script>putcountdown2({{ remaining_time_before_unlock }},"", "<br/><form method='post' action='?'>{% csrf_token|escapejs %}<input type='submit' name='unlock' value='Débloquer'></form>");</script>
+		{% endif %}
+		</div>
+
+		</div>
+		</div>
+	</body>
+</html>

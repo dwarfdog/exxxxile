@@ -1,0 +1,63 @@
+{% load static %}{% load bbcode_tags %}
+<div id="alliance">
+
+{% if noalliance %}
+	<a href="{% url 'exile:alliancecreate' %}'">Créer une alliance</a><br/>
+	<a href="{% url 'exile:allianceinvitations' %}">Invitations reçues</a><br/>
+{% endif %}
+
+{% if alliance %}
+	<table class="default">
+	<tr class="bigtitle"><td>[{{ alliance.tag }}] {{ alliance.name }}</td></tr>
+	{% if alliance.logo %}
+		<tr class="item"><td align=center><img src="{{ alliance.logo_url }}" class="logo"></td></tr>
+	{% endif %}
+	{% if alliance.description %}
+		<tr class="item"><td><p>{{ alliance.description|bbcode|safe }}</p></td></tr>
+	{% endif %}
+
+	{% if alliance.members and alliance.members.rank_label %}
+		{% for k,rank in alliance.members.rank_label.items %}
+			{% if rank %}
+				<tr class="item"><td><div id="stats"><span class="label">{{ k }}:</span> <span class="value">
+					{% for k,member in rank.items %}
+						<a href="{% url 'exile:mails' %}?to={{ member.member }}">{{ member.member }}</a>
+					{% endfor %}
+				</span></div></td></tr>
+			{% endif %}
+		{% endfor %}
+	{% endif %}
+	<tr class="item"><td><div id="stats"><span class="label">Nombre de membres:</span> <span class="value">{{ alliance.members.total }} / {{ alliance.max_members }}</span></div></td></tr>
+	{% if alliance.website %}
+		<tr class="item"><td><div id="stats"><span class="label">Site web:</span> <span class="value"><a href="{website_url}">{{ alliance.website_url }}</a></span></div></td></tr>
+	{% endif %}
+
+	<tr><td>
+		<table class="clear">
+		<tr valign="top"><td>
+			<table width="300">
+			<tr class="title"><td>Pacte(s) de non-aggression</td></tr>
+			{% for k,nap in alliance.naps.items %}
+				<tr class="smallitem"><td><a href="{% url 'exile:alliance' %}?tag={{ nap.naptag }}">[{{ nap.naptag }}] {{ nap.napname }}</a></td></tr>
+			{% endfor %}
+			{% if alliance.nonaps %}
+				<tr><td align=center>Aucun</td></tr>
+			{% endif %}
+			</table>
+		</td>
+		<td>
+			<table>
+			<tr class="title"><td>Guerres en cours</td></tr>
+			{% for k,war in alliance.wars.items %}
+				<tr class="smallitem"><td><a href="{% url 'exile:alliance' %}?tag={{ war.wartag }}">[{{ war.wartag }}] {{ war.warname }}</a></td></tr>
+			{% endfor %}
+			{% if alliance.nowars %}
+				<tr><td align=center>Aucune</td></tr>
+			{% endif %}
+			</table>
+		</td></tr>
+		</table>
+	</td></tr>
+	</table>
+{% endif %}
+</div>

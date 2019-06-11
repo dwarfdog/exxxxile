@@ -1,0 +1,264 @@
+{% load static %}{% load exile_extras %}
+<script>
+var menulinks=new Array();
+var activeSection = '';
+var selectedmenu='';
+var sectionmenu='';
+var lastmenulvl=1;
+var lastmenuname='';
+var lastmenuhidden='';
+
+var defaultTitle = document.title;
+
+function setTitle(title){
+	if(title.indexOf("<") > -1)
+		document.title = defaultTitle + ' - ' + title.substring(0,title.indexOf("<"));
+	else
+		document.title = defaultTitle + ' - ' + title;
+}
+
+function putMenu(url,name,label,lvl,x,popup,extended)
+{
+	if(name==activeSection) setTitle(label);
+
+	{% if comment %}<!-- add sections terminators -->{% endif %}
+	while(lastmenulvl > lvl) {
+		document.write('<div id="menu_'+lastmenuname+'_'+lastmenulvl+'" class="lvl'+lastmenulvl+'last'+lastmenuhidden+'"></div>');
+		menulinks.push(new Array(lastmenuname+'_'+lastmenulvl,lastmenulvl,true));
+		lastmenulvl--;
+	}
+
+	lastmenulvl = lvl;
+	lastmenuname = name;
+
+	if(lvl==0) return;
+
+	var selected = (name == selectedmenu)?" selected":"";
+	var hidden = (extended || (lvl < 3) || (sectionmenu != "" && name.indexOf(sectionmenu)==0))?"":" hidden";
+	lastmenuhidden = hidden;
+
+	x = false;
+
+	if(!x)
+	{
+		var target=popup?" target=_blank":"";
+
+		if(lvl==1)
+			document.write('<a href="'+url+'" class="menu lvl1"><img src="{% static 'exile/assets/menu/expand.gif' %}" class="menuExpand">'+label+'</a>');
+		else
+		{
+			document.write('<a href="'+url+'"'+target+' id="menu_'+name+'" class="menu lvl' + lvl + selected + hidden + '"><span class=dot>&middot;</span>'+label+'</a>');
+			menulinks.push(new Array(name,lvl,false));
+		}
+	}
+	else
+	{
+		url = "return display('" + url + (url.indexOf('?') > -1?"&":"?") + "xml=1');";
+
+		if(lvl==1)
+			document.write('<a href="#" onclick="'+url+'" class="menu lvl1"><img src="{% static 'exile/assets/menu/expand.gif' %}" class="menuExpand">'+label+'</a>');
+		else
+		{
+			document.write('<a href="#" onclick="'+url+'" id="menu_'+name+'" class="menu lvl' + lvl + selected + hidden + '"><span class=dot>&middot;</span>'+label+'</a>');
+			menulinks.push(new Array(name,lvl,false));
+		}
+	}
+}
+
+// update selected menu link
+function setSelectedMenu(name)
+{
+	selectedmenu = name;
+
+	if(name.indexOf("_") == -1)
+	{
+		sectionmenu = name + "_";
+		activeSection = name;
+	}
+	else
+	{
+		sectionmenu = name.split("_")[0] + "_";
+		activeSection = name.split("_")[0];
+	}
+
+	var link,linkname,selected,hidden;
+
+	for(var i=0; i<menulinks.length;i++)
+	{
+		linkname = menulinks[i][0];
+		link = $('menu_'+linkname);
+		selected = (selectedmenu == linkname)?" selected":"";
+		hidden = (menulinks[i][1] < 3 || (sectionmenu != "" && linkname.indexOf(sectionmenu)==0))?"":" hidden";
+
+		if(!menulinks[i][2])
+			link.className = "menu lvl" + menulinks[i][1] + selected + hidden;
+		else
+			link.className = "lvl" + menulinks[i][1] + 'last' + hidden;
+	}
+}
+
+function setMailsCount(nb)
+{
+	var o = $('mailscount');
+	if(nb > 0)
+		o.innerHTML = '('+nb+')';
+	else
+		o.innerHTML = '';
+}
+
+function setReportsCount(nb)
+{
+	var o = $('reportscount');
+	if(nb > 0)
+		o.innerHTML = '('+nb+')';
+	else
+		o.innerHTML = '';
+}
+
+setSelectedMenu('{{ selectedmenu }}');
+</script>
+
+<script>
+{% if comment %}<!-- empire -->{% endif %}
+
+putMenu("{% url 'exile:overview' %}","empire","Empire",1);
+putMenu("{% url 'exile:overview' %}","overview","Vue d'ensemble",2);
+putMenu("{% url 'exile:upkeep' %}","upkeep","Coût d'entretien",2);
+putMenu("{% url 'exile:commanders' %}","commanders","Commandants",2);
+
+putMenu("{% url 'exile:fleets' %}","fleets","Flottes",2);
+putMenu("{% url 'exile:fleets' %}","fleets_fleets","Flottes",3);
+putMenu("{% url 'exile:fleetsorbiting' %}","fleets_orbiting","Flottes en orbite",3);
+putMenu("{% url 'exile:fleetsstandby' %}","fleets_standby","Vaisseaux au sol",3);
+putMenu("{% url 'exile:fleetsshipsstats' %}","fleets_ships_stats","Détruits / perdus",3);
+
+putMenu("{% url 'exile:planets' %}","planets","Planètes",2);
+
+putMenu("{% url 'exile:marketsell' %}","merchant","Marchands",2);
+putMenu("{% url 'exile:marketbuy' %}","merchant_buy","Acheter",3);
+putMenu("{% url 'exile:marketsell' %}","merchant_sell","Vendre",3);
+
+putMenu("{% url 'exile:research' %}","research","Recherche",2);
+{% if tmp %}
+	putMenu("{% url 'exile:researchoverview' %}","research_scientists","Vue d'ensemble",3);
+	putMenu("{% url 'exile:research' %}","research_researches","Recherches",3);
+{% endif %}
+
+{% if show_alliance %}
+	putMenu("{% url 'exile:alliance' %}","alliance","Alliance",2);
+		putMenu("{% url 'exile:alliance' %}","alliance_overview","Vue d'ensemble",3);
+		{% if show_alliance.show_management %}
+			putMenu("{% url 'exile:alliancemanage' %}","alliance_manage","Gestion",3);
+		{% endif %}
+		{% if show_alliance.show_members %}
+			putMenu("{% url 'exile:alliancemembers' %}","alliance_members","Membres",3);
+		{% endif %}
+		putMenu("{% url 'exile:alliancenaps' %}","alliance_naps","PNA",3);
+		putMenu("{% url 'exile:alliancetributes' %}","alliance_tributes","Tributs",3);
+		putMenu("{% url 'exile:alliancewars' %}","alliance_wars","Guerres",3);
+		putMenu("{% url 'exile:alliancewallet' %}","alliance_wallet","Portefeuille",3);
+		{% if show_alliance.show_reports %}
+			putMenu("{% url 'exile:alliancereports' %}","alliance_reports","Rapports",3);
+		{% endif %}
+		putMenu("{% url 'exile:allianceinvitations' %}","alliance_invitations","Invitations",3);
+{% else %}
+	putMenu("{% url 'exile:alliance' %}","alliance","Alliance",2);
+		putMenu("{% url 'exile:alliancecreate' %}","noalliance_create","Création",3);
+		putMenu("{% url 'exile:allianceinvitations' %}","noalliance_invitations","Invitations",3);
+{% endif %}
+
+{% if comment %}<!-- galaxy -->{% endif %}
+
+putMenu("{% url 'exile:map' %}","map","Galaxie",1);
+putMenu("{% url 'exile:map' %}?g={{ g }}&s={{ s }}","map","Carte spatiale",2);
+putMenu("{% url 'exile:rankingalliances' %}","ranking","Alliances",2);
+
+{% if old %}
+	putMenu("{% url 'exile:rankingplayers' %}","ranking","Classement",2);
+	putMenu("{% url 'exile:rankingalliances' %}","ranking_alliances","par alliance",3);
+	putMenu("{% url 'exile:rankingplayers' %}","ranking_players","par nation",3);
+	putMenu("{% url 'exile:rankinggalaxies' %}","ranking_galaxies","par galaxie",3);
+	putMenu("{% url 'exile:rankingsearch' %}","ranking_search","rechercher",3);
+{% endif %}
+
+{% if comment %}<!-- planet -->{% endif %}
+
+putMenu("{% url 'exile:planet' %}?planet={{ planetid }}","planet","Planète ({{ g }}.{{ s }}.{{ p }})",1);
+putMenu("{% url 'exile:planet' %}?planet={{ planetid }}","planet","Vue d'ensemble",2);
+putMenu("{% url 'exile:production' %}?planet={{ planetid }}","production","Production",2);
+putMenu("{% url 'exile:buildings' %}?planet={{ planetid }}","buildings","Infrastructures",2);
+putMenu("{% url 'exile:shipyard' %}?planet={{ planetid }}","shipyard","Chantier spatial",2);
+putMenu("{% url 'exile:shipyard' %}?planet={{ planetid }}&f=0","shipyard_all","Tous",3);
+putMenu("{% url 'exile:shipyard' %}?planet={{ planetid }}&f=1","shipyard_military","Militaire",3);
+putMenu("{% url 'exile:shipyard' %}?planet={{ planetid }}&f=2","shipyard_unarmed","Utilitaire",3);
+putMenu("{% url 'exile:shipyard' %}?planet={{ planetid }}&f=3","shipyard_upgrade","Upgrade",3);
+putMenu("{% url 'exile:shipyard' %}?planet={{ planetid }}&recycle=1","shipyard_recycle","Recyclage",3);
+putMenu("{% url 'exile:training' %}?planet={{ planetid }}","training","Entraînement",2);
+putMenu("{% url 'exile:orbit' %}?planet={{ planetid }}","orbit","Orbite",2);
+
+putMenu("{% url 'exile:marketsell' %}?planet={{ planetid }}","market","Marché",2);
+putMenu("{% url 'exile:marketbuy' %}?planet={{ planetid }}","market_buy","Acheter",3);
+putMenu("{% url 'exile:marketsell' %}?planet={{ planetid }}","market_sell","Vendre",3);
+
+
+
+{% if comment %}<!-- communication -->{% endif %}
+putMenu("{% url 'exile:mails' %}","mails","Communication",1);
+putMenu("{% url 'exile:nation' %}","nation","Infos nations",2);
+putMenu("{% url 'exile:mails' %}","mails","Messagerie <span id=mailscount></span>",2);
+
+putMenu("{% url 'exile:mails' %}","mails_inbox","Reçu",3);
+putMenu("{% url 'exile:mails' %}?a=sent","mails_sent","Envoyé",3);
+putMenu("{% url 'exile:mails' %}?a=new","mails_compose","Composer",3);
+putMenu("{% url 'exile:mails' %}?a=ignorelist","mails_ignorelist","Nations ignorées",3);
+
+putMenu("{% url 'exile:reports' %}","reports","Rapports <span id=reportscount></span>",2);
+putMenu("https://discord.gg/{% settings_value 'DISCORD' %}","Discord","Discord",2);
+putMenu("{% url 'exile:notes' %}","notes","Notes",2);
+
+{% if comment %}<!-- mercenary services -->{% endif %}
+{% if show_mercenary %}
+putMenu("{% url 'exile:mercenaryintelligence' %}","intelligence","Mercenaires",1);
+putMenu("{% url 'exile:mercenaryintelligence' %}","intelligence","Espionnage",2);
+{% endif %}
+
+{% if dev %}
+	<!-- dev -->
+	putMenu("{% url 'exile:exileversion' %}","admin","Admin",1);
+	putMenu("{% url 'exile:devlogerrors' %}","log","Log",2);
+	putMenu("{% url 'exile:devlogerrors' %}","log_errors","Erreurs ({{ new_error }})",3,0,0,1);
+	putMenu("{% url 'exile:devlognotices' %}","log_notices","Notices ({{ new_notices }})",3,0,0,1);
+	putMenu("{% url 'exile:devmulti' %}","log_multi","Multi-comptes",3,0,0,1);
+
+	putMenu("{% url 'exile:devoptions' %}","player","Joueur",2);
+	putMenu("{% url 'exile:devoptions' %}","player_penalty","Options",3,0,0,1);
+	putMenu("{% url 'exile:devfleets' %}","player_fleets","Créer des flottes",3,0,0,1);
+	putMenu("{% url 'exile:devconnections' %}","player_connections","Connexions",3,0,0,1);
+	putMenu("{% url 'exile:devmultiusers' %}","player_multi","Multi-comptes",3,0,0,1);
+	putMenu("{% url 'exile:devexpenses' %}","player_expenses","Dépenses",3,0,0,1);
+
+	putMenu("{% url 'exile:devplayas' %}","playas","Jouer en tant que...",2);
+	putMenu("{% url 'exile:devstats' %}","stats","Statistiques",2);
+{% endif %}
+
+{% if comment %}<!-- help -->{% endif %}
+
+putMenu("{% url 'exile:help' %}","help","Aide",1);
+putMenu("{% url 'exile:help' %}","help","Aide",2);
+// putMenu("https://forum.{% settings_value 'DOMAIN' %}","forum","Forum",2,0,1);
+
+{% if comment %}<!-- account -->{% endif %}
+
+putMenu("{% url 'exile:options' %}","options","Compte",1);
+putMenu("{% url 'exile:options' %}","options","Options",2);
+putMenu("{% url 'exile:logout' %}","logout","Déconnexion",2);
+
+putMenu("","","",0);
+
+{% if new_mail %}
+	setMailsCount({{ new_mail }});
+{% endif %}
+{% if new_report %}
+	setReportsCount({{ new_report }});
+{% endif %}
+</script>

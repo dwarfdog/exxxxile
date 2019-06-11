@@ -1,0 +1,50 @@
+{% load static %}
+<table class="default">
+    <tr class="header">
+        <td><a href="?col=1{% if r1 %}&r=1{% endif %}{% if search_params %}&a={{ param_a }}&n={{ param_n }}{% endif %}">Nation</a></td>
+        <td><a href="?col=2{% if r2 %}&r=1{% endif %}{% if search_params %}&a={{ param_a }}&n={{ param_n }}{% endif %}">Alliance</a></td>
+        <td><a href="?col=3{% if r3 %}&r=1{% endif %}{% if search_params %}&a={{ param_a }}&n={{ param_n }}{% endif %}">Développement</a></td>
+        <td><a href="?col=4{% if r4 %}&r=1{% endif %}{% if search_params %}&a={{ param_a }}&n={{ param_n }}{% endif %}">Prestige</a></td>
+        {% if t %}
+        <td><a href="?col=5{% if r5 %}&r=1{% endif %}{% if search_params %}&a={{ param_a }}&n={{ param_n }}{% endif %}">Dernière connexion</a></td>
+        {% endif %}
+    </tr>
+
+    {% if nav %}
+        <tr class="nav">
+            <td colspan="4" align=left>Page {{ page_displayed }}, Nations {{ page_first }}-{{ page_last }}. Aller à
+            {% for i,p in nav.p.items %}&nbsp;{% if p.link %}<a href="?start={{ p.page_link }}{% if search_params %}&a={{ param_a }}&n={{ param_n }}{% endif %}&col={{ sort_column }}{% if p.reversed %}&r=1{% endif %}">{% endif %}{% if p.selected %}<span class="selected">{% endif %}{{ p.page_id }}{% if p.selected %}</span>{% endif %}{% if p.link %}</a>{% endif %}{% endfor %}.
+            </td>
+        </tr>
+    {% endif %}
+
+    {% if noresult %}<tr><td colspan="4" align="center">Aucune nation trouvée.</td></tr>{% endif %}
+
+    {% for i,play in player.items %}
+        <tr class="item{% if play.self %}highlight{% endif %}{% if play.ally %}ally{% endif %}">
+            <td>{% if play.top10avatar %}<p align="center"><a href="{% url 'exile:nation' %}?name={{ play.name }}" title="Afficher les informations sur {{ play.name }}">{% if play.top10avatar.avatar %}<img src="{{ play.avatar_url }}" width="64" height="64" class="avatar">{% endif %}{% if play.top10avatar.noavatar %}<img src="{% static 'exile/assets/interface/noavatar.gif' %}" width=64 height=64 class="avatar">{% endif %}</a></p>{% endif %}{{ play.place }}.&nbsp;{% if play.name %}<a href="{% url 'exile:nation' %}?name={{ play.name }}" title="Afficher les informations sur {{ play.name }}">{{ play.name }}</a>{% endif %}{% if play.name_na %}Inconnu{% endif %}</td>
+            <td align="right">{% if play.alliance %}<a href="{% url 'exile:alliance' %}?tag={{ play.alliancetag }}">[{{ play.alliancetag }}] {{ play.alliancename }}</a>{% endif %}{% if play.noalliance %}&nbsp;{% endif %}</td>
+            <td align="right">{{ play.score }}<br/><span {% if play.plus %}class="plus"{% endif %}{% if play.minus %}class="minus"{% endif %}>{% if play.plus %}+{% endif %}{{ play.score_delta }}</span></td>
+            <td align="right">{{ play.score_battle }}</td>
+            {% if t %}
+                <td align="right">
+                {% if play.recently %}<span class="recent">Récemment</span>{% endif %}
+                {% if play.1day %}<span class="oneday">1 jour</span>{% endif %}
+                {% if play.days %}<span class="threedays">{last_login} jours</span>{% endif %}
+                {% if play.3daysplus %}<span class="threedaysmore">&gt; 3 jours</span>{% endif %}
+                {% if play.1weekplus %}<span class="oneweekmore">&gt; 1 semaine</span>{% endif %}
+                {% if play.2weeksplus %}<span class="twoweeksmore">&gt; 2 semaines</span>{% endif %}
+                </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+
+    
+    {% if nav %}
+        <tr class="nav">
+            <td colspan="4" align=left>Page {{ page_displayed }}, Nations {{ page_first }}-{{ page_last }}. Aller à
+            {% for i,p in nav.p.items %}&nbsp;{% if p.link %}<a href="?start={{ p.page_link }}{% if search_params %}&a={{ param_a }}&n={{ param_n }}{% endif %}&col={{ sort_column }}{% if p.reversed %}&r=1{% endif %}">{% endif %}{% if p.selected %}<span class="selected">{% endif %}{{ p.page_id }}{% if p.selected %}</span>{% endif %}{% if p.link %}</a>{% endif %}{% endfor %}.
+            </td>
+        </tr>
+    {% endif %}
+</table>

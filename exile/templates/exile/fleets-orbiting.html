@@ -1,0 +1,20 @@
+{% load static %}
+<div id="fleets">
+    <table class="default" width="450">
+        <tr class="header">
+        	<td>Planète</td><td>Flottes</td>
+        </tr>
+
+        {% for i,pla in planet.items %}
+            <tr class="smallitem">
+            	<td><b><a href="{% url 'exile:orbit' %}'?planet={{ pla.planetid }}">{{ pla.planetname }}</a>&nbsp;<a href="{% url 'exile:map' %}'?g={{ pla.g }}&s={{ pla.s }}&p={{ pla.p }}">({{ pla.g }}.{{ pla.s }}.{{ pla.p }})</a></b></td>
+            	<td align=left>{% for j,fle in pla.fleet.items %}<a title="Écrire à {{ fle.fleetowner }}" href="{% url 'exile:mails' %}'?subject=À propos de la flotte {{ fle.fleetname }}&to={{ fle.fleetowner }}" class={% if fle.ally %}ally{% endif %}{% if fle.friend %}friend{% endif %}{% if fle.enemy %}enemy{% endif %}>{% if fle.alliance %}[{{ fle.tag }}]{% endif %} {{ fle.fleetname }} ({{ fle.fleetsignature }})</a><br/>{% endfor %}</td>
+            </tr>
+        {% endfor %}
+        {% if nofleets %}
+            <tr class="smallitem">
+            	<td colspan="3" align="center">Aucune flotte étrangère en orbite de nos planètes</td>
+            </tr>
+        {% endif %}
+    </table>
+</div>

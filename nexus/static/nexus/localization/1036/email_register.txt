@@ -1,0 +1,15 @@
+{% load nexus_extras %}
+Votre inscription à Exile
+Bonjour {{ username }} et bienvenue sur Exile !
+
+Pour vous connecter sur votre compte, rendez-vous sur {{ request.scheme }}://{{ request.get_host }} et entrez vos identifiants :
+
+Nation : {{ username }}
+Mot de passe : {{ password }}
+
+N'hésitez pas à visiter le forum pour discuter avec d'autres joueurs : {{ request.scheme }}://forum.{% settings_value 'DOMAIN' %}
+
+Ne communiquez en aucun cas votre mot de passe à d'autres personnes et ne l'utilisez pas pour vous enregistrer sur d'autres forums que les forums officiels.
+
+L'équipe d'Exile
+info@{% settings_value 'DOMAIN' %}

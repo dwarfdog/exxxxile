@@ -1,0 +1,91 @@
+{% load static %}{% load tz %}
+<table width=750 cellpadding=0 cellspacing=0>
+	<tr>
+	<td align=center>
+		{% if nav %}
+			<div>
+			<ul class="htabs">
+				{% if nav.cat1 %}<li {% if nav.cat1.selected %}class="active"{% endif %}><a href="?cat=1">Tributs perçus</a></li>{% endif %}
+				{% if nav.cat2 %}<li {% if nav.cat2.selected %}class="active"{% endif %}><a href="?cat=2">Tributs envoyés</a></li>{% endif %}
+				{% if nav.cat3 %}<li {% if nav.cat3.selected %}class="active"{% endif %}><a href="?cat=3">Nouveau tribut</a></li>{% endif %}
+			</ul>
+			</div>
+		{% endif %}
+		<div>
+
+	{% if tributes_sent %}
+		<table class="default" width="100%">
+			<tr class="title"><td colspan="4">Nos tributs</td></tr>
+			<tr class="header">
+			<td><a href="?cat={{ cat }}&col=1{% if tributes_sent.r1 %}&r=1{% endif %}">Alliance</a></td>
+			<td><a href="?cat={{ cat }}&col=2{% if tributes_sent.r2 %}&r=1{% endif %}">Créé le</a></td>
+			<td><a href="?cat={{ cat }}&col=3{% if tributes_sent.r3 %}&r=1{% endif %}">Somme</a></td>
+			{% if tributes_sent.cancel %}<td>Annuler</td>{% endif %}
+			</tr>
+			{% for i,it in tributes_sent.item.items %}
+				<tr><td>{{ it.place }}. <a href="{% url 'exile:alliance' %}?tag={{ it.tag }}">[{{ it.tag }}] {{ it.name }}</a></td>
+				<td>{{ it.created|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td>
+				<td align="right"><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ it.credits }}</td>
+				{% if tributes_sent.cancel %}<td><a href="?cat={{ cat }}&a=cancel&tag={{ it.tag }}">Annuler</a></td>{% endif %}
+				</tr>
+			{% endfor %}
+			{% if tributes_sent.none %}
+				<tr><td colspan=4 align=center>Aucun</td></tr>
+			{% endif %}
+			{% if tributes_sent.message %}
+				<tr><td colspan=5 class="error">
+				{% if tributes_sent.message.norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
+				{% if tributes_sent.message.unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
+				</td></tr>
+			{% endif %}
+		</table>
+	{% endif %}
+
+	{% if tributes_received %}
+		<table class="default" width="100%">
+			<tr class="title"><td colspan="4">Nos tributs perçus</td></tr>
+			<tr class="header">
+			<td><a href="?cat={{ cat }}&col=1{% if tributes_received.r1 %}&r=1{% endif %}">Alliance</a></td>
+			<td><a href="?cat={{ cat }}&col=2{% if tributes_received.r2 %}&r=1{% endif %}">Créé le</a></td>
+			<td><a href="?cat={{ cat }}&col=3{% if tributes_received.r3 %}&r=1{% endif %}">Somme</a></td>
+			<td>Prochain versement</td>
+			</tr>
+			{% for i,it in tributes_received.item.items %}
+				<tr><td>{{ it.place }}. <a href="{% url 'exile:alliance' %}?tag={{ it.tag }}">[{{ it.tag }}] {{ it.name }}</a></td>
+				<td>{{ it.created|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td>
+				<td align="right"><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width="16" height="16"> {{ it.credits }}</td>
+				<td>{{ it.next_transfer|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td>
+				</tr>
+			{% endfor %}
+			{% if tributes_received.none %}
+				<tr><td colspan=4 align=center>Aucun</td></tr>
+			{% endif %}
+		</table>
+	{% endif %}
+
+	{% if new %}
+		<form action="?cat={{ cat }}&a=new" method="post">
+			{% csrf_token %}
+			<table class="default" width="100%">
+				<tr class="title"><td colspan=2>Créer un virement automatique</td></tr>
+				<tr><td colspan=2>Veuillez indiquer le tag de l'alliance à laquelle envoyer les crédits chaque jour.</td></tr>
+				<tr><td>Alliance (tag)</td><td><input type="text" name="tag" value="{{ tag|escape }}" maxlength=4></td></tr>
+				<tr><td>Crédits</td><td><input type="text" name="credits" value="{{ credits|escape }}" maxlength=10> crédits</td></tr>
+				<tr><td colspan=2 align=center><input type="submit" name="submit" value="Envoyer"></td></tr>
+				{% if new.message %}
+					<tr><td colspan=2 class="error">
+					{% if new.message.ok %}Tribut automatique créé{% endif %}
+					{% if new.message.norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
+					{% if new.message.unknown %}Aucune alliance avec un tel tag n'a été trouvée{% endif %}
+					{% if new.message.already_exists %}Nous avons déjà un versement automatique avec cette alliance, annuler celui existant et recommencez.{% endif %}
+					</td></tr>
+				{% endif %}
+			</table>
+		</form>
+	{% endif %}
+
+	</div>
+
+	</td>
+	</tr>
+</table>
