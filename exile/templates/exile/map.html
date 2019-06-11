@@ -695,7 +695,7 @@ function displayRadar() {
 			displaySector(new Array(0
 				{% for k,pla in sector.planet.items %},new Array('{% if pla.vortex %}vortex{% elif pla.asteroids %}asteroids{% elif pla.clouds %}clouds{% elif pla.empty %}{% else %}{{ pla.planet_img }}{% endif %}', '{{ pla.alliancetag }}','{{ pla.planetid }}','{{ pla.ownername }}','{{ pla.planetname }}',{{ pla.relation }},{{ pla.radarstrength }},{{ pla.radarjamming }},'{{ pla.ore }}','{{ pla.hydrocarbon }}','{{ pla.floor }}','{{ pla.space }}','{{ pla.a_ore }}','{{ pla.a_hydrocarbon }}','{{ pla.vortex_strength }}',{% if pla.frozen %}true{% endif %}{% if pla.active %}false{% endif %},{{ pla.orbit.parked }}
 				,new Array({% if pla.orbit %}0{% for i,fle in pla.orbit.fleet.items %},new Array({{ fle.fleetid }},'{{ fle.fleetname|escapejs }}','{{ fle.alliancetag|escapejs }}','{{ fle.fleetowner|escapejs }}',{{ fle.relation }},{{ fle.signature }},0{% if fle.fleeing %}1{% endif %}){% endfor %}{% endif %})
-				,new Array({% if pla.elements %}0{% for i,elt in pla.elements.items %},'{{ elt.element|escapejs }}'{% endfor %}{% endif %})
+				,new Array({% if pla.elements %}0{% for i,elt in pla.elements.items %},'{{ elt|escapejs }}'{% endfor %}{% endif %})
 				,'{{ pla.buy_ore }}','{{ pla.buy_hydrocarbon }}'
 				){% endfor %}
 			));
