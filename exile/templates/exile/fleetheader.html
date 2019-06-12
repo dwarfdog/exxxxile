@@ -35,7 +35,7 @@ table.tableheader td { padding-right:8px; }
 		<td nowrap>
 			<select id="fleetlist" tabindex="1" onchange="jumpf(this)">
 				{% for key,fle in fleetlist.items %}
-					<option value="{{ fleet.id }}" {% if fleet.selected %}selected="selected"{% endif %}>{{ fle.name }} ({{ fle.g }}.{{ fle.s }}.{{ fle.p }}{% if fle.t_planetid %} -> {{ fle.t_g }}.{{ fle.t_s }}.{{ fle.t_p }}{% endif %})</option>
+					<option value="{{ fle.id }}" {% if fle.selected %}selected="selected"{% endif %}>{{ fle.name }} ({{ fle.g }}.{{ fle.s }}.{{ fle.p }}{% if fle.t_planetid %} -> {{ fle.t_g }}.{{ fle.t_s }}.{{ fle.t_p }}{% endif %})</option>
 				{% endfor %}
 			</select>
 		</td>
