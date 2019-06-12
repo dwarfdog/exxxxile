@@ -578,7 +578,7 @@ fleetList = [];
 {% for ind,fleet in list.fleet.items %}
 fleetList.push(
 		new Fleet({{ fleet.id }},'{{ fleet.name }}',{{ fleet.category }},{{ fleet.stance }},{{ fleet.size }},{{ fleet.signature }},{{ fleet.cargo_load }},
-				{{ fleet.cargo_capacity }},'{{ fleet.action }}',{{ fleet.time }},'{{ fleet.commandername }}',
+				{{ fleet.cargo_capacity }},'{{ fleet.action }}',{{ fleet.time }},'{% if fleet.commandername %}{{ fleet.commandername }}{% endif %}',
 				new Planet({{ fleet.planetid }},'{% if fleet.planetname %}{{ fleet.planetname }}{% else %}{% endif %}',{{ fleet.relation }},"{{ fleet.g }}","{{ fleet.s }}","{{ fleet.p }}"),
 				new Planet({{ fleet.t_planetid }},'{{ fleet.t_planetname }}',{{ fleet.t_relation }},"{{ fleet.t_g }}","{{ fleet.t_s }}","{{ fleet.t_p }}"),
 				new Array(0{% for key, ship in fleet.ship.items %},new Ship('{{ ship.ship_label }}',{{ ship.ship_quantity }}){% endfor %}),

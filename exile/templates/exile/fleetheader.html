@@ -48,7 +48,25 @@ table.tableheader td { padding-right:8px; }
 		<td rowspan=3>&nbsp;<a href="#" onclick="nextfleet(); return false;"><img src="{% static 'exile/assets/interface/right.gif' %}" title="Flotte suivante" width=10 height=34></a></td>
 	</tr>
 	<tr>
-		<td nowrap>{% if fleet.remaining_time %}(Arrivée dans <script>putcountdown1({{ fleet.remaining_time }}, 'Voyage terminé', '{% url 'exile:fleet' %}?id={{ fleet.id }}')</script>)<br/>{% endif %}<img src="{% static 'exile/assets/interface/commander.gif' %}" class="smallres" width=10 height=6 title="Commandant">{% if fleet.commandername %}{{ fleet.commandername }}{% else %}-{% endif %}</td>
+		<td nowrap>
+			{% if fleet.stance == 1 %}
+				<img src="{% static 'exile/assets/interface/stance_attack.gif' %}" class="stance" alt="Attaque" width="10" height="10">
+			{% else %}
+				<img src="{% static 'exile/assets/interface/stance_defend.gif' %}" class="stance" alt="Riposte" width="10" height="10">
+			{% endif %}
+		
+			{% if fleet.action == 0 %}
+				<span class="state_patrolling">En patrouille <script>putplanet("{{ fleet.planetid }}","{% if fleet.planetname %}{{ fleet.planetname }}{% else %}{% endif %}","{{ fleet.g }}","{{ fleet.s }}","{{ fleet.p }}",{{ fleet.relation }});</script></span>
+			{% elif fleet.action == 1 %}
+				<span class="state_moving">En transit vers <script>putplanet("{{ fleet.t_planetid }}","{% if fleet.t_planetname %}{{ fleet.t_planetname }}{% else %}{% endif %}","{{ fleet.t_g }}","{{ fleet.t_s }}","{{ fleet.t_p }}",{{ fleet.t_relation }});</script> - (<script>putcountdown1({{ fleet.remaining_time }}, 'Arrivé', '{% url 'exile:fleet' %}?id={{ fleet.id }}')</script>)<br/>
+			{% elif fleet.action == 2 %}
+				<span class="state_recycling">Recyclage de ressources <script>putplanet("{{ fleet.planetid }}","{% if fleet.planetname %}{{ fleet.planetname }}{% else %}{% endif %}","{{ fleet.g }}","{{ fleet.s }}","{{ fleet.p }}",{{ fleet.relation }});</script></span> - (<script>putcountdown1({{ fleet.remaining_time }}, 'Cycle terminé', '{% url 'exile:fleet' %}?id={{ fleet.id }}')</script>)<br/>
+			{% elif fleet.action == 4 %}
+				<span class="state_waiting">En attente <script>putplanet("{{ fleet.planetid }}","{% if fleet.planetname %}{{ fleet.planetname }}{% else %}{% endif %}","{{ fleet.g }}","{{ fleet.s }}","{{ fleet.p }}",{{ fleet.relation }});</script></span> - (<script>putcountdown1({{ fleet.remaining_time }}, 'Terminé', '{% url 'exile:fleet' %}?id={{ fleet.id }}')</script>)<br/>
+			{% elif fleet.action == 'x' %}
+				<span class="state_fighting">En combat <script>putplanet("{{ fleet.planetid }}","{% if fleet.planetname %}{{ fleet.planetname }}{% else %}{% endif %}","{{ fleet.g }}","{{ fleet.s }}","{{ fleet.p }}",{{ fleet.relation }});</script></span><br/>
+			{% endif %}
+			<img src="{% static 'exile/assets/interface/commander.gif' %}" class="smallres" width=10 height=6 title="Commandant">{% if fleet.commandername %}{{ fleet.commandername }}{% else %}-{% endif %}</td>
 		<td nowrap>{% if fleet.capacity %}<img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width=16 height=16 class=res><span>{{ fleet.cargo_hydrocarbon }}</span>{% endif %}</td>
 		<td nowrap>{% if fleet.capacity %}<img src="{% static 'exile/assets/interface/scientists.gif' %}" title="Scientifiques" width=16 height=16 class=res><span>{{ fleet.cargo_scientists }}</span>{% endif %}</td>
 		<td nowrap>{% if fleet.capacity %}charge : {{ fleet.load }}{% endif %}</td>

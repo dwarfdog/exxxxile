@@ -2155,7 +2155,6 @@ def fleet(request):
                             " LIMIT 200", [gcontext['exile_user'].id, gcontext['exile_user'].id])
                     res2 = cursor.fetchall()
                     gcontext['move_fleet']['fleetgroup'] = {'location':{}}
-                    cpt = 0
                     for re in res2:
                         pla = {
                             "index": cpt,
@@ -2176,7 +2175,6 @@ def fleet(request):
                     cursor.execute(query)
                     res2 = cursor.fetchall()
                     gcontext['move_fleet']['merchantplanetsgroup'] = {'location':{}}
-                    cpt = 0
                     for re in res2:
                         pla = {
                             "index": cpt,
@@ -2645,6 +2643,8 @@ def fleetshandler(request):
                     fleet['cargo_soldiers'] = re[30]
                     fleet['cargo_workers'] = re[31]
                     fleet['commandername'] = re[9]
+                    if not re[9]:
+                        fleet['commandername'] = ''
                     fleet['action'] = abs(re[34])
                     if re[3]:
                         fleet['action'] = "x"
