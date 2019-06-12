@@ -48,7 +48,7 @@ table.tableheader td { padding-right:8px; }
 		<td rowspan=3>&nbsp;<a href="#" onclick="nextfleet(); return false;"><img src="{% static 'exile/assets/interface/right.gif' %}" title="Flotte suivante" width=10 height=34></a></td>
 	</tr>
 	<tr>
-		<td nowrap>{% if fleet.remaining_time %}(Arrivée dans <script>putcountdown1({{ fleet.remaining_time }}, 'Voyage terminé', '{% url 'exile:fleet' %}?id={{ fleet.id }}')</script>){% endif %}<br/><img src="{% static 'exile/assets/interface/commander.gif' %}" class="smallres" width=10 height=6 title="Commandant">{% if fleet.commandername %}{{ fleet.commandername }}{% else %}-{% endif %}</td>
+		<td nowrap>{% if fleet.remaining_time %}(Arrivée dans <script>putcountdown1({{ fleet.remaining_time }}, 'Voyage terminé', '{% url 'exile:fleet' %}?id={{ fleet.id }}')</script>)<br/>{% endif %}<img src="{% static 'exile/assets/interface/commander.gif' %}" class="smallres" width=10 height=6 title="Commandant">{% if fleet.commandername %}{{ fleet.commandername }}{% else %}-{% endif %}</td>
 		<td nowrap>{% if fleet.capacity %}<img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width=16 height=16 class=res><span>{{ fleet.cargo_hydrocarbon }}</span>{% endif %}</td>
 		<td nowrap>{% if fleet.capacity %}<img src="{% static 'exile/assets/interface/scientists.gif' %}" title="Scientifiques" width=16 height=16 class=res><span>{{ fleet.cargo_scientists }}</span>{% endif %}</td>
 		<td nowrap>{% if fleet.capacity %}charge : {{ fleet.load }}{% endif %}</td>

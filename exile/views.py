@@ -633,7 +633,7 @@ def construct(function):
             'CurrentSector': request.session.get('CurrentSector', 0),
             'CurrentFleet': request.session.get('CurrentFleet', 0),
             'IsImpersonating':False,
-            'skin':'s_default',
+            'skin':'s_transparent',
         }
         return function(request, *args, **kwargs)
 
