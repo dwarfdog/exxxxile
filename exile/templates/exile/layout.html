@@ -136,7 +136,7 @@ var startTime;
 {% endif %}
 
 <div {% if menu %} id="content" {% endif %} align="center">
-	{% if contextinfo %}<div id="status">{{ contextinfo }}</div>{% endif %}
+	{% if contextinfo or contextinfo2 %}<div id="status">{{ contextinfo }}{{ contextinfo2 }}</div>{% endif %}
 	<div id="page">{{ content }}</div>
 </div>
 

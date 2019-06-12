@@ -1,0 +1,63 @@
+{% load static %}
+<script>
+function jumpf(obj){
+	eval("location='{{ urlf|safe }}" + obj.options[obj.selectedIndex].value + "'");
+}
+function nextfleet(){
+	var obj = document.getElementById("fleetlist");
+	if(obj.selectedIndex<obj.options.length-1)
+		obj.selectedIndex=obj.selectedIndex+1;
+	else
+		obj.selectedIndex=0;
+	jumpf(obj);
+}
+function previousfleet(){
+	var obj = document.getElementById("fleetlist");
+	if(obj.selectedIndex>0)
+		obj.selectedIndex=obj.selectedIndex-1;
+	else
+		obj.selectedIndex=obj.options.length-1;
+	jumpf(obj);
+}
+</script>
+
+<style>
+table.tableheader {
+	background:url('{% static 'exile/assets/interface/header-bg.png' %}');
+}
+table.tableheader td { padding-right:8px; }
+</style>
+
+<div align=center>
+	<table class="tableheader" cellspacing=2>
+	<tr>
+		<td rowspan="3"><a href="#" onclick="previousfleet(); return false;"><img src="{% static 'exile/assets/interface/left.gif' %}" title="Flotte précédente" width=10 height=34></a>&nbsp;</td>
+		<td nowrap>
+			<select id="fleetlist" tabindex="1" onchange="jumpf(this)">
+				{% for key,fle in fleetlist.items %}
+					<option value="{{ fleet.id }}" {% if fleet.selected %}selected="selected"{% endif %}>{{ fle.name }} ({{ fle.g }}.{{ fle.s }}.{{ fle.p }}{% if fle.t_planetid %} -> {{ fle.t_g }}.{{ fle.t_s }}.{{ fle.t_p }}{% endif %})</option>
+				{% endfor %}
+			</select>
+		</td>
+		<td nowrap>{% if fleet.capacity %}<img src="{% static 'exile/assets/interface/ore.gif' %}" title="Minerai" width=16 height=16 class=res><span>{{ fleet.cargo_ore }}</span>{% endif %}</td>
+		<td nowrap>{% if fleet.capacity %}<img src="{% static 'exile/assets/interface/workers.gif' %}" title="Travailleurs" width=16 height=16 class=res><span>{{ fleet.cargo_workers }}</span>{% endif %}</td>
+		<td nowrap></td>
+		{% if fleet.ship %}
+			<td nowrap rowspan="3">{% for i,sh in fleet.ship.items %}{{ sh.ship_quantity }} x {{ sh.ship_label }}<br/>{% endfor %}</td>
+		{% endif %}
+		<td rowspan=3>&nbsp;<a href="#" onclick="nextfleet(); return false;"><img src="{% static 'exile/assets/interface/right.gif' %}" title="Flotte suivante" width=10 height=34></a></td>
+	</tr>
+	<tr>
+		<td nowrap>(Arrivée dans <script>putcountdown1({{ fleet.remaining_time }}, 'Voyage terminé', '{% url 'exile:fleet' %}?id={{ fleet.id }}')</script>)<br/><img src="{% static 'exile/assets/interface/commander.gif' %}" class="smallres" width=10 height=6 title="Commandant">{% if fleet.commandername %}{{ fleet.commandername }}{% else %}-{% endif %}</td>
+		<td nowrap>{% if fleet.capacity %}<img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width=16 height=16 class=res><span>{{ fleet.cargo_hydrocarbon }}</span>{% endif %}</td>
+		<td nowrap>{% if fleet.capacity %}<img src="{% static 'exile/assets/interface/scientists.gif' %}" title="Scientifiques" width=16 height=16 class=res><span>{{ fleet.cargo_scientists }}</span>{% endif %}</td>
+		<td nowrap>{% if fleet.capacity %}charge : {{ fleet.load }}{% endif %}</td>
+	</tr>
+	<tr>
+		<td nowrap>vitesse : {{ fleet.speed }}<br/>signature : {{ fleet.signature }}</td>
+		<td nowrap></td>
+		<td nowrap>{% if fleet.capacity %}<img src="{% static 'exile/assets/interface/soldiers.gif' %}" title="Soldats" width=16 height=16 class=res><span>{{ fleet.cargo_soldiers }}</span>{% endif %}</td>
+		<td nowrap>capacité : {% if fleet.capacity %}{{ fleet.capacity }}{% else %}0{% endif %}{% if fleet.recycler_output %}<br/>Recyclage : {{ fleet.recycler_output }} unités/heure{% endif %}</td>
+	</tr>
+	</table>
+</div>

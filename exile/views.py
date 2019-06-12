@@ -344,6 +344,129 @@ def menu(request):
     t = loader.get_template('exile/menu.html')
     return t.render(gcontext, request)
 
+def fleetheader(request):
+    global gcontext
+    if gcontext['CurrentFleet'] == 0:
+        return ''
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT fleetid, fleets_ships.shipid, quantity' +
+            ' FROM fleets' +
+            ' INNER JOIN fleets_ships ON (fleets.id=fleets_ships.fleetid)' +
+            ' WHERE ownerid=%s' +
+            ' ORDER BY fleetid, fleets_ships.shipid', [gcontext['exile_user'].id])
+        res = cursor.fetchall()
+        if not res:
+            ShipListCount = -1
+        else:
+            ShipListArray = res
+            ShipListCount = len(res)
+        cursor.execute('SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername,' + # 0 1 2 3 4 5 6 7 8 9
+            ' planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation,' + # 10 11 12 13 14 15 16 17
+            ' destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation,' + # 18 19 20 21 22 23 24 25
+            ' cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers,' + # 26 27 28 29 30 31
+            ' recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action,' + # 32 33 34
+            '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %(UserId)s)) AS from_radarstrength, ' + # 35
+            '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %(UserId)s)) AS to_radarstrength,' + # 36
+            ' categoryid' + # 37
+            ' FROM vw_fleets as f WHERE ownerid = %(UserId)s', {'UserId': gcontext['exile_user'].id})
+        res = cursor.fetchall()
+        tpl_header = {'fleetlist':{}}
+        if not res:
+            pass
+        else:
+            for re in res:
+                fleet = {}
+                fleet['ship'] = {}
+                fleet['resource'] = {1:{},2:{},3:{},4:{},5:{}}
+                fleet['id'] = re[0]
+                fleet['name'] = re[1]
+                fleet['category'] = re[37]
+                fleet['size'] = re[4]
+                fleet['signature'] = re[5]
+                fleet['speed'] = re[6]
+                fleet['remaining_time'] = re[7]
+                fleet['cargo_load'] = re[27]+re[28]+re[29]+re[30]+re[31]
+                fleet['cargo_capacity'] = re[26]
+                fleet['cargo_ore'] = re[27]
+                fleet['cargo_hydrocarbon'] = re[28]
+                fleet['cargo_scientists'] = re[29]
+                fleet['cargo_soldiers'] = re[30]
+                fleet['cargo_workers'] = re[31]
+                fleet['commanderid'] = re[8]
+                fleet['commandername'] = re[9]
+                fleet['action'] = abs(re[34])
+                if re[3]:
+                    fleet['action'] = "x"
+                if re[2]:
+                    fleet['stance'] = 1
+                else:
+                    fleet['stance'] = 0
+                if re[7]:
+                    fleet['time'] = re[7]
+                else:
+                    fleet['time'] = 0
+                # Assign fleet current planet
+                fleet['planetid'] = 0
+                fleet['g'] = 0
+                fleet['s'] = 0
+                fleet['p'] = 0
+                fleet['relation'] = 0
+                fleet['planetname'] = ""
+                if re[10]:
+                    fleet['planetid'] = re[10]
+                    fleet['g'] = re[12]
+                    fleet['s'] = re[13]
+                    fleet['p'] = re[14]
+                    fleet['relation'] = re[17]
+                    fleet['planetname'] = getPlanetName(re[17], re[35], re[16], re[11])
+                    if not fleet['planetname']:
+                        fleet['planetname'] = re[16]
+                # Assign fleet destination planet
+                fleet['t_planetid'] = 0
+                fleet['t_g'] = 0
+                fleet['t_s'] = 0
+                fleet['t_p'] = 0
+                fleet['t_relation'] = 0
+                fleet['t_planetname'] = ""
+                if re[18]:
+                    fleet['t_planetid'] = re[18]
+                    fleet['t_g'] = re[20]
+                    fleet['t_s'] = re[21]
+                    fleet['t_p'] = re[22]
+                    fleet['t_relation'] = re[25]
+                    fleet['t_planetname'] = getPlanetName(re[25], re[36], re[24], re[19])
+                for i in range(0, ShipListCount):
+                    if ShipListArray[i][0] == re[0]:
+                        fleet['ship'][i] = {
+                            'ship_label':getShipLabel(ShipListArray[i][1]),
+                            'ship_quantity': ShipListArray[i][2],
+                        }
+                fleet['resource'][1]['res_id'] = 1
+                fleet['resource'][1]['res_quantity'] = re[28]
+                fleet['resource'][2]['res_id'] = 2
+                fleet['resource'][2]['res_quantity'] = re[29]
+                fleet['resource'][3]['res_id'] = 3
+                fleet['resource'][3]['res_quantity'] = re[30]
+                fleet['resource'][4]['res_id'] = 4
+                fleet['resource'][4]['res_quantity'] = re[31]
+                fleet['resource'][5]['res_id'] = 5
+                fleet['resource'][5]['res_quantity'] = re[32]
+                tpl_header['fleetlist'][re[0]] = fleet.copy()
+                if gcontext['CurrentFleet'] == re[0]:
+                    fleet['selected'] = True
+                    tpl_header['fleet'] = fleet.copy()
+    tmp = request.GET.copy()
+    tmp.pop('fleet', None)
+    tmp.pop('planet', None)
+    url_extra_params = urlencode(tmp, doseq=True)
+    if url_extra_params != "":
+        tpl_header["urlf"] = "?" + url_extra_params + "&fleet="
+    else:
+        tpl_header["urlf"] = "?fleet="
+    t = loader.get_template('exile/fleetheader.html')
+    gcontext['tpl_fheader'] = tpl_header.copy()
+    return t.render(tpl_header, request)
+
 def header(request):
     global gcontext
     if gcontext['CurrentPlanet'] == 0:
@@ -422,6 +545,7 @@ def header(request):
         # Fill the planet list
         tmp = request.GET.copy()
         tmp.pop('planet', None)
+        tmp.pop('fleet', None)
         url_extra_params = urlencode(tmp, doseq=True)
         if url_extra_params != "":
             tpl_header["url"] = "?" + url_extra_params + "&planet="
@@ -507,6 +631,7 @@ def construct(function):
             'CurrentPlanet': request.session.get('CurrentPlanet', 0),
             'CurrentGalaxy': request.session.get('CurrentGalaxy', 0),
             'CurrentSector': request.session.get('CurrentSector', 0),
+            'CurrentFleet': request.session.get('CurrentFleet', 0),
             'IsImpersonating':False,
             'skin':'s_default',
         }
@@ -582,6 +707,19 @@ def logged(function):
             gcontext['g'] = fplanet.galaxy.id
             gcontext['s'] = fplanet.sector
             gcontext['p'] = fplanet.planet
+        fleet = request.GET.get('fleet',0)
+        forced = False
+        if fleet and fleet.isdigit():
+            fleet = Fleets.objects.get(pk=fleet)
+            if fleet.ownerid_id == user.id:
+                forced = True
+                gcontext['CurrentFleet'] = fleet.id
+                request.session['CurrentFleet'] = fleet.id
+        if gcontext['CurrentFleet'] == 0:
+            fleet = user.fleets_set.first()
+            if fleet:
+                gcontext['CurrentFleet'] = fleet.id
+                request.session['CurrentFleet'] = fleet.id
         if IsPlayerAccount(request):
             # Redirect to locked page
             if gcontext['exile_user'].privilege == -1:
@@ -693,13 +831,10 @@ def start(request):
         with connection.cursor() as cursor:
             cursor.execute('UPDATE users SET login=%s, lastactivity=now() WHERE id=%s', [newName, userId])
     def init_player(userId, galaxy, orientation):
-        print(userId, galaxy, orientation)
         with connection.cursor() as cursor:
-            print('cursor OK')
             cursor.execute('UPDATE users SET orientation=%s, lastactivity=now() WHERE id=%s', [orientation, userId])
             cursor.execute('SELECT sp_reset_account(%s,%s)', [userId, galaxy])
             res = cursor.fetchone()
-            print(res)
             if res[0] != 0:
                 raise Exception('can\'t reset account')
             if orientation == 1: # merchant
@@ -1687,6 +1822,8 @@ def fleet(request):
             # if fleet doesnt exist, redirect to the last known planet orbit or display the fleets list
             if not res:
                 return HttpResponseRedirect(reverse('exile:fleets'))
+            gcontext['CurrentFleet'] = fleetid
+            request.session['CurrentFleet'] = fleetid
             gcontext['overview'] = {
                 'actions':{'action':{}},
                 'shiplist':{},
@@ -2200,7 +2337,6 @@ def fleet(request):
             return False
     def ExecuteOrder(fleetid):
         action = request.POST.get('action',request.GET.get('action', ''))
-        print(action)
         if action == "invade":
             try:
                 droppods = int(request.POST.get("droppods", 0))
@@ -2250,7 +2386,6 @@ def fleet(request):
             with connection.cursor() as cursor:
                 cursor.execute("SELECT sp_start_recycling(%s, %s)", [gcontext['exile_user'].id, fleetid])
                 res = cursor.fetchone()
-                print(res)
                 if res[0] == -2:
                     gcontext['action_result'] = "error_recycling"
         elif action == "stoprecycling":
@@ -2291,9 +2426,14 @@ def fleet(request):
     gcontext['selectedmenu'] = 'fleets_fleets'
     gcontext['menu'] = menu(request)
     try:
-        fleetid = int(request.GET.get("id", 0))
+        fleetid = int(request.GET.get("fleet", 0))
     except (KeyError, Exception):
         fleetid = 0
+    if not fleetid:
+        try:
+            fleetid = int(request.GET.get("id", 0))
+        except (KeyError, Exception):
+            fleetid = 0
     try:
         trade = int(request.GET.get("trade", 0))
     except (KeyError, Exception):
@@ -2307,7 +2447,9 @@ def fleet(request):
     if r:
         return r
     DisplayFleet(fleetid)
-
+    fh = fleetheader(request)
+    if fh:
+        gcontext['contextinfo'] = fleetheader(request)
     context = gcontext
     t = loader.get_template('exile/fleet.html')
     context['content'] = t.render(gcontext, request)
@@ -3786,7 +3928,6 @@ def alliancemanage(request):
                     c14 = True and bool(request.POST.get("c"+str(re[1])+"_14", ""))
                     c15 = True and bool(request.POST.get("c"+str(re[1])+"_15", ""))
                     cenabled = True and bool(request.POST.get("c"+str(re[1])+"_enabled", ""))
-                    print(c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, cenabled)
                     if c0:
                         cursor.execute("UPDATE alliances_ranks SET is_default=false WHERE allianceid=%s", [gcontext['exile_user'].alliance_id])
                     cursor.execute("UPDATE alliances_ranks SET" +
@@ -5881,16 +6022,27 @@ def map(request):
         galaxy = gcontext['CurrentGalaxy']
         sector = gcontext['CurrentSector']
     else:
-        if galaxy != "":
-            if galaxy.isdigit():
-                galaxy = int(galaxy)
+        fleet = request.GET.get("fleet", '')
+        if fleet != "":
+            fleet = Fleets.objects.get(pk=fleet)
+            dest = fleet.dest_planetid
+            if dest:
+                galaxy = dest.galaxy_id
+                sector = dest.sector
             else:
-                galaxy = gcontext['CurrentGalaxy']
-        if sector != "":
-            if sector.isdigit():
-                sector = int(sector)
-            else:
-                sector = gcontext['CurrentSector']
+                galaxy = fleet.planetid.galaxy_id
+                sector = fleet.planetid.sector
+        else:
+            if galaxy != "":
+                if galaxy.isdigit():
+                    galaxy = int(galaxy)
+                else:
+                    galaxy = gcontext['CurrentGalaxy']
+            if sector != "":
+                if sector.isdigit():
+                    sector = int(sector)
+                else:
+                    sector = gcontext['CurrentSector']
     redirect = False
     if sector != '' and ( int(sector) < 1 or int(sector) > 99):
         redirect = True
@@ -5903,6 +6055,9 @@ def map(request):
     DisplayMap(galaxy, sector)
     context = gcontext
     gcontext['contextinfo'] = header(request)
+    fh = fleetheader(request)
+    if fh:
+        gcontext['contextinfo2'] = fleetheader(request)
     t = loader.get_template('exile/map.html')
     context['content'] = t.render(gcontext, request)
     return render(request, 'exile/layout.html', context)
@@ -9447,7 +9602,6 @@ def FormatBattle(battleid, creator, pointofview, ispubliclink):
             }
             killed = 0
             total = 0
-            print(killsArray)
             for i in killsArray:
                 if re[12] == i[0] and re[2] == i[1]:
                     gcontext['opponent'][re[10]]['fleet'][re[12]]['category'][re[3]][cpt]['killed'][str(i[0])+':'+str(i[2])] = {
@@ -9550,7 +9704,6 @@ def battle(request):
                     creator = res[0] #fromview
         if display_battle:
             FormatBattle(id, creator, fromview, False)
-            #print(gcontext)
         else:
             return HttpResponseRedirect(reverse('exile:reports'))
         context = gcontext

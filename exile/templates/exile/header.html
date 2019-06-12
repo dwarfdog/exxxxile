@@ -1,7 +1,7 @@
 {% load static %}
 <script>
 function jump(obj){
-	eval("location='{{ url|escape }}" + obj.options[obj.selectedIndex].value + "'");
+	eval("location='{{ url|safe }}" + obj.options[obj.selectedIndex].value + "'");
 }
 function nextplanet(){
 	var obj = document.getElementById("planetlist");
