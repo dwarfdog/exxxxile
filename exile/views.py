@@ -451,10 +451,10 @@ def fleetheader(request):
                 fleet['resource'][4]['res_quantity'] = re[31]
                 fleet['resource'][5]['res_id'] = 5
                 fleet['resource'][5]['res_quantity'] = re[32]
-                tpl_header['fleetlist'][re[0]] = fleet.copy()
                 if gcontext['CurrentFleet'] == re[0]:
                     fleet['selected'] = True
                     tpl_header['fleet'] = fleet.copy()
+                tpl_header['fleetlist'][re[0]] = fleet.copy()
     tmp = request.GET.copy()
     tmp.pop('fleet', None)
     tmp.pop('planet', None)
