@@ -135,3 +135,39 @@ function formatnumber(n){
 
 Number.prototype.n = function() { return addThousands(this,'.',' '); }
 Number.prototype.lz = function() { return (this < 10?"0":"") + this; }
+
+var notify = function(text){
+}
+
+window.addEventListener('load', function () {
+  // Premièrement, vérifions que nous avons la permission de publier des notifications. Si ce n'est pas le cas, demandons la
+  if (window.Notification && Notification.permission !== "granted") {
+    Notification.requestPermission(function (status) {
+      if (Notification.permission !== status) {
+        Notification.permission = status;
+      }
+    });
+  }
+
+  notify = function(text, icon) {
+    // Si l'utilisateur accepte d'être notifié
+    if (window.Notification && Notification.permission === "granted") {
+      var n = new Notification(text, {'icon':icon});
+    }
+
+    // Si l'utilisateur n'a pas choisi s'il accepte d'être notifié
+    // Note: à cause de Chrome, nous ne sommes pas certains que la propriété permission soit définie, par conséquent il n'est pas sûr de vérifier la valeur par défaut.
+    else if (window.Notification && Notification.permission !== "denied") {
+      Notification.requestPermission(function (status) {
+        if (Notification.permission !== status) {
+          Notification.permission = status;
+        }
+
+        // Si l'utilisateur est OK
+        if (status === "granted") {
+          var n = new Notification(text, {'icon':icon});
+        }
+      });
+    }
+  };
+});

@@ -1,12 +1,13 @@
 var counters = [];
 
-function Counter(name, seconds, display, endContent, onFinished){
+function Counter(name, seconds, display, endContent, onFinished, onFinishedIcon=null){
 	this.name = name;
 	this.started = new Date().getTime();
 	this.endTime = new Date().getTime() + seconds*1000;
 	this.display = display;
 	this.endContent = endContent;
 	this.onFinished = onFinished;
+	this.onFinishedIcon = onFinishedIcon;
 
 	// return remaining time in seconds
 	this.remainingTime = function(){ return Math.ceil((this.endTime - new Date().getTime())/1000); };
@@ -28,7 +29,12 @@ function Counter(name, seconds, display, endContent, onFinished){
 					this.obj.innerHTML = formatRemainingTime(0);
 
 				if(this.onFinished){
-					this.onFinished(this);
+					if(this.onFinishedIcon){
+						notify(this.onFinished,this.onFinishedIcon);
+					}else{
+						notify(this.onFinished);
+					}
+					//this.onFinished(this);
 					this.onFinished = null;
 				}
 
@@ -51,8 +57,8 @@ function Counter(name, seconds, display, endContent, onFinished){
 	};
 }
 
-function startCountdown(name, seconds, displayCountdown, endContent, onFinished){
-	var c = new Counter(name, seconds, displayCountdown, endContent, onFinished);
+function startCountdown(name, seconds, displayCountdown, endContent, onFinished, onFinishedIcon=null){
+	var c = new Counter(name, seconds, displayCountdown, endContent, onFinished, onFinishedIcon);
 	counters.push(c);
 	return c;
 }
@@ -95,9 +101,9 @@ function formatRemainingTime(s){
 
 var countdownnbr = 0;
 
-function putcountdown1(seconds, endlabel, url)
+function putcountdown1(seconds, endlabel, url, text=null, icon=null)
 {
-	var c = startCountdown('cntdwn' + countdownnbr++, seconds, null, '<a href="' + url + '">' + endlabel + '</a>', null);
+	var c = startCountdown('cntdwn' + countdownnbr++, seconds, null, '<a href="' + url + '">' + endlabel + '</a>', text, icon);
 	document.write(c);
 }
 

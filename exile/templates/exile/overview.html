@@ -96,7 +96,7 @@ function sig(signature){
 		{% if fleet.ally %}Une flotte alliée de <a href="{% url 'exile:mails' %}?to={{ fleet.name }}" class="ally" title="Envoyer un message à {{ fleet.name }}">{{ fleet.name }}</a>{% endif %}
 		{% if fleet.friend %}Une flotte amie de <a href="{% url 'exile:mails' %}?to={{ fleet.name }}" class="friend" title="Envoyer un message à {{ fleet.name }}">{{ fleet.name }}</a>{% endif %}
 		{% if fleet.hostile %}Une flotte hostile de <a href="{% url 'exile:nation' %}?name={{ fleet.name }}" class="enemy" title="Envoyer un message à {{ fleet.name }}">{{ fleet.name }}</a>{% endif %}
-		<script>sig({{ fleet.signature }})</script> est en transit{% if fleet.movingfrom %} de <script>putplanet("{{ fleet.f_planetid }}","{{ fleet.f_planetname }}","{{ fleet.f_g }}","{{ fleet.f_s }}","{{ fleet.f_p }}",{{ fleet.f_relation }});</script>{% else %} d'une planète inconnue{% endif %} vers <script>putplanet("{{ fleet.t_planetid }}","{{ fleet.t_planetname }}","{{ fleet.t_g }}","{{ fleet.t_s }}","{{ fleet.t_p }}",{{ fleet.t_relation }});</script> - (<script>putcountdown1({{ fleet.time }}, "Terminé", "{% url 'exile:overview' %}");</script>)
+		<script>sig({{ fleet.signature }})</script> est en transit{% if fleet.movingfrom %} de <script>putplanet("{{ fleet.f_planetid }}","{{ fleet.f_planetname }}","{{ fleet.f_g }}","{{ fleet.f_s }}","{{ fleet.f_p }}",{{ fleet.f_relation }});</script>{% else %} d'une planète inconnue{% endif %} vers <script>putplanet("{{ fleet.t_planetid }}","{{ fleet.t_planetname }}","{{ fleet.t_g }}","{{ fleet.t_s }}","{{ fleet.t_p }}",{{ fleet.t_relation }});</script> - (<script>putcountdown1({{ fleet.time }}, "Terminé", "{% url 'exile:overview' %}", "{% if fleet.owned %}Votre flotte{% elif fleet.ally %}Une flotte alliée de{% elif fleet.friend %}Une flotte amie de{% elif fleet.hostile %}Une flotte hostile de{% endif %} {{ fleet.name }} est arrivée à {{ fleet.t_planetname }} ({{ fleet.f_g }}.{{ fleet.f_s }}.{{ fleet.f_p }})");</script>)
 		</div>
 	{% endfor %}
 	{% ifequal fleets|length 0 %}
@@ -113,7 +113,7 @@ function sig(signature){
 <tr class="item">
 <td>
 	{% for rid, re in research.items %}
-		<div><a href="{% url 'exile:research' %}#{{ re.researchid }}">{{ re.research }}</a> (<script>putcountdown1({{ re.time }}, "Terminé", "{% url 'exile:research' %}");</script>)</div>
+		<div><a href="{% url 'exile:research' %}#{{ re.researchid }}">{{ re.research }}</a> (<script>putcountdown1({{ re.time }}, "Terminé", "{% url 'exile:research' %}","{{ re.research }} terminée");</script>)</div>
 	{% endfor %}
 	{% ifequal research|length 0 %}<div><a href="{% url 'exile:research' %}" title="Voir le laboratoire de recherches">Aucune recherche en cours</a></div>{% endifequal %}
 </td>
@@ -130,7 +130,7 @@ function sig(signature){
 		<table class="clear" cellpadding="0" cellspacing="0">
 		<tr valign="top"><td><a href="{% url 'exile:buildings' %}?planet={{ planet.planetid }}">{{ planet.planetname }} ({{ planet.galaxy }}.{{ planet.sector }}.{{ planet.planet }}) : </a></td><td>
 			{% for bid, building in planet.buildings.items %}
-				<div>{% if building.destroy %}<span class="destroy">Destruction de {% endif %}{{ building.building }} (<script>putcountdown1({{ building.time }}, "Terminé", "{% url 'exile:buildings' %}?planet={{ planet.planetid }}#{{ building.buildingid }}");</script>){% if building.destroy %}</span>{% endif %}</div>
+				<div>{% if building.destroy %}<span class="destroy">Destruction de {% endif %}{{ building.building }} (<script>putcountdown1({{ building.time }}, "Terminé", "{% url 'exile:buildings' %}?planet={{ planet.planetid }}#{{ building.buildingid }}","{% if building.destroy %}Destruction{% else %}Construction{% endif %} de {{ building.building }} terminée sur {{ planet.planetname }} ({{ planet.galaxy }}.{{ planet.sector }}.{{ planet.planet }})","{% static 'exile/assets/buildings/' %}{{ building.buildingid }}.jpg");</script>){% if building.destroy %}</span>{% endif %}</div>
 			{% endfor %}
 			{% ifequal planet.buildings|length 0 %}
 			<div><a href="{% url 'exile:buildings' %}?planet={{ planet.planetid }}" title="Voir les infrastructures">Aucune construction en cours</a></div>

@@ -450,14 +450,16 @@ tiptext = $("hinttext");
 		</td>
 	</tr>
 
-	<tr>
-		<td nowrap>Partage</td>
-		<td>
-			<div class=left>
-				Flotte partagée à l'alliance: <a href="?id={{ overview.fleetid }}&action=share">{% if overview.shared %}Oui{% endif %}{% if overview.not_shared %}Non{% endif %}</a>
-			</div>
-		</td>
-	</tr>
+	{% if exile_user.alliance_id %}
+		<tr>
+			<td nowrap>Partage</td>
+			<td>
+				<div class=left>
+					Flotte partagée à l'alliance: <a href="?id={{ overview.fleetid }}&action=share">{% if overview.shared %}Oui{% endif %}{% if overview.not_shared %}Non{% endif %}</a>
+				</div>
+			</td>
+		</tr>
+	{% endif %}
 
 	<tr {% if overview.hide_cargo %}class="hidden"{% endif %}>
 		<td nowrap>Cargaison</td>
