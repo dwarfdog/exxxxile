@@ -92,7 +92,7 @@ function writeBuilding(id,name,quantity,status,o,o2,h,h2,w,w2,e,e2,f,f2,s,s2,rem
 			'<td align=center>';
 
 	if(status==01||status==012)
-		a+= '<script>putcountdown1('+remainingtime+',"","#","Construction de '+name'+ terminée","{% static 'exile/assets/buildings/' %}'+id+'.jpg");</scr'+'ipt><br/><script>putcountdown2('+remainingtime+', "<a href=\'#\' onclick=\'refreshPage(\\"{% url 'exile:buildings' %}?planet={{ planetid }}&a=cancel&b='+id+'\\"); return false;\'>annuler</a>", "<a href=\'#\' onclick=\'refreshPage(); return false;\'>terminé</a>");</sc'+'ript>';
+		a+= '<script>putcountdown1('+remainingtime+',"","#","Construction de '+name+' terminée","{% static 'exile/assets/buildings/' %}'+id+'.jpg");</scr'+'ipt><br/><script>putcountdown2('+remainingtime+', "<a href=\'#\' onclick=\'refreshPage(\\"{% url 'exile:buildings' %}?planet={{ planetid }}&a=cancel&b='+id+'\\"); return false;\'>annuler</a>", "<a href=\'#\' onclick=\'refreshPage(); return false;\'>terminé</a>");</sc'+'ript>';
 	else
 	if(build==1)
 		a+= '<span class="error">bâtiment(s) requis</span>';
@@ -116,7 +116,7 @@ function writeBuilding(id,name,quantity,status,o,o2,h,h2,w,w2,e,e2,f,f2,s,s2,rem
 		case 01: a+= '<span class="nodestruct" title="Pas assez de travailleurs pour détruire le bâtiment">démolir</span>'; break;
 		case 02: a+= '<span class="nodestruct" title="Détruisez d\'abord les bâtiments qui dépendent de celui-ci">démolir</span>'; break;
 		case 03: a+= '<span class="nodestruct" title="La destruction de ce bâtiment entraînerait une perte de scientifiques, soldats, travailleurs, de minerai ou d\'hydrocarbure">démolir</span>'; break;
-		case 04: a+= '<span class="nodestruct" title="Le terrain du dernier bâtiment est toujours en train d\'être déblayé"><script>putcountdown2('+destroytime+', "démolition en cours", "<a href=\'#\' onclick=\'refreshPage(); return false;\'>démolition terminée</a>","Destruction de '+name'+ terminée","{% static 'exile/assets/buildings/' %}'+id+'.jpg");</scr'+'ipt></span><br/><script>putcountdown1('+destroytime+',"");</scr'+'ipt>'; break;
+		case 04: a+= '<span class="nodestruct" title="Le terrain du dernier bâtiment est toujours en train d\'être déblayé"><script>putcountdown2('+destroytime+', "démolition en cours", "<a href=\'#\' onclick=\'refreshPage(); return false;\'>démolition terminée</a>","Destruction de '+name+' terminée","{% static 'exile/assets/buildings/' %}'+id+'.jpg");</scr'+'ipt></span><br/><script>putcountdown1('+destroytime+',"");</scr'+'ipt>'; break;
 		case 05: a+= '<span id="destroy'+id+'"><a href="?" title="Détruire le bâtiment" onclick="javascript:return showDestroy('+id+');">démolir</a></span><span id="destroyConfirm'+id+'" style="display: none;font-weight:bold;"><a href=\'#\' onclick="refreshPage(\'?planet={{ planetid }}&a=destroy&b='+id+'\'); return false;" title="Confirmer la destruction">confirmer</></span>'; break;
 		default: a+= '-';
 	}
