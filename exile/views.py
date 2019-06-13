@@ -1890,7 +1890,7 @@ def fleet(request):
                         "   LEFT JOIN nav_planet AS p ON (routes_waypoints.planetid=p.id)" +
                         " WHERE routeid=%s AND routes_waypoints.id >= %s" +
                         " ORDER BY routes_waypoints.id", [gcontext['exile_user'].id, res[45], res[44]])
-                res2 = fetchall()
+                res2 = cursor.fetchall()
                 waypointscount = 0
                 for re in res2:
                     wp = {'fake':True}
