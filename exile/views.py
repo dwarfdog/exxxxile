@@ -1902,9 +1902,9 @@ def fleet(request):
                             "p": re[5],
                             "relation": re[8],
                         }
-                        if re[6] >= config.rAlliance:
+                        if re[8] >= config.rAlliance:
                             wp["planetname"] = re[6]
-                        elif re[6] >= config.rUninhabited:
+                        elif re[8] >= config.rUninhabited:
                             wp["planetname"] = re[7]
                         else:
                             wp["planetname"] = ""
