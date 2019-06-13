@@ -35,3 +35,5 @@ class ExileConfig(AppConfig):
     sPlanetListCount = "planetlistcount"
     sPrivilege = "sPrivilege"
     sLogonUserID = "sLogonUserID"
+
+    onlineusers_refreshtime = 60

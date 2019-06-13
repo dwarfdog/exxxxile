@@ -1,4 +1,4 @@
-{% load static %}{% load tz %}
+{% load static %}{% load tz %}{% load bbcode_tags %}
 <div id="mails">
 <table class="default" width="100%">
 
@@ -21,7 +21,7 @@
 				<td width="90%" valign=top>
 				<div class="subject">
 				{{ p.date|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} | {{ p.subject }}{% if p.money %} | Somme envoyée : <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width=16 height=16> {{ p.moneyamount }}{% endif %}</div>
-				<div class="body">{% if p.html %}{{ p.body|safe }}{% endif %}{% if p.bbcode|safe %}{{ p.bodybb }}{% endif %}</div>
+				<div class="body">{% if p.html %}{{ p.body|safe }}{% endif %}{% if p.bbcode %}{{ p.bodybb|bbcode|safe }}{% endif %}</div>
 				</td>
 			</tr>
 		{% endfor %}

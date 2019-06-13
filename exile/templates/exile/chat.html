@@ -1,7 +1,8 @@
-[[chat]]
+{% load static %}{% load tz %}{% load bbcode_tags %}
+{% if chat %}
 <script>
-var chatInstance = {chatinstance};
-var chatDateTime = new Date({now:yyyy},{now:m}-1,{now:d },{now:h },{now:n },{now:s},{now:z});
+var chatInstance = {{ chatinstance }};
+var chatDateTime = new Date({{ now|timezone:"Europe/Paris"|date:"Y" }},{{ now|timezone:"Europe/Paris"|date:"m" }}-1,{{ now|timezone:"Europe/Paris"|date:"d" }},{{ now|timezone:"Europe/Paris"|date:"H" }},{{ now|timezone:"Europe/Paris"|date:"i" }},{{ now|timezone:"Europe/Paris"|date:"s" }},{{ now|timezone:"Europe/Paris"|date:"z" }});
 var pageLocation = location.href;
 
 var days=['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
@@ -58,7 +59,7 @@ function formatLine(author,line)
 {
 	var smileys = 0;
 
-	highlight = line.indexOf({login:quote}, 0) > -1;
+	highlight = line.indexOf('{{ login|escapejs }}', 0) > -1;
 	words = line.split(" ");
 
 	for(i=0;i<words.length;i++)
@@ -67,14 +68,14 @@ function formatLine(author,line)
 
 		if(tab != null && tab[1] > 0 && tab[2] > 0 && tab[2] < 100 && tab[3] > 0 && tab[3] <= 25)
 		{
-			words[i] = "<a href='map.asp?g="+tab[1] + "&s=" + tab[2] + "&p=" + tab[3] + "' target=_blank>" + words[i] + "</a>";
+			words[i] = "<a href='{% url 'exile:map' %}?g="+tab[1] + "&s=" + tab[2] + "&p=" + tab[3] + "' target=_blank>" + words[i] + "</a>";
 			continue;
 		}
 
 		if(smileys < 3) {
 			var smiley = Smileys.get(words[i]);
 			if(smiley) {
-				words[i] = '<img src="{PATH_IMAGES}/smileys/'+smiley+'" class=smiley alt="'+smiley+'">';
+				words[i] = '<img src="{% static 'exile/assets/smileys/' %}'+smiley+'" class=smiley alt="'+smiley+'">';
 				smileys++;
 				continue;
 			}
@@ -86,7 +87,7 @@ function formatLine(author,line)
 			words[i] = addWbr(words[i]);
 	}
 
-	if(author == {login:quote})
+	if(author == '{{ login|escapejs }}')
 		return '<span class="player">' + words.join(' ') + '</span>';
 	else
 	if(highlight)
@@ -140,7 +141,7 @@ Chat.prototype = {
 		this.lastRefresh = new Date().getTime();
 		this.nextRefreshOnlineUsers = new Date().getTime() + 60000;
 
-		this.loaded = false; [[comment]]// set to true once chat history has been filled[/comment]]
+		this.loaded = false; // set to true once chat history has been filled
 
 		this.lastTo = '';
 		this.line = '';
@@ -154,7 +155,7 @@ Chat.prototype = {
 		this.tab.chat = this;
 
 		this.tab.innerHTML = '<a href="#" onclick="chatlist['+id+'].setActive(); return false;">' + name + 
-							 (canClose?'&nbsp;<img src="{PATH_IMAGES}/interface/closechat.gif" width="12" height="12" title="Fermer" class="close" onclick="chatlist['+id+'].close();">':'') +
+							 (canClose?'&nbsp;<img src="{% static 'exile/assets/interface/closechat.gif' %}" width="12" height="12" title="Fermer" class="close" onclick="chatlist['+id+'].close();">':'') +
 							 '</a>';
 
 		tabs.insertBefore(this.tab, newtab);
@@ -302,7 +303,7 @@ Chat.prototype = {
 
 		if(!this.showTag) tag = '';
 
-		this.lines.push((datetime==null?'<b>':'')+'<img src="{PATH_IMAGES}/interface/spacer.gif" width="0" height="15" border="0">' + formatTime(datetime) + (tag!=''?' <a href="alliance.asp?tag='+tag+'" target="_blank">['+tag+']</a>':'') + ' <a href="#" onclick="chatlist['+this.id+'].tell(\''+author+'\'); return false;" class="author">' + author + '</a> : ' + line + (datetime==null?'</b>':''));
+		this.lines.push((datetime==null?'<b>':'')+'<img src="{% static 'exile/assets/interface/spacer.gif' %}" width="0" height="15" border="0">' + formatTime(datetime) + (tag!=''?' <a href="{% url 'exile:alliance' %}?tag='+tag+'" target="_blank">['+tag+']</a>':'') + ' <a href="#" onclick="chatlist['+this.id+'].tell(\''+author+'\'); return false;" class="author">' + author + '</a> : ' + line + (datetime==null?'</b>':''));
 
 		// limit chatbox to 250 messages
 		while(this.lines.length > 250) this.lines.shift();
@@ -350,7 +351,7 @@ Chat.prototype = {
 		for(var i=0; i<this.users.length; i++) {
 			var user = this.users[i];
 			if(user.idleSince > d)
-				s += (s!=''?', ':'') + (user.tag!=''?' <a href="alliance.asp?tag='+user.tag+'" target="_blank">['+user.tag+']</a>':'') + ' <a href="#" onclick="chatlist[' + this.id + '].tell(\'' + user.name + '\'); return false;">' + user.name + '</a>';
+				s += (s!=''?', ':'') + (user.tag!=''?' <a href="{% url 'exile:alliance' %}?tag='+user.tag+'" target="_blank">['+user.tag+']</a>':'') + ' <a href="#" onclick="chatlist[' + this.id + '].tell(\'' + user.name + '\'); return false;">' + user.name + '</a>';
 		}
 
 		$('onlineusers').innerHTML = s;
@@ -367,9 +368,9 @@ Chat.prototype = {
 		var c = this;
 		var cb = function(req) {
 					try {
-						[[dev]]
+						{% if dev %}
 						alert(req.status + '\r\n'+req.responseText);
-						[/dev]]
+						{% endif %}
 						if(req.status==200)
 							eval(req.responseText);
 					} catch(e) {
@@ -580,8 +581,8 @@ function displayPublicChats(list)
 <table class="default" width="100%">
 <tr class="title"><td colspan="2">Rejoindre un nouveau salon</td></tr>
 <tr><td colspan="2" align="center">
-Nom du salon : <input type="text" id="chatname" maxlength="12"><br/><br/>
-Mot de passe : <input type="password" id="chatpassword" maxlength="16"><br/><br/>
+Nom du salon : <input type="text" id="chatname" maxlength="12" required><br/><br/>
+Mot de passe : <input type="password" id="chatpassword" maxlength="16" required><br/><br/>
 <input type="submit" value="Rejoindre">
 </td></tr>
 </table>
@@ -593,44 +594,48 @@ Mot de passe : <input type="password" id="chatpassword" maxlength="16"><br/><br/
 <script>
 oChat = $('chat');
 oChatLine = $('chatline');
-[/chat]]
+{% endif %}
 
-[[alliance]]
-var allianceChat = addChat(0,'Alliance','',false,false);
-[/alliance]]
+{% if alliance %}
+	var allianceChat = addChat(0,'Alliance','',false,false);
+{% endif %}
 
-[[join]]
-var chat = addChat({id},{name:quote},{topic:quote},true,true);
-[[setactive]]chat.setActive();[/setactive]]
-[/join]]
-[[join_badpassword]]
-alert('Nom de salon ou mot de passe incorrect.');
-[/join_badpassword]]
-[[join_error]]
-alert('Impossible de rejoindre ce salon.');
-[/join_error]]
+{% for i,j in join.items %}
+	var chat = addChat({{ j.id }},'{{ j.name|escapejs }}','{{ topic|escapejs }}',true,true);
+	{% if j.setactive %}chat.setActive();{% endif %}
+{% endfor %}
+
+{% if join_badpassword %}
+	alert('Nom de salon ou mot de passe incorrect.');
+{% endif %}
+
+{% if join_error %}
+	alert('Impossible de rejoindre ce salon.');
+{% endif %}
 
 
-[[refresh]]
-var chat = chatlist[{chatid}];
-if(chat) {
-	[[line]]chat.addLine({alliancetag:quote}, {author:quote}, new Date({datetime:yyyy},{datetime:m}-1,{datetime:d },{datetime:h },{datetime:n },{datetime:s},{datetime:z}), {line:quotehtml});[/line]]
-	chat.display();
+{% if refresh %}
+	var chat = chatlist[{{ chatid }}];
+	if(chat) {
+		{% for i,l in refresh.line.items %}
+			chat.addLine('{{ l.alliancetag|escapejs }}', '{{ l.author|escapejs }}', new Date({{ l.datetime|timezone:"Europe/Paris"|date:"Y" }},{{ l.datetime|timezone:"Europe/Paris"|date:"m" }}-1,{{ l.datetime|timezone:"Europe/Paris"|date:"d" }},{{ l.datetime|timezone:"Europe/Paris"|date:"H" }},{{ l.datetime|timezone:"Europe/Paris"|date:"i" }},{{ l.datetime|timezone:"Europe/Paris"|date:"s" }},{{ l.datetime|timezone:"Europe/Paris"|date:"z" }}), '{{ l.line|bbcode|escapejs }}');
+		{% endfor %}
+		chat.display();
 
-[[online_users]]
-	chat.clearUsers();
-	[[user]]chat.addUser({alliancetag:quote}, {user:quote}, {lastactivity});[/user]]
-	chat.displayUsers();
-[/online_users]]
+	{% if refresh.online_users %}
+		chat.clearUsers();
+		{% for i,user in refresh.online_users.items %}chat.addUser('{{ user.alliancetag|escapejs }}', '{{ user.user|escapejs }}', {{ user.lastactivity }});{% endfor %}
+		chat.displayUsers();
+	{% endif %}
 
-}
-[/refresh]]
+	}
+{% endif %}
 
-[[publicchats]]
-displayPublicChats([0[[chat]],[{name:quote},{topic:quote},{online}][/chat]]]);
-[/publicchats]]
+{% if publicchats %}
+	displayPublicChats([0{% for i,chat in publicchats.chat.items %},['{{ chat.name|escapejs }}','{{ chat.topic|escapejs }}',{{ chat.online }}]{% endfor %}]);
+{% endif %}
 
-[[chat]]
+{% if chat %}
 if(chatlist.length == 0) showJoinChatForm();
 </script>
-[/chat]]
+{% endif %}
