@@ -1,6 +1,6 @@
 var counters = [];
 
-function Counter(name, seconds, display, endContent, onFinished, onFinishedIcon=null){
+function Counter(name, seconds, display, endContent, onFinished, onFinishedTitle=null, onFinishedIcon=null){
 	this.name = name;
 	this.started = new Date().getTime();
 	this.endTime = new Date().getTime() + seconds*1000;
@@ -28,12 +28,13 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedIcon=
 				else
 					this.obj.innerHTML = formatRemainingTime(0);
 
+				if(this.onFinishedTitle){
+					notify(this.onFinishedTitle,this.onFinishedIcon);
+				}else{
+					notify(this.onFinishedTitle);
+				}
+
 				if(this.onFinished){
-					if(this.onFinishedIcon){
-						notify(this.onFinished,this.onFinishedIcon);
-					}else{
-						notify(this.onFinished);
-					}
 					//this.onFinished(this);
 					this.onFinished = null;
 				}
@@ -57,8 +58,8 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedIcon=
 	};
 }
 
-function startCountdown(name, seconds, displayCountdown, endContent, onFinished, onFinishedIcon=null){
-	var c = new Counter(name, seconds, displayCountdown, endContent, onFinished, onFinishedIcon);
+function startCountdown(name, seconds, displayCountdown, endContent, onFinished, onFinishedTitle=null,onFinishedIcon=null){
+	var c = new Counter(name, seconds, displayCountdown, endContent, onFinished, onFinishedTitle, onFinishedIcon);
 	counters.push(c);
 	return c;
 }
@@ -103,12 +104,12 @@ var countdownnbr = 0;
 
 function putcountdown1(seconds, endlabel, url, text=null, icon=null)
 {
-	var c = startCountdown('cntdwn' + countdownnbr++, seconds, null, '<a href="' + url + '">' + endlabel + '</a>', text, icon);
+	var c = startCountdown('cntdwn' + countdownnbr++, seconds, null, '<a href="' + url + '">' + endlabel + '</a>', null, text, icon);
 	document.write(c);
 }
 
-function putcountdown2(seconds, content1, content2)
+function putcountdown2(seconds, content1, content2, text=null, icon=null)
 {
-	var c = startCountdown('cntdwn' + countdownnbr++, seconds, content1, content2, null);
+	var c = startCountdown('cntdwn' + countdownnbr++, seconds, content1, content2, null, text, icon);
 	document.write(c);
 }

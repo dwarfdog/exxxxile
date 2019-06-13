@@ -269,7 +269,7 @@ function displayFleetList(list) {
 				z+= '<span class="state_patrolling">En patrouille</span>';
 			break;
 			case '1':
-				var c = startCountdown('fleetcountdown' + fleet.id, fleet.remainingTime(), null, '<a href="{% url 'exile:fleets' %}?id=' + fleet.id + '">Arrivé</a>', counterFinished);
+				var c = startCountdown('fleetcountdown' + fleet.id, fleet.remainingTime(), null, '<a href="{% url 'exile:fleets' %}?id=' + fleet.id + '">Arrivé</a>', counterFinished, 'La flotte '+fleet.name+' est arrivée à '+fleet.destination,"/static/exile/assets/reports/400.jpg");
 				z+= '<span class="state_moving">En transit vers ' + fleet.destination + ' - (' + c + ')';
 			break;
 			case '2':
