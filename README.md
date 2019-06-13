@@ -36,4 +36,27 @@ cd exxxxile
 
 cp pyxile/settings.py.example pyxile/settings.py
 
-Edit settings.py.example to set correct values (secret key, db access, etc.)
+4/ CREATE A DATABASE IN POSTGRESQL
+
+5/ EDIT clean_dump.sql TO REPLACE OWNER 'exxxxile' BY YOUR USER IN ALL FILE
+
+6/ IMPORT THE SQL DUMP
+
+psql -d [db_name] -f clean_dump.sql
+
+7/ SET CONFIG
+
+Edit pyxile/settings.py.example to set correct values (secret key, db access, etc.)
+
+8/ RUNSERVER OR WSGI
+
+9/ INFINITE LOOP RUN COMMANDS (nohup, screen OR ADD A PYTHON SCHEDULER MODULE):
+
+python3.7 manage.py sp_process_all
+
+python3.7 manage.py update_player
+
+python3.7 manage.py sp_battle
+
+python3.7 manage.py sp_events
+
