@@ -7,6 +7,7 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedTitle
 	this.display = display;
 	this.endContent = endContent;
 	this.onFinished = onFinished;
+	this.onFinishedTitle = onFinishedTitle;
 	this.onFinishedIcon = onFinishedIcon;
 
 	// return remaining time in seconds
