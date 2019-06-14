@@ -43,7 +43,7 @@ table.tableheader td { padding-right:8px; }
 		<td nowrap>{% if fleet.cargo_capacity %}<img src="{% static 'exile/assets/interface/workers.gif' %}" title="Travailleurs" width=16 height=16 class=res><span>{{ fleet.cargo_workers }}</span>{% endif %}</td>
 		<td nowrap></td>
 		{% if fleet.ship %}
-			<td nowrap rowspan="3">{% for i,sh in fleet.ship.items %}{{ sh.ship_quantity }} x {{ sh.ship_label }}<br/>{% endfor %}</td>
+			<td nowrap rowspan="3" style="padding-left:5px;">{% for i,sh in fleet.ship.items %}{{ sh.ship_label }} x {{ sh.ship_quantity }}<br/>{% endfor %}</td>
 		{% endif %}
 		<td rowspan=3>&nbsp;<a href="#" onclick="nextfleet(); return false;"><img src="{% static 'exile/assets/interface/right.gif' %}" title="Flotte suivante" width=10 height=34></a></td>
 	</tr>
@@ -67,8 +67,8 @@ table.tableheader td { padding-right:8px; }
 				<span class="state_fighting">En combat <script>putplanet("{{ fleet.planetid }}","{% if fleet.planetname %}{{ fleet.planetname }}{% else %}{% endif %}","{{ fleet.g }}","{{ fleet.s }}","{{ fleet.p }}",{{ fleet.relation }});</script></span><br/>
 			{% endif %}
 			<img src="{% static 'exile/assets/interface/commander.gif' %}" class="smallres" width=10 height=6 title="Commandant">{% if fleet.commandername %}{{ fleet.commandername }}{% else %}-{% endif %}</td>
-		<td nowrap>{% if fleet.cargo_capacity %}<img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width=16 height=16 class=res><span>{{ fleet.cargo_hydrocarbon }}</span>{% endif %}</td>
-		<td nowrap>{% if fleet.cargo_capacity %}<img src="{% static 'exile/assets/interface/scientists.gif' %}" title="Scientifiques" width=16 height=16 class=res><span>{{ fleet.cargo_scientists }}</span>{% endif %}</td>
+		<td nowrap style="min-width:50px;">{% if fleet.cargo_capacity %}<img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width=16 height=16 class=res><span>{{ fleet.cargo_hydrocarbon }}</span>{% endif %}</td>
+		<td nowrap style="min-width:50px;">{% if fleet.cargo_capacity %}<img src="{% static 'exile/assets/interface/scientists.gif' %}" title="Scientifiques" width=16 height=16 class=res><span>{{ fleet.cargo_scientists }}</span>{% endif %}</td>
 		<td nowrap>{% if fleet.cargo_capacity %}charge : {{ fleet.cargo_load }}{% endif %}</td>
 	</tr>
 	<tr>
