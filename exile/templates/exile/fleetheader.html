@@ -69,7 +69,7 @@ table.tableheader td { padding-right:8px; }
 			<img src="{% static 'exile/assets/interface/commander.gif' %}" class="smallres" width=10 height=6 title="Commandant">{% if fleet.commandername %}{{ fleet.commandername }}{% else %}-{% endif %}</td>
 		<td nowrap>{% if fleet.cargo_capacity %}<img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width=16 height=16 class=res><span>{{ fleet.cargo_hydrocarbon }}</span>{% endif %}</td>
 		<td nowrap>{% if fleet.cargo_capacity %}<img src="{% static 'exile/assets/interface/scientists.gif' %}" title="Scientifiques" width=16 height=16 class=res><span>{{ fleet.cargo_scientists }}</span>{% endif %}</td>
-		<td nowrap>{% if fleet.cargo_capacity %}charge : {{ fleet.load }}{% endif %}</td>
+		<td nowrap>{% if fleet.cargo_capacity %}charge : {{ fleet.cargo_load }}{% endif %}</td>
 	</tr>
 	<tr>
 		<td nowrap>vitesse : {{ fleet.speed }}<br/>signature : {{ fleet.signature }}</td>
