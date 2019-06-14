@@ -16,12 +16,12 @@
 					{% if avatar %}<img src="{{ avatar_url }}" width=64 height=64 class="avatar">{% endif %}
 					{% if noavatar %}<img src="{% static 'exile/assets/interface/noavatar.gif' %}" width=64 height=64 class="avatar">{% endif %}
 				</td>
-				<td valign="top">{% if alliance %}<a href="alliance.asp?tag={{ alliancetag }}" class="{% if alliance.self %}self{% endif %}{% if alliance.ally %}ally{% endif %}{% if alliance.friend %}friend{% endif %}{% if alliance.enemy %}enemy{% endif %}">[{{ alliancetag }}]</a>&nbsp;{% endif %}<span class="{% if alliance.self %}self{% endif %}{% if alliance.ally %}ally{% endif %}{% if alliance.friend %}friend{% endif %}{% if alliance.enemy %}enemy{% endif %}">{{ name }}</span>, 
+				<td valign="top">{% if alliance %}<a href="{% url 'exile:alliance' %}?tag={{ alliancetag }}" class="{% if alliance.self %}self{% endif %}{% if alliance.ally %}ally{% endif %}{% if alliance.friend %}friend{% endif %}{% if alliance.enemy %}enemy{% endif %}">[{{ alliancetag }}]</a>&nbsp;{% endif %}<span class="{% if alliance.self %}self{% endif %}{% if alliance.ally %}ally{% endif %}{% if alliance.friend %}friend{% endif %}{% if alliance.enemy %}enemy{% endif %}">{{ name }}</span>, 
 				{% if alliance %}{{ rank_label|escape }}{% endif %}{% if noalliance %}indépendant{% endif %}
 				<br/>
 				Date d'arrivée:&nbsp;{{ regdate|timezone:"Europe/Paris"|date:"d/m/Y" }}<br/>
 				<br/>
-				{% if sendmail %}<a href="/game/mails.asp?a=new&b={{ name }}" title="Nouveau message à {{ name }}">Envoyer un message</a>{% endif %}
+				{% if sendmail %}<a href="{% url 'exile:mails' %}?a=new&b={{ name }}" title="Nouveau message à {{ name }}">Envoyer un message</a>{% endif %}
 				</td>
 			</tr>
 		</table>
@@ -58,7 +58,7 @@
 			<table class="clear" width="100%">
 			{% for i,fle in allied.fleet.items %}
 				<tr>
-					<td nowrap>{% if fle.owned %}<a href="fleet.asp?id={{ fle.fleetid }}">{% endif %}{% if fle.ally %}<span class="ally">{% endif %}{{ fle.fleetname }}{% if fle.owned %}</a>{% endif %}{% if fle.ally %}</span>{% endif %}&nbsp;({{ fle.signature }})</td>
+					<td nowrap>{% if fle.owned %}<a href="{% url 'exile:fleet' %}?id={{ fle.fleetid }}">{% endif %}{% if fle.ally %}<span class="ally">{% endif %}{{ fle.fleetname }}{% if fle.owned %}</a>{% endif %}{% if fle.ally %}</span>{% endif %}&nbsp;({{ fle.signature }})</td>
 					<td><script>putplanet("{{ fle.planetid }}","{{ fle.planetname }}","{{ fle.g }}","{{ fle.s }}","{{ fle.p }}",{{ fle.relation }});</script></td>
 					<td nowrap>
 					{% if fle.recycling %}
