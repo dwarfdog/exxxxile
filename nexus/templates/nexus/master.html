@@ -10,13 +10,37 @@
 		<meta http-equiv="Pragma" content="no-cache" />
 		<meta http-equiv="Window-target" content="_top" />
 
-		<meta name="Identifier-URL" content="https://www.exil.pw" />
+		<meta name="Identifier-URL" content="https://www.{% settings_value 'DOMAIN' %}" />
 		<meta name="Robots" content="all" />
 		<meta name="Revisit-after" content="1 days" />
 		<meta name="Category" content="Game" />
 
 		<meta name="Description" content="Exile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs" />
-		<meta name="Keywords" content="Exile, jeu en ligne, conquete spatiale, jeu gratuit, jeu web, jeu browser, multijoueur, combat spatial" />
+		<meta name="Keywords" content="Exxxxile, Exile, jeu en ligne, conquete spatiale, jeu gratuit, jeu web, jeu browser, multijoueur, combat spatial, ogame, 4X, jeu navigateur" />
+
+		<!-- Schema.org meta for Google+ -->
+		<meta itemprop="name" content="Exxxxile">
+		<meta itemprop="description" content="xile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs">
+		<meta itemprop="image" content="https://www.{% settings_value 'DOMAIN' %}/static/nexus/assets/site/ss1.jpg">
+
+		<!-- Twitter Card meta -->
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@exxxxile">
+		<meta name="twitter:title" content="Exxxxile">
+		<meta name="twitter:description" content="Exile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs">
+		<meta name="twitter:creator" content="@exxxxile">
+		<meta name="twitter:url" content="https://www.{% settings_value 'DOMAIN' %}" />
+		<meta name="twitter:domain" content="{% settings_value 'DOMAIN' %}" />
+		<!-- Twitter summary card with large image must be at least 280x150px -->
+		<meta name="twitter:image:src" content="https://www.{% settings_value 'DOMAIN' %}/static/nexus/assets/site/ss1.jpg">
+
+		<!-- Open Graph meta -->
+		<meta property="og:title" content="Exxxxile" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://www.{% settings_value 'DOMAIN' %}" />
+		<meta property="og:image" content="https://www.{% settings_value 'DOMAIN' %}/static/nexus/assets/site/ss1.jpg" />
+		<meta property="og:description" content="Exile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs" />
+		<meta property="og:site_name" content="Exxxxile.ovh" />
 
 		<link href="{% static 'nexus/assets/favicon.ico' %}" rel="shortcut icon" />
 		<link href="{% static 'nexus/styles/exile/exile.css' %}?v=1" type="text/css" rel="stylesheet" media="all" />
