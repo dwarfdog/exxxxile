@@ -558,16 +558,16 @@ tiptext = $("hinttext");
 						</optgroup>
 					{% endif %}
 
-					{% if move_fleet.planetgroup %}
-						<optgroup label="Planètes">
+					{% if move_fleet.fleetgroup %}
+						<optgroup label="Flottes">
 						{% for k,pla in move_fleet.fleetgroup.location.items %}
 							<option {% if pla.selected %}selected{% endif %}>{{ pla.fleet_name }} ({{ pla.to_g }}.{{ pla.to_s }}.{{ pla.to_p }})</option>
 						{% endfor %}
 						</optgroup>
 					{% endif %}
 
-					{% if move_fleet.planetgroup %}
-						<optgroup label="Planètes">
+					{% if move_fleet.merchantplanetsgroup %}
+						<optgroup label="Marchands">
 						{% for k,pla in move_fleet.merchantplanetsgroup.location.items %}
 							<option {% if pla.selected %}selected{% endif %}>Marchand ({{ pla.to_g }}.{{ pla.to_s }}.{{ pla.to_p }})</option>
 						{% endfor %}
