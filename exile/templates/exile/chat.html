@@ -369,7 +369,7 @@ Chat.prototype = {
 		var cb = function(req) {
 					try {
 						{% if dev %}
-						alert(req.status + '\r\n'+req.responseText);
+						//alert(req.status + '\r\n'+req.responseText);
 						{% endif %}
 						if(req.status==200)
 							eval(req.responseText);
