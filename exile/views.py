@@ -2164,10 +2164,10 @@ def fleet(request):
                         gcontext['move_fleet']['planetgroup']['location'][cpt] = pla.copy()
                         cpt += 1
                     # list planets where we have fleets not on our planets
-                    cursor.execute(" SELECT DISTINCT ON (f.planetid) f.name, f.planetid, f.planet_galaxy, f.planet_sector, f.planet_planet" +
+                    cursor.execute("SELECT DISTINCT ON (f.planetid) f.name, f.planetid, f.planet_galaxy, f.planet_sector, f.planet_planet" +
                             " FROM vw_fleets AS f" +
                             "    LEFT JOIN nav_planet AS p ON (f.planetid=p.id)" +
-                            " WHERE f.ownerid=%s AND p.ownerid IS DISTINCT FROM %s" +
+                            " WHERE f.ownerid=%s AND p.ownerid IS DISTINCT FROM %s AND f.action <> 1" + # cacher les flottes en mouvement
                             " ORDER BY f.planetid" +
                             " LIMIT 200", [gcontext['exile_user'].id, gcontext['exile_user'].id])
                     res2 = cursor.fetchall()
