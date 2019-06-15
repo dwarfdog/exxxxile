@@ -30,9 +30,11 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedTitle
 					this.obj.innerHTML = formatRemainingTime(0);
 
 				if(this.onFinishedTitle){
-					notify(this.onFinishedTitle,this.onFinishedIcon);
-				}else{
-					notify(this.onFinishedTitle);
+					if(this.onFinishedIcon){
+						notify(this.onFinishedTitle,this.onFinishedIcon);
+					}else{
+						notify(this.onFinishedTitle);
+					}
 				}
 
 				if(this.onFinished){

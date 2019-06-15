@@ -2318,7 +2318,7 @@ def fleet(request):
             if res[0] == 0:
                     gcontext['move_fleet_result'] = "ok"
             elif res[0] == -1: # fleet not found or busy
-                    log_notice("fleet", "Move: cant move fleet", 0)
+                    log_notice(request, "fleet", "Move: cant move fleet", 0)
             elif res[0] == -4: # new player or holidays protection
                     gcontext['move_fleet_result'] = "new_player_protection"
             elif res[0] == -5: # long travel not possible
@@ -2380,7 +2380,7 @@ def fleet(request):
         elif action == "move":
             loop = request.POST.get('loop', '0')
             if loop != "0":
-                log_notice("fleet", "Move: parameter missing", 1)
+                log_notice(request, "fleet", "Move: parameter missing", 1)
                 with connection['exile_nexus'].cursor() as cursor:
                     cursor.execute("UPDATE nusers SET cheat_detected=now() WHERE id=%s", [gcontext['user'].id])
             MoveFleet(fleetid)
