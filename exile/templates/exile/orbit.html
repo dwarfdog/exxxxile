@@ -87,10 +87,10 @@ function cargoDesc(id){
 
 {% if error %}
 <tr><td colspan=2 align=center>
-{% if fleet_too_many %}<span class="error">Vous avez atteint le nombre maximum de flottes.</span>{% endif %}
-{% if fleet_name_already_used %}<span class="error">Le nom de la flotte est déjà utilisé, veuillez en choisir un autre.</span>{% endif %}
-{% if fleet_name_invalid %}<span class="error">Le nom de la flotte est invalide, il ne peut contenir que des lettres (a-z) et des chiffres (0-9).</span>{% endif %}
-{% if ship_cant_be_used %}<span class="error">Certains vaisseaux n'ont pu être ajoutés à la flotte car nous ne disposons pas des recherches requises pour les utiliser.</span>{% endif %}
+{% if fleet_creation_error == 'fleet_too_many' %}<span class="error">Vous avez atteint le nombre maximum de flottes.</span>{% endif %}
+{% if fleet_creation_error == 'fleet_name_already_used' %}<span class="error">Le nom de la flotte est déjà utilisé, veuillez en choisir un autre.</span>{% endif %}
+{% if fleet_creation_error == 'fleet_name_invalid' %}<span class="error">Le nom de la flotte est invalide, il ne peut contenir que des lettres (a-z) et des chiffres (0-9).</span>{% endif %}
+{% if fleet_creation_error == 'ship_cant_be_used' %}<span class="error">Certains vaisseaux n'ont pu être ajoutés à la flotte car nous ne disposons pas des recherches requises pour les utiliser.</span>{% endif %}
 </td></tr>
 {% endif %}
 
