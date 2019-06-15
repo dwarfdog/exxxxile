@@ -785,6 +785,14 @@ def logged(function):
 def index(request):
     return HttpResponseRedirect(reverse('exile:connect'))
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 @construct
 def connect(request):
     """
@@ -801,7 +809,8 @@ def connect(request):
         return browserid
     """
     def sp_account_connect(request,context,browserid):
-        address = request.META['REMOTE_ADDR']
+        address = get_client_ip(request)
+        print(address)
         addressForwarded = request.get_host()
         userAgent = request.headers.get('User-Agent','')
         with connection.cursor() as cursor:
