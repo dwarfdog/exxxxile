@@ -1792,7 +1792,9 @@ def fleetsplit(request):
     gcontext['menu'] = menu(request)
     context = gcontext
     if gcontext['exile_user'].privilege > 100:
-        t = loader.get_template('exile/fleet-split.html')
+        t = loader.get_template('exile/fleet-split_old.html')
+        # à regarder !!!
+        #t = loader.get_template('exile/fleet-split.html')
     else:
         t = loader.get_template('exile/fleet-split_old.html')
     context['content'] = t.render(gcontext, request)
@@ -2719,15 +2721,15 @@ def fleetshandler(request):
                                 'ship_quantity': ShipListArray[i][2],
                             }
                     fleet['resource'][1]['res_id'] = 1
-                    fleet['resource'][1]['res_quantity'] = re[28]
+                    fleet['resource'][1]['res_quantity'] = re[27]
                     fleet['resource'][2]['res_id'] = 2
-                    fleet['resource'][2]['res_quantity'] = re[29]
+                    fleet['resource'][2]['res_quantity'] = re[28]
                     fleet['resource'][3]['res_id'] = 3
-                    fleet['resource'][3]['res_quantity'] = re[30]
+                    fleet['resource'][3]['res_quantity'] = re[29]
                     fleet['resource'][4]['res_id'] = 4
-                    fleet['resource'][4]['res_quantity'] = re[31]
+                    fleet['resource'][4]['res_quantity'] = re[30]
                     fleet['resource'][5]['res_id'] = 5
-                    fleet['resource'][5]['res_quantity'] = re[32]
+                    fleet['resource'][5]['res_quantity'] = re[31]
                     gcontext['list']['fleet'][re[0]] = fleet.copy()
     global gcontext, config
     context = gcontext

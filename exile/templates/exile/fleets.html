@@ -269,7 +269,7 @@ function displayFleetList(list) {
 				z+= '<span class="state_patrolling">En patrouille</span>';
 			break;
 			case '1':
-				var c = startCountdown('fleetcountdown' + fleet.id, fleet.remainingTime(), null, '<a href="{% url 'exile:fleets' %}?id=' + fleet.id + '">Arrivé</a>', counterFinished, 'La flotte '+fleet.name+' est arrivée à '+fleet.destination,"/static/exile/assets/reports/400.jpg");
+				var c = startCountdown('fleetcountdown' + fleet.id, fleet.remainingTime(), null, '<a href="{% url 'exile:fleets' %}?id=' + fleet.id + '">Arrivé</a>', counterFinished, 'La flotte '+fleet.name+' est arrivée à '+fleet.destination.name+' ('+fleet.destination.g+'.'+fleet.destination.s+'.'+fleet.destination.p+')',"/static/exile/assets/reports/400.jpg");
 				z+= '<span class="state_moving">En transit vers ' + fleet.destination + ' - (' + c + ')';
 			break;
 			case '2':
@@ -574,27 +574,28 @@ displayCategory(activeCategory);
 
 <!-- called by exile:fleetshander -->
 {% if list %}
-fleetList = [];
-{% for ind,fleet in list.fleet.items %}
-fleetList.push(
-		new Fleet({{ fleet.id }},'{{ fleet.name }}',{{ fleet.category }},{{ fleet.stance }},{{ fleet.size }},{{ fleet.signature }},{{ fleet.cargo_load }},
-				{{ fleet.cargo_capacity }},'{{ fleet.action }}',{{ fleet.time }},'{% if fleet.commandername %}{{ fleet.commandername }}{% endif %}',
-				new Planet({{ fleet.planetid }},'{% if fleet.planetname %}{{ fleet.planetname }}{% else %}{% endif %}',{{ fleet.relation }},"{{ fleet.g }}","{{ fleet.s }}","{{ fleet.p }}"),
-				new Planet({{ fleet.t_planetid }},'{{ fleet.t_planetname }}',{{ fleet.t_relation }},"{{ fleet.t_g }}","{{ fleet.t_s }}","{{ fleet.t_p }}"),
-				new Array(0{% for key, ship in fleet.ship.items %},new Ship('{{ ship.ship_label }}',{{ ship.ship_quantity }}){% endfor %}),
-				new Array(0{% for key, resource in fleet.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
-);
-{% endfor %}
-displayCategory(activeCategory);
+	fleetList = [];
+	{% for ind,fleet in list.fleet.items %}
+		fleetList.push(
+			new Fleet({{ fleet.id }},'{{ fleet.name }}',{{ fleet.category }},{{ fleet.stance }},{{ fleet.size }},{{ fleet.signature }},{{ fleet.cargo_load }},
+					{{ fleet.cargo_capacity }},'{{ fleet.action }}',{{ fleet.time }},'{% if fleet.commandername %}{{ fleet.commandername }}{% endif %}',
+					new Planet({{ fleet.planetid }},'{% if fleet.planetname %}{{ fleet.planetname }}{% else %}{% endif %}',{{ fleet.relation }},"{{ fleet.g }}","{{ fleet.s }}","{{ fleet.p }}"),
+					new Planet({{ fleet.t_planetid }},'{{ fleet.t_planetname }}',{{ fleet.t_relation }},"{{ fleet.t_g }}","{{ fleet.t_s }}","{{ fleet.t_p }}"),
+					new Array(0{% for key, ship in fleet.ship.items %},new Ship('{{ ship.ship_label }}',{{ ship.ship_quantity }}){% endfor %}),
+					new Array(0{% for key, resource in fleet.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
+		);
+	{% endfor %}
+	displayCategory(activeCategory);
 {% endif %}
+
 {% if fleet_category_changed %}
-setFleetCategory({{ id }},{{ old }},{{ new }});
+	setFleetCategory({{ id }},{{ old }},{{ new }});
 {% endif %}
 
 {% if category %}
-addCategory({{ id }}, '{{ label }}'');
+	addCategory({{ id }}, '{{ label }}'');
 {% endif %}
 
 {% if category_name_invalid %}
-alert('Nom de catégorie invalide');
+	alert('Nom de catégorie invalide');
 {% endif %}
