@@ -95,10 +95,10 @@ class Command(BaseCommand):
                     shot = ship[10]
                     if shot[0] != 0: # ship can shot
                         for target in possible_targets[ship[0]]:
-                            ship_key = ship[0]+'|'+ship[2]
+                            ship_key = str(ship[0])+'|'+str(ship[2])
                             if not ship_key in possible_targets_stats.keys():
                                 possible_targets_stats[ship_key] = {}
-                            target_key = target[0]+'|'+target[2]
+                            target_key = str(target[0])+'|'+str(target[2])
                             if not target_key in possible_targets_stats[ship_key].keys():
                                 chance_to_hit = max(shot[1]/target[5],1)
                                 tech_diff = ship[15] - target[15]
@@ -135,14 +135,14 @@ class Command(BaseCommand):
                         continue
                     shot = ship[10]
                     if shot[0] != 0: # ship can shot
-                        ship_key = ship[0]+'|'+ship[2]
+                        ship_key = str(ship[0])+'|'+str(ship[2])
                         len_possible_targets = len(possible_targets[ship[0]])
                         if len_possible_targets == 0:
                             continue
                         target_index = random.randint(0,len_possible_targets-1)
                         target = possible_targets[ship[0]][target_index]
                         targets += 1
-                        target_key = target[0]+'|'+target[2]
+                        target_key = str(target[0])+'|'+str(target[2])
                         chance_to_hit = possible_targets_stats[ship_key][target_key]['chance_to_hit']
                         if chance_to_hit < 1 and random.random() <= chance_to_hit:
                             continue
