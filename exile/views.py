@@ -6410,7 +6410,7 @@ def rankingplayers(request):
                 if visible:
                     if re[6] == gcontext['exile_user'].id:
                         player["self"] = True
-                    elif re[8] == gcontext['exile_user'].alliance_id:
+                    elif gcontext['exile_user'].alliance_id and re[8] == gcontext['exile_user'].alliance_id:
                         player["ally"] = True
                     # show avatar only if top 10
                     if re[1] >= TenthUserScore:
