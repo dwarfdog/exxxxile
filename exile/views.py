@@ -21,6 +21,7 @@ gcontext = {}
 config = apps.get_app_config('exile')
 
 def retrieveAllianceChat(id):
+    print('retrieveAllianceChat '+str(id))
     if not cache.get('alliances_chat') or not id in cache.get('alliances_chat').keys():
         with connection.cursor() as cursor:
             cursor.execute('SELECT id,chatid FROM alliances ORDER BY id')
@@ -29,7 +30,8 @@ def retrieveAllianceChat(id):
             for re in res:
                 gs[re[0]] = re[1]
             if res:
-                cache.add('alliances_chat', gs, None)
+                cache.add('alliances_chat', gs.copy(), None)
+    print(cache.get('alliances_chat'))
     try:
         return cache.get('alliances_chat')[id]
     except(KeyError,Exception):
@@ -8508,6 +8510,8 @@ def chat(request):
         if chatid and not request.session.get("chat_joined_" + str(chatid), False):
             return
         chatid = getChatId(chatid)
+        if not chatid:
+            return
         refresh_userlist = (time.time() - request.session.get("lastchatactivity_" + str(chatid), 0)) > config.onlineusers_refreshtime
     #   if IsEmpty(Application("chat_lastmsg_" & chatid)) then Application("chat_lastmsg_" & chatid) = "0"
     #   if Session("lastchatmsg_" & chatid) <> Application("chat_lastmsg_" & chatid) then
