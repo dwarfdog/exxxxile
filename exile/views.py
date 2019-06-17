@@ -182,6 +182,7 @@ def checkPlanetListCache(request, force=False):
 def getAllianceTag(allianceid):
     if not allianceid:
         return ''
+    print(allianceid)
     if not cache.get("AllianceTag_" + str(allianceid)):
         with connection.cursor() as cursor:
             cursor.execute('SELECT tag FROM alliances WHERE id=%s', allianceid)
@@ -8553,6 +8554,7 @@ def chat(request):
                 res = cursor.fetchall()
                 if not res:
                     return
+                print(res)
                 for re in res:
                     chater = {
                         "alliancetag": getAllianceTag(re[0]),
