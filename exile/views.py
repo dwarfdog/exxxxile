@@ -21,7 +21,7 @@ gcontext = {}
 config = apps.get_app_config('exile')
 
 def retrieveAllianceChat(id):
-    if not cache.get('alliances_chat'):
+    if not cache.get('alliances_chat') or not id in cache.get('alliances_chat').keys():
         with connection.cursor() as cursor:
             cursor.execute('SELECT id,chatid FROM alliances ORDER BY id')
             res = cursor.fetchall()
@@ -30,8 +30,6 @@ def retrieveAllianceChat(id):
                 gs[re[0]] = re[1]
             if res:
                 cache.add('alliances_chat', gs, None)
-            else:
-                cache.add('alliances_chat', {}, 300)
     try:
         return cache.get('alliances_chat')[id]
     except(KeyError,Exception):
