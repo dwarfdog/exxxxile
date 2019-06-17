@@ -8493,7 +8493,7 @@ def reports(request):
 def chat(request):
     def getChatId(id):
         if not id and gcontext['exile_user'].alliance_id:
-            return retrieveAllianceChat(id)
+            return retrieveAllianceChat(gcontext['exile_user'].alliance_id)
         return id
     def addLine(chatid, msg):
         msg = msg.strip()[:260]
