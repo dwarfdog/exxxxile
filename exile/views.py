@@ -2252,7 +2252,7 @@ def fleet(request):
             else:
                 planet_ownerid = gcontext['exile_user'].id
             # display header
-            if res[34] == 0 and res[17] == config.rSelf:
+            if res[34] == 0 and res[15] == gcontext['exile_user'].id:
                 gcontext['CurrentPlanet'] = res[10]
                 gcontext['contextinfo'] = header(request)
             else:
