@@ -8512,7 +8512,6 @@ def chat(request):
         chatid = getChatId(chatid)
         if not chatid:
             return
-        print(chatid)
         refresh_userlist = (time.time() - request.session.get("lastchatactivity_" + str(chatid), 0)) > config.onlineusers_refreshtime
     #   if IsEmpty(Application("chat_lastmsg_" & chatid)) then Application("chat_lastmsg_" & chatid) = "0"
     #   if Session("lastchatmsg_" & chatid) <> Application("chat_lastmsg_" & chatid) then
@@ -8530,7 +8529,6 @@ def chat(request):
             gcontext["login"] = gcontext['exile_user'].login
             gcontext["chatid"] = chatid
             gcontext['refresh'] = {'line':{},'online_users':{}}
-            print(res)
             if res:
                 for re in res:
                     request.session["lastchatmsg_" + str(chatid)] = re[0]
@@ -8553,6 +8551,8 @@ def chat(request):
                     "   INNER JOIN users ON (users.id=chat_onlineusers.userid)" +
                     " WHERE chat_onlineusers.lastactivity > now()-INTERVAL '10 minutes' AND chatid=%s", [chatid])
                 res = cursor.fetchall()
+                if not res:
+                    return
                 for re in res:
                     chater = {
                         "alliancetag": getAllianceTag(re[0]),
