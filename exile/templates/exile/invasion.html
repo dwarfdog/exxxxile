@@ -2,7 +2,7 @@
 {% if invasion_report %}
     <table class="default" width="60%">
         <tr class="title">
-            <td colspan=4 align=center>Rapport d'invasion de <script>putplanet("{{ planetid }}","{{ planetname }}","{{ g }}","{{ s }}","{{ p }}",{{ relation }});</script> par {{ fleet_owner }} </td>
+            <td colspan=4 align=center>Rapport d'invasion de <script>putplanet("{{ reportplanetid }}","{{ planetname }}","{{ reportg }}","{{ reports }}","{{ reportp }}",{{ relation }});</script> par {{ fleet_owner }} </td>
         </tr>
         {% if invasion_report.report %}
             <tr class="category"><td>Troupes</td><td>Effectif<td>Pertes</td><td>Après Combat</td></tr>
@@ -35,12 +35,12 @@
         {% endif %}
         {% if invasion_report.not_succeeded]]
             <tr>
-                <td colspan=4 align=center><script>putplanet("{{ planetid }}","{{ planetname }}","{{ g }}","{{ s }}","{{ p }}",{{ relation }});</script> a été défendue avec succès.</td>
+                <td colspan=4 align=center><script>putplanet("{{ reportplanetid }}","{{ planetname }}","{{ reportg }}","{{ reports }}","{{ reportp }}",{{ relation }});</script> a été défendue avec succès.</td>
             </tr>
         {% endif %}
         {% if invasion_report.succeeded %}
             <tr>
-                <td colspan=4 align=center>La nation <a href="{% url 'exile:nation' %}?name={{ fleet_owner }}">{{ fleet_owner }}</a> s'est emparée de <script>putplanet("{{ planetid }}","{{ planetname }}","{{ g }}","{{ s }}","{{ p }}",{{ relation }});</script>.</td>
+                <td colspan=4 align=center>La nation <a href="{% url 'exile:nation' %}?name={{ fleet_owner }}">{{ fleet_owner }}</a> s'est emparée de <script>putplanet("{{ reportplanetid }}","{{ planetname }}","{{ reportg }}","{{ reports }}","{{ reportp }}",{{ relation }});</script>.</td>
             </tr>
         {% endif %}
         {% if invasion_report.justdone %}
