@@ -3110,9 +3110,6 @@ def planets(request):
 @construct
 @logged
 def planet(request):
-    e_no_error = 0
-    e_rename_bad_name = 1
-    planet_error = e_no_error
     def planetimg(id,floor):
         planetimg = 1 + (floor + id) % 21
         if planetimg < 10:
@@ -3268,15 +3265,18 @@ def planet(request):
                 planet['fleets'][re[0]] = fleet.copy()
             gcontext['planet'] = planet
     global gcontext, config
+    e_no_error = 0
+    e_rename_bad_name = 1
+    planet_error = e_no_error
     gcontext['showHeader'] = True
     gcontext['selectedmenu'] = 'planet'
     pid = request.POST.get('id', request.GET.get('id' , gcontext['CurrentPlanet']))
     try:
         fplanet = NavPlanet.objects.get(pk=pid)
     except (KeyError, NavPlanet.DoesNotExist):
-        return HttpResponseRedirect(reverse('exile:planet'))
+        return HttpResponseRedirect(reverse('exile:planet')+'?id='+gcontext['CurrentPlanet'])
     if fplanet.ownerid_id != gcontext['exile_user'].id:
-        return HttpResponseRedirect(reverse('exile:planet'))
+        return HttpResponseRedirect(reverse('exile:planet')+'?id='+gcontext['CurrentPlanet'])
     gcontext['CurrentPlanet'] = fplanet.id
     gcontext['planetid'] = gcontext['CurrentPlanet']
     gcontext['g'] = fplanet.galaxy.id
