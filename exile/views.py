@@ -21,7 +21,6 @@ gcontext = {}
 config = apps.get_app_config('exile')
 
 def retrieveAllianceChat(id):
-    print('retrieveAllianceChat '+str(id))
     if not cache.get('alliances_chat') or not id in cache.get('alliances_chat').keys():
         with connection.cursor() as cursor:
             cursor.execute('SELECT id,chatid FROM alliances ORDER BY id')
@@ -31,7 +30,6 @@ def retrieveAllianceChat(id):
                 gs[re[0]] = re[1]
             if res:
                 cache.add('alliances_chat', gs.copy(), None)
-    print(cache.get('alliances_chat'))
     try:
         return cache.get('alliances_chat')[id]
     except(KeyError,Exception):
@@ -182,10 +180,9 @@ def checkPlanetListCache(request, force=False):
 def getAllianceTag(allianceid):
     if not allianceid:
         return ''
-    print(allianceid)
     if not cache.get("AllianceTag_" + str(allianceid)):
         with connection.cursor() as cursor:
-            cursor.execute('SELECT tag FROM alliances WHERE id=%s', allianceid)
+            cursor.execute('SELECT tag FROM alliances WHERE id=%s', [allianceid])
             res = cursor.fetchone()
             if res:
                 cache.set("AllianceTag_" + str(allianceid), res, None)
@@ -8554,7 +8551,6 @@ def chat(request):
                 res = cursor.fetchall()
                 if not res:
                     return
-                print(res)
                 for re in res:
                     chater = {
                         "alliancetag": getAllianceTag(re[0]),
