@@ -7822,12 +7822,12 @@ def mails(request):
                     "mailid": re[4],
                     "moneyamount": re[8],
                 }
-                if re[10]:
-                    mail["bodybb"] = True
-                    mail["body"] = re[2]
-                else:
-                    mail["html"] = True
-                    mail["body"] = re[2].replace("\r\n", "<br/>")
+                #if re[10]:
+                mail["bodybb"] = True
+                mail["body"] = re[2]
+                #else:
+                #    mail["html"] = True
+                #    mail["body"] = re[2].replace("\r\n", "<br/>")
                 if re[8] > 0:
                     mail["money"] = True # sender has given money
                 if re[9] and re[9] >= 500:
@@ -7932,11 +7932,11 @@ def mails(request):
                     mail["alliance"] = True
                 else:
                     mail["nation"] = True
-                if re[8]:
-                    mail["bodybb"] = re[5]
-                else:
-                    mail["body"] = re[5].replace("\r\n", "<br/>")
-                    mail["html"] = True
+                #if re[8]:
+                mail["bodybb"] = re[5]
+                #else:
+                #    mail["body"] = re[5].replace("\r\n", "<br/>")
+                #    mail["html"] = True
                 if re[6] > 0: # sender has given money
                     mail["money"] = True
                 if not re[2]:
