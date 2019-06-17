@@ -8507,9 +8507,9 @@ def chat(request):
     def refreshContent(chatid):
         if chatid and not request.session.get("chat_joined_" + str(chatid), False):
             return
-        chatid = getChatId(chatid)
-        if not chatid:
-            return
+        #chatid = getChatId(chatid)
+        #if not chatid:
+        #    return
         refresh_userlist = (time.time() - request.session.get("lastchatactivity_" + str(chatid), 0)) > config.onlineusers_refreshtime
     #   if IsEmpty(Application("chat_lastmsg_" & chatid)) then Application("chat_lastmsg_" & chatid) = "0"
     #   if Session("lastchatmsg_" & chatid) <> Application("chat_lastmsg_" & chatid) then
@@ -8664,6 +8664,7 @@ def chat(request):
         chatid = int(request.GET.get("id", "0"))
     except (KeyError, Exception):
         chatid = 0
+    chatid = getChatId(chatid)
     action = request.GET.get("a","")
     if action == "send":
         addLine(chatid, request.GET.get("l",""))
