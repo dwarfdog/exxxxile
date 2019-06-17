@@ -2523,11 +2523,11 @@ def invasion(request):
                     viewername = re2[0]
                 else:
                     return HttpResponseRedirect(reverse('exile:overview'))
-            gcontext["planetid"] = re[2]
+            gcontext["reportplanetid"] = re[2]
             gcontext["planetname"] = re[3]
-            gcontext["g"] = re[15]
-            gcontext["s"] = re[16]
-            gcontext["p"] = re[17]
+            gcontext["reportg"] = re[15]
+            gcontext["reports"] = re[16]
+            gcontext["reportp"] = re[17]
             gcontext["planet_owner"] = re[5]
             gcontext["fleet_owner"] = re[4]
             gcontext["date"] = re[1]
@@ -9500,11 +9500,11 @@ def FormatBattle(battleid, creator, pointofview, ispubliclink):
         gcontext["userid"] = creator
         gcontext["key"] = re[8]
         gcontext["time"] = re[0]
-        gcontext["planetid"] = re[1]
-        gcontext["planet"] = re[2]
-        gcontext["g"] = re[3]
-        gcontext["s"] = re[4]
-        gcontext["p"] = re[5]
+        gcontext["battleplanetid"] = re[1]
+        gcontext["battleplanet"] = re[2]
+        gcontext["battleg"] = re[3]
+        gcontext["battles"] = re[4]
+        gcontext["battlep"] = re[5]
         gcontext["rounds"] = re[6]
         if not ispubliclink:
             # link for the freely viewable report of this battle
