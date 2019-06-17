@@ -76,21 +76,48 @@ class Command(BaseCommand):
                             friends.append(oFriend[0])
                     players[oFleet[0]] = {'friends': friends.copy()}
                 for i in range(oFleet[10]):
-                    #  owner, id, shipid, hull, shield, handling, res_em, res_expl, res_kin, res_ther, [shot], mod_shield, mod_handling, mod_tracking_speed, mod_damage
+                    #  owner, id, shipid, hull, shield, handling, res_em, res_expl, res_kin, res_ther, [shot], mod_shield, mod_handling, mod_tracking_speed, mod_damage, tech
                     if not [oFleet[11]]:
-                        ships.append([oFleet[0], oFleet[1], oFleet[2], oFleet[3], oFleet[4]*oFleet[12]/100, oFleet[5]*oFleet[13]/100, oFleet[21] , oFleet[22], oFleet[23], oFleet[24], [oFleet[9], oFleet[14]*oFleet[8]/100, oFleet[15]*oFleet[17]/100, oFleet[15]*oFleet[18]/100, oFleet[15]*oFleet[19]/100, oFleet[15]*oFleet[20]/100], oFleet[12], oFleet[13], oFleet[14], oFleet[15]])
+                        ships.append([oFleet[0], oFleet[1], oFleet[2], oFleet[3], oFleet[4]*oFleet[12]/100, oFleet[5]*oFleet[13]/100, oFleet[21] , oFleet[22], oFleet[23], oFleet[24], [oFleet[9], oFleet[14]*oFleet[8]/100, oFleet[15]*oFleet[17]/100, oFleet[15]*oFleet[18]/100, oFleet[15]*oFleet[19]/100, oFleet[15]*oFleet[20]/100], oFleet[12], oFleet[13], oFleet[14], oFleet[15], oFleet[25]])
                     else:
-                        ships.append([oFleet[0], oFleet[1], oFleet[2], oFleet[3], oFleet[4]*oFleet[12]/100, oFleet[5]*oFleet[13]/100, oFleet[21] , oFleet[22], oFleet[23], oFleet[24], [oFleet[9], oFleet[14]/2*oFleet[8]/100, oFleet[15]*oFleet[17]/100, oFleet[15]*oFleet[18]/100, oFleet[15]*oFleet[19]/100, oFleet[15]*oFleet[20]/100], oFleet[12], oFleet[13], oFleet[14], oFleet[15]])
+                        ships.append([oFleet[0], oFleet[1], oFleet[2], oFleet[3], oFleet[4]*oFleet[12]/100, oFleet[5]*oFleet[13]/100, oFleet[21] , oFleet[22], oFleet[23], oFleet[24], [oFleet[9], oFleet[14]/2*oFleet[8]/100, oFleet[15]*oFleet[17]/100, oFleet[15]*oFleet[18]/100, oFleet[15]*oFleet[19]/100, oFleet[15]*oFleet[20]/100], oFleet[12], oFleet[13], oFleet[14], oFleet[15], oFleet[25]])
             for d, player in players.items():
                 enemies = [k for k, v in players.items() if k != d and not d in v['friends']]
                 players[d]['enemies'] = enemies.copy()
             ships_b = ships.copy()
             counter = {}
             possible_targets = {}
+            possible_targets_stats = {}
             for ship in ships:
                 counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])] = {'killed':{},'damages':0,'before':0,'after':0,'mod_shield':0, 'mod_handling':0, 'mod_tracking_speed':0, 'mod_damage':0}
                 if not ship[0] in possible_targets.keys():
                     possible_targets[ship[0]] = list(filter(lambda x: x[0] in players[ship[0]]['enemies'], ships))
+                    shot = ship[10]
+                    if shot[0] != 0: # ship can shot
+                        for target in possible_targets[ship[0]]:
+                            ship_key = ship[0]+'|'+ship[2]
+                            if not ship_key in possible_targets_stats.keys():
+                                possible_targets_stats[ship_key] = {}
+                            target_key = target[0]+'|'+target[2]
+                            if not target_key in possible_targets_stats[ship_key].keys():
+                                chance_to_hit = max(shot[1]/target[5],1)
+                                tech_diff = ship[15] - target[15]
+                                if tech_diff < 0:
+                                    chance_to_hit *= 0.85**abs(tech_diff);
+                                elif tech_diff > 0:
+                                    chance_to_hit *= 1.10**tech_diff;
+                                if chance_to_hit >= 1:
+                                    chance_to_hit = 1
+                                if chance_to_hit < 0:
+                                    chance_to_hit = 0
+                                degats = shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100
+                                avg_degats = degats * chance_to_hit
+                                possible_targets_stats[ship_key][target_key] = {'degats':degats,'avg_degats':avg_degats,'chance_to_hit':chance_to_hit}
+                        # TODO
+                        # shuffle(possible_targets) then sort them by possible_targets_stats[ship_key][target_key]['avg_degats']
+                        # QUESTION: this is an targeting optimization, how can a ship know others ships mods, from ship type ok but from other mods sources ?
+                        # Maybe degats base should be = shot[2] + shot[3] + shot[4] + shot[5] to simulate this lack of knowledge
+                        # it suppose to compute the real degats too, for algo optimization (like now)
             for r in range(Rounds):
                 targets = 0
                 for ship in ships:
@@ -108,27 +135,25 @@ class Command(BaseCommand):
                         continue
                     shot = ship[10]
                     if shot[0] != 0: # ship can shot
+                        ship_key = ship[0]+'|'+ship[2]
                         len_possible_targets = len(possible_targets[ship[0]])
                         if len_possible_targets == 0:
                             continue
                         target_index = random.randint(0,len_possible_targets-1)
                         target = possible_targets[ship[0]][target_index]
                         targets += 1
-                        chance_to_hit = max(shot[1]/target[5],1)
-                        if chance_to_hit == 1:
-                            hit = True
-                        else:
-                            hit = random.random() <= chance_to_hit
-                        if not hit:
+                        target_key = target[0]+'|'+target[2]
+                        chance_to_hit = possible_targets_stats[ship_key][target_key]['chance_to_hit']
+                        if chance_to_hit < 1 and random.random() <= chance_to_hit:
                             continue
-                        degats = shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100
+                        degats = possible_targets_stats[ship_key][target_key]['degats']
                         if target[4] > 0:
                             shield = target[4]
                             degats -= shield
                             target[4] -= degats
                         if target[4] > 0:
                             counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['damages'] += degats
-                            target[4] = target[4] + (shield-target[4])/2 # les shields se rechargent de la moitié de leurs pertes
+                            target[4] = target[4] + (shield-target[4])/2 # les shields se rechargent de la moitié de leurs pertes si ils n'ont pas été détruits
                             continue
                         if target[3] > 0:
                             target[3] -= degats
@@ -139,6 +164,7 @@ class Command(BaseCommand):
                                 counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]] += 1
                                 del possible_targets[ship[0]][target_index]
                 if targets == 0: # battle finished ?!
+                    r -= 1
                     break
             r += 1
             for ship in ships:
@@ -208,7 +234,7 @@ class Command(BaseCommand):
                         cursor.execute("SELECT ownerid FROM reports WHERE ownerid=%s AND type=2 AND subtype=%s AND battleid=%s", [expl[0], battlesubtype, BattleId])
                         ree = cursor.fetchone()
                         if not ree:
-                            cursor.execute("INSERT INTO reports(ownerid, type, subtype, battleid, planetid, data) VALUES(%s, 2, %s, %s, %s,'{" + data + ",battleid:" + str(BattleId) + ",ownerid:" + str(expl[0]) + "}')", [expl[0], battlesubtype, BattleId, planetid])
+                            cursor.execute("INSERT INTO reports(ownerid, type, subtype, battleid, planetid, data) VALUES(%s, 2, %s, %s, %s,'{%s,battleid:" + str(BattleId) + ",ownerid:" + str(expl[0]) + "}')", [expl[0], battlesubtype, BattleId, planetid, data])
                         lastOwner = expl[0]
             else:
                 BattleId = "#"
