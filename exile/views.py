@@ -729,13 +729,13 @@ def logged(function):
                 request.session['CurrentSector'] = fplanet.sector
             else:
                 fplanet = user.navplanet_set.first()
-                    if fplanet:
-                        gcontext['CurrentPlanet'] = fplanet.id
-                        gcontext['CurrentGalaxy'] = fplanet.galaxy_id
-                        gcontext['CurrentSector'] = fplanet.sector
-                        request.session['CurrentPlanet'] = fplanet.id
-                        request.session['CurrentGalaxy'] = fplanet.galaxy_id
-                        request.session['CurrentSector'] = fplanet.sector
+                if fplanet:
+                    gcontext['CurrentPlanet'] = fplanet.id
+                    gcontext['CurrentGalaxy'] = fplanet.galaxy_id
+                    gcontext['CurrentSector'] = fplanet.sector
+                    request.session['CurrentPlanet'] = fplanet.id
+                    request.session['CurrentGalaxy'] = fplanet.galaxy_id
+                    request.session['CurrentSector'] = fplanet.sector
         if fplanet:
             gcontext['planetid'] = gcontext['CurrentPlanet']
             gcontext['g'] = fplanet.galaxy.id
