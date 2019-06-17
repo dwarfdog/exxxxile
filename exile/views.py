@@ -8503,6 +8503,7 @@ def chat(request):
             return retrieveAllianceChat(gcontext['exile_user'].alliance_id)
         return id
     def addLine(chatid, msg):
+        print('addLine '+str(chatid)+' '+msg)
         msg = msg.strip()[:260]
         if msg:
     #       set oRs = connExecuteRetry("SELECT sp_chat_append
@@ -8511,6 +8512,7 @@ def chat(request):
             with connection.cursor() as cursor:
                 cursor.execute("INSERT INTO chat_lines(chatid, allianceid, userid, login, message) VALUES(%s, %s, %s, %s, %s)",
                     [chatid,gcontext['exile_user'].alliance_id,gcontext['exile_user'].id,gcontext['exile_user'].login,msg])
+                print("INSERT INTO chat_lines(chatid, allianceid, userid, login, message) VALUES("+str(chatid)+", "+str(gcontext['exile_user'].alliance_id)+", "+str(gcontext['exile_user'].id)+", "+gcontext['exile_user'].login+", "+msg+")")
     #       chatid = getChatId(chatid)
     #       connExecuteRetryNoRecords "INSERT INTO chat_onlineusers(chatid, userid) VALUES(" & chatid & "," & UserId & ")"
     def refreshContent(chatid):
