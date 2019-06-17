@@ -820,7 +820,6 @@ def connect(request):
     """
     def sp_account_connect(request,context,browserid):
         address = get_client_ip(request)
-        print(address)
         addressForwarded = request.get_host()
         userAgent = request.headers.get('User-Agent','')
         with connection.cursor() as cursor:
@@ -5821,14 +5820,14 @@ def map(request):
             else:
                 aid = gcontext['exile_user'].alliance_id
             # Main query : retrieve planets info in the sector
-            cursor.execute('SELECT nav_planet.id, nav_planet.planet, nav_planet.name, nav_planet.ownerid, ' +
-                    ' users.login, sp_relation(nav_planet.ownerid,%(UserID)s), floor, space, GREATEST(0, radar_strength), radar_jamming, ' +
-                    ' orbit_ore, orbit_hydrocarbon, alliances.tag, ' +
-                    ' (SELECT SUM(quantity*signature) FROM planet_ships LEFT JOIN db_ships ON (planet_ships.shipid = db_ships.id) WHERE planet_ships.planetid=nav_planet.id), ' +
-                    ' floor_occupied, planet_floor, production_frozen, warp_to IS NOT NULL OR vortex_strength > 0, ' +
-                    ' planet_pct_ore, planet_pct_hydrocarbon, spawn_ore, spawn_hydrocarbon, vortex_strength, ' +
-                    ' COALESCE(buy_ore, 0) AS buy_ore, COALESCE(buy_hydrocarbon, 0) as buy_hydrocarbon, ' +
-                    ' sp_locs_shared(COALESCE(%(aid)s, -1), COALESCE(users.alliance_id, -1)) AS locs_shared ' +
+            cursor.execute('SELECT nav_planet.id, nav_planet.planet, nav_planet.name, nav_planet.ownerid, ' + # 0 1 2 3
+                    ' users.login, sp_relation(nav_planet.ownerid,%(UserID)s), floor, space, GREATEST(0, radar_strength), radar_jamming, ' + # 4 5 6 7 8 9
+                    ' orbit_ore, orbit_hydrocarbon, alliances.tag, ' + # 10 11 12
+                    ' (SELECT SUM(quantity*signature) FROM planet_ships LEFT JOIN db_ships ON (planet_ships.shipid = db_ships.id) WHERE planet_ships.planetid=nav_planet.id), ' + # 13
+                    ' floor_occupied, planet_floor, production_frozen, warp_to IS NOT NULL OR vortex_strength > 0, ' + # 14 15 16 17
+                    ' planet_pct_ore, planet_pct_hydrocarbon, spawn_ore, spawn_hydrocarbon, vortex_strength, ' + # 18 19 20 21 22
+                    ' COALESCE(buy_ore, 0) AS buy_ore, COALESCE(buy_hydrocarbon, 0) as buy_hydrocarbon, ' + # 23 24
+                    ' sp_locs_shared(COALESCE(%(aid)s, -1), COALESCE(users.alliance_id, -1)) AS locs_shared ' + # 25 26
                     ' FROM nav_planet ' +
                     '   LEFT JOIN users ON (users.id = ownerid) ' +
                     '   LEFT JOIN alliances ON (users.alliance_id=alliances.id) ' +
@@ -5856,7 +5855,7 @@ def map(request):
                 rel = re[5]
                 if rel == config.rAlliance and not hasRight("can_use_alliance_radars"):
                     rel = config.rWar
-                if rel == config.rFriend and not re[25]:
+                if rel == config.rFriend and not re[25] and re[3] != 3:
                     rel = config.rWar
                 displayElements = False # hasElements is true if the planet has some particularities like magnetic cloud or sun radiation ..
                 displayPlanetInfo = False
@@ -5984,6 +5983,9 @@ def map(request):
                             displayElements = False
                             displayPlanetInfo = False
                             displayResources = False
+                if re[3] == 3:
+                    pla["planetname"] = "Planète Marchande"
+                    pla["planet_img"] = "merchant"
                 if rel >= config.rAlliance:
                     pla["radarstrength"] = re[8]
                     pla["radarjamming"] = re[9]
