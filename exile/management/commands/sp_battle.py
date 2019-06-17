@@ -234,7 +234,7 @@ class Command(BaseCommand):
                         cursor.execute("SELECT ownerid FROM reports WHERE ownerid=%s AND type=2 AND subtype=%s AND battleid=%s", [expl[0], battlesubtype, BattleId])
                         ree = cursor.fetchone()
                         if not ree:
-                            cursor.execute("INSERT INTO reports(ownerid, type, subtype, battleid, planetid, data) VALUES(%s, 2, %s, %s, %s,'{%s,battleid:" + str(BattleId) + ",ownerid:" + str(expl[0]) + "}')", [expl[0], battlesubtype, BattleId, planetid, data])
+                            cursor.execute("INSERT INTO reports(ownerid, type, subtype, battleid, planetid, data) VALUES(%s, 2, %s, %s, %s,'%s')", [expl[0], battlesubtype, BattleId, planetid, '{'+data+',battleid:'+str(BattleId)+',ownerid:'+str(expl[0])+'}'])
                         lastOwner = expl[0]
             else:
                 BattleId = "#"
