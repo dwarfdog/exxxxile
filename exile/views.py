@@ -9593,10 +9593,10 @@ def FormatBattle(battleid, creator, pointofview, ispubliclink):
             gcontext['opponent'][re[10]]['fleet'][re[12]]['after'] += (re[5]-re[6])
             # on cache les modificateurs de la flotte si conditions
             if not showEnemyDetails and re[9] < config.rFriend:
-                gcontext['opponent'][re[10]]['fleet']["mod_shield"] = "?"
-                gcontext['opponent'][re[10]]['fleet']["mod_handling"] = "?"
-                gcontext['opponent'][re[10]]['fleet']["mod_tracking_speed"] = "?"
-                gcontext['opponent'][re[10]]['fleet']["mod_damage"] = "?"
+                gcontext['opponent'][re[10]]['fleet'][re[12]]["mod_shield"] = "?"
+                gcontext['opponent'][re[10]]['fleet'][re[12]]["mod_handling"] = "?"
+                gcontext['opponent'][re[10]]['fleet'][re[12]]["mod_tracking_speed"] = "?"
+                gcontext['opponent'][re[10]]['fleet'][re[12]]["mod_damage"] = "?"
             # on crée une category de vaisseau dans la flotte si inconnue
             if not re[3] in gcontext['opponent'][re[10]]['fleet'][re[12]]['category'].keys():
                 gcontext['opponent'][re[10]]['fleet'][re[12]]['category'][re[3]] = {}
