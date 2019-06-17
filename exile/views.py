@@ -3278,6 +3278,9 @@ def planet(request):
     if fplanet.ownerid_id != gcontext['exile_user'].id:
         return HttpResponseRedirect(reverse('exile:planet')+'?id='+str(gcontext['CurrentPlanet']))
     gcontext['CurrentPlanet'] = fplanet.id
+    request.session['CurrentPlanet'] = fplanet.id
+    request.session['CurrentGalaxy'] = fplanet.galaxy.id
+    request.session['CurrentSector'] = fplanet.sector
     gcontext['planetid'] = gcontext['CurrentPlanet']
     gcontext['g'] = fplanet.galaxy.id
     gcontext['s'] = fplanet.sector
