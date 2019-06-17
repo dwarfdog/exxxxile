@@ -13,7 +13,7 @@ class Command(BaseCommand):
         h = now.timetuple().tm_hour
         print('hour=' + str(h))
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id FROM users WHERE privilege = 0 AND planets > 0 AND credits_bankruptcy > 0 AND lastlogin IS NOT NULL ORDER BY id')
+            cursor.execute('SELECT id FROM users WHERE privilege >= 0 AND planets > 0 AND credits_bankruptcy > 0 AND lastlogin IS NOT NULL ORDER BY id')
             res = cursor.fetchall()
             for re in res:
                 print(re)

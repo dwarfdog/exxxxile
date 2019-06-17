@@ -157,14 +157,24 @@ def retrieveResearchCache():
                 cache.add('db_research', {}, 300)
     return cache.get('db_research')
 
+def planetimg(id,floor):
+    planetimg = 1 + (floor + id) % 21
+    if planetimg < 10:
+        planetimg = "0" + str(planetimg)
+    return str(planetimg)
+
 def checkPlanetListCache(request, force=False):
     if force or not request.session.get("planetlist", {}):
         # retrieve Research info
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, name, galaxy, sector, planet FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
+            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
             res = cursor.fetchall()
             if res:
-                request.session["planetlist"] = res.copy()
+                tmp = []
+                for re in res:
+                    re = re + (planetimg(re[0],re[6]),)
+                    tmp.append(re)
+                request.session["planetlist"] = tmp
             else:
                 request.session["planetlist"] = {}
     return request.session.get("planetlist")
@@ -687,7 +697,7 @@ def logged(function):
         if not user.lastactivity:
             with connection.cursor() as cursor:
                 cursor.execute('UPDATE users SET lastactivity=now() WHERE id=%s', [user.id])
-        checkPlanetListCache(request, True)
+        gcontext['planet_list'] = checkPlanetListCache(request, True)
         gcontext['can_join_alliance'] = not gcontext['exile_user'].leave_alliance_datetime and (not gcontext['exile_user'].alliance_left or gcontext['exile_user'].alliance_left < time.time())
         planet = request.GET.get('planet',0)
         forced = False
@@ -949,8 +959,8 @@ def gameover(request):
 @logged
 def overview(request):
     def check_session_stats():
-        stat_rank = request.session.get('stat_rank', None)
-        stat_score = request.session.get('stat_score', None)
+        stat_rank = request.session.get('stat_rank', 0)
+        stat_score = request.session.get('stat_score', 0)
         if not stat_rank or not stat_score or stat_score != gcontext['exile_user'].score:
             with connection.cursor() as cursor:
                 cursor.execute('SELECT int4(count(1)), (SELECT int4(count(1)) FROM vw_players WHERE score >= %s) FROM vw_players', [gcontext['exile_user'].score])
@@ -960,9 +970,13 @@ def overview(request):
                 request.session['stat_score'] = gcontext['exile_user'].score
                 request.session['stat_players'] = res[0]
                 request.session['stat_rank'] = res[1]
-        gcontext['stat_rank'] = request.session.get('stat_rank', 0)
-        gcontext['stat_score'] = request.session.get('stat_score', 0)
-        gcontext['stat_players'] = request.session.get('stat_players', 0)
+            gcontext['stat_rank'] = res[1]
+            gcontext['stat_score'] = gcontext['exile_user'].score
+            gcontext['stat_players'] = res[0]
+        else:
+            gcontext['stat_rank'] = request.session.get('stat_rank', 0)
+            gcontext['stat_score'] = request.session.get('stat_score', 0)
+            gcontext['stat_players'] = request.session.get('stat_players', 0)
     def stat_rank_battle():
         with connection.cursor() as cursor:
             cursor.execute('SELECT (SELECT score_prestige FROM users WHERE id=%s), (SELECT int4(count(1)) FROM vw_players WHERE score_prestige >= (SELECT score_prestige FROM users WHERE id=%s))', [gcontext['exile_user'].id, gcontext['exile_user'].id])
@@ -2034,7 +2048,8 @@ def fleet(request):
                         gcontext['fleets']["playerfleet"][re[0]] = fleet.copy()
                     else:
                         fleet["owner"] = re[9]
-                        fleet["tag"] = re[10]
+                        if re[10]:
+                            fleet["tag"] = re[10]
                         if re[11] == 1:
                             gcontext['fleets']['fleet']["ally"][re[0]] = fleet.copy()
                         elif re[11] == 0:
@@ -2936,11 +2951,6 @@ def fleetsshipsstats(request):
 @construct
 @logged
 def planets(request):
-    def planetimg(id,floor):
-        planetimg = 1 + (floor + id) % 21
-        if planetimg < 10:
-            planetimg = "0" + str(planetimg)
-        return str(planetimg)
     def ListPlanets():
         gcontext['planets'] = {}
         col = int(request.POST.get('col', request.GET.get('col', 0)))
@@ -6922,7 +6932,7 @@ def buildings(request):
             # list buildings that can be built on the planet
             cursor.execute('SELECT id, category, cost_prestige, cost_ore, cost_hydrocarbon, cost_energy, cost_credits, workers, floor, space, ' +
                     ' construction_maximum, quantity, build_status, construction_time, destroyable, \'\', production_ore, production_hydrocarbon, ' +
-                    ' energy_production, buildings_requirements_met, destruction_time, upkeep, energy_consumption, buildable ' +
+                    ' energy_production, buildings_requirements_met, destruction_time, upkeep, energy_consumption, buildable, research_requirements_met ' +
                     ' FROM vw_buildings ' +
                     ' WHERE planetid=%s AND ((buildable AND research_requirements_met) or quantity > 0)', [gcontext['CurrentPlanet']])
             res = cursor.fetchall()
@@ -6998,6 +7008,8 @@ def buildings(request):
                             building['limitreached'] = True
                     elif not re[19]:
                         building['buildings_required'] = True
+                    elif not re[24]:
+                        building['researches_required'] = True
                     else:
                         notenoughspace = False
                         notenoughresources = False

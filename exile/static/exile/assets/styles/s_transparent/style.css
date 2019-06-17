@@ -153,10 +153,16 @@ div.clear { clear:both; }
 	width:150px;
 }
 
+#rightnav {
+	position:absolute;
+	right:6px;
+	width:150px;
+}
+
 #content {
 	position:absolute;
 	left:166px;
-	right:16px;
+	right:166px;
 }
 
 #status {

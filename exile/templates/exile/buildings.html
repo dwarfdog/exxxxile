@@ -110,6 +110,8 @@ function writeBuilding(id,name,quantity,status,o,o2,h,h2,w,w2,e,e2,f,f2,s,s2,rem
 		if(o2>0||h2>0||w2>0||e2>0) a+= '<br/><span class="notenough">ressources insuffisantes</span>';
 		if(f2>0||s2>0) a+= '<br/><span class="notenough">pas assez de place</span>';
 	}
+	if(build==5)
+		a+= '<span class="error">recherche(s) requise(s)</span>';
 		a+= '</td>'+
 			'<td align=center valign=middle>';
 	switch(destroy) {
@@ -153,7 +155,7 @@ function writeBuilding(id,name,quantity,status,o,o2,h,h2,w,w2,e,e2,f,f2,s,s2,rem
 <script type="text/javascript">
 // {{ k }}
 {% for i,bui in cat.items %}
-	writeBuilding({{ bui.id }},'{{ bui.name|escapejs }}',{{ bui.quantity }},0{% if bui.isbuilding %}1{% endif %}{% if bui.isdestroying %}2{% endif %},'{{ bui.ore }}',0{% if bui.not_enough_ore %}1{% endif %},'{{ bui.hydrocarbon }}',0{% if bui.not_enough_hydrocarbon %}1{% endif %},'{{ bui.workers }}',0{% if bui.not_enough_workers %}1{% endif %},'{{ bui.energy }}',0{% if bui.not_enough_energy %}1{% endif %},'{{ bui.floor }}',0{% if bui.not_enough_floor %}1{% endif %},'{{ bui.space }}',0{% if bui.not_enough_space %}1{% endif %},'{{ bui.remainingtime }}',0{% if bui.buildings_required %}1{% endif %}{% if bui.limitreached %}2{% endif %}{% if bui.built %}3{% endif %}{% if bui.build %}4{% endif %},{{ bui.time }},0{% if bui.workers_required %}1{% endif %}{% if bui.required %}2{% endif %}{% if bui.capacity %}3{% endif %}{% if bui.next_destruction_in %}4{% endif %}{% if bui.destroy %}5{% endif %},'{{ bui.nextdestroytime }}','{{ bui.prestige }}', 0{% if bui.not_enough_prestige %}1{% endif %});
+	writeBuilding({{ bui.id }},'{{ bui.name|escapejs }}',{{ bui.quantity }},0{% if bui.isbuilding %}1{% endif %}{% if bui.isdestroying %}2{% endif %},'{{ bui.ore }}',0{% if bui.not_enough_ore %}1{% endif %},'{{ bui.hydrocarbon }}',0{% if bui.not_enough_hydrocarbon %}1{% endif %},'{{ bui.workers }}',0{% if bui.not_enough_workers %}1{% endif %},'{{ bui.energy }}',0{% if bui.not_enough_energy %}1{% endif %},'{{ bui.floor }}',0{% if bui.not_enough_floor %}1{% endif %},'{{ bui.space }}',0{% if bui.not_enough_space %}1{% endif %},'{{ bui.remainingtime }}',0{% if bui.buildings_required %}1{% endif %}{% if bui.limitreached %}2{% endif %}{% if bui.built %}3{% endif %}{% if bui.build %}4{% endif %}{% if bui.researches_required %}5{% endif %},{{ bui.time }},0{% if bui.workers_required %}1{% endif %}{% if bui.required %}2{% endif %}{% if bui.capacity %}3{% endif %}{% if bui.next_destruction_in %}4{% endif %}{% if bui.destroy %}5{% endif %},'{{ bui.nextdestroytime }}','{{ bui.prestige }}', 0{% if bui.not_enough_prestige %}1{% endif %});
 {% endfor %}
 </script>
 <tr class="clear"><td colspan=4>&nbsp;</td></tr>

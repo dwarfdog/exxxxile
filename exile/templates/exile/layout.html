@@ -10,7 +10,8 @@
 	<meta http-equiv="pragma" content="no-cache"/>
 
 	<link href="{% static 'exile/assets/styles/reset.css' %}?v=1" type="text/css" rel="stylesheet" media="all" />
-	<link href="{% static 'exile/assets/styles/' %}{{ skin }}/style.css?v=0" type="text/css" rel="stylesheet" media="all"/>
+	<link href="{% static 'exile/assets/styles/' %}{{ skin }}/style.css?v=1" type="text/css" rel="stylesheet" media="all"/>
+	<link href="{% static 'exile/assets/styles/card.css' %}?v=0" type="text/css" rel="stylesheet" media="all"/>
 	<link rel="icon" href="{% static 'exile/assets/favicon.ico' %}" />
 
 	<script type="text/javascript" src="{% static 'exile/scripts/lang.js' %}?v=1"></script>
@@ -126,29 +127,36 @@ var startTime;
 <!--[[ads]]<iframe id="topad" src="https://ad.exil.pw/ad-728.asp[[code]]?id={userid}&code={ad_code}[/code]]" frameborder=0 marginwidth=0 marginheight=0 vspace=0 hspace=0 scrolling=no></iframe>[/ads]]-->
 
 <div id="main">
-{% if menu %}
-<div id="leftnav">{{ menu }}
-	{% if dev %}
-	<div>{{ render_time }}</div>
-	<div>Joueurs: {{ players}}</div>
+
+	<div id="rightnav">
+		{% for planet in planet_list %}
+		    {% include "exile/card_planet.html" with planet=planet only %}    
+		{% endfor %}
+	</div>
+
+	{% if menu %}
+		<div id="leftnav">{{ menu }}
+			{% if dev %}
+				<div>{{ render_time }}</div>
+				<div>Joueurs: {{ players}}</div>
+			{% endif %}
+		</div>
 	{% endif %}
-</div>
-{% endif %}
 
-<div {% if menu %} id="content" {% endif %} align="center">
-	{% if contextinfo or contextinfo2 %}<div id="status">{{ contextinfo }}{{ contextinfo2 }}</div>{% endif %}
-	<div id="page">{{ content }}</div>
-</div>
+	<div {% if menu %} id="content" {% endif %} align="center">
+		{% if contextinfo or contextinfo2 %}<div id="status">{{ contextinfo }}{{ contextinfo2 }}</div>{% endif %}
+		<div id="page">{{ content }}</div>
+	</div>
 
-</div>
+	</div>
 
-<div class="clear"></div>
+	<div class="clear"></div>
 </div>
 
 <!--[[t]]-->
 <script>
 window.onresize = function() {
-	$('content').style.width = ((document.documentElement || document.body).clientWidth-170) + 'px';
+	$('content').style.width = ((document.documentElement || document.body).clientWidth-340) + 'px';
 }
 window.onresize();
 </script>

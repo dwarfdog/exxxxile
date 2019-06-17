@@ -653,21 +653,21 @@ tiptext = $("hinttext");
 	{% for k,fleet in fleets.fleet.ally.items %}
 		<tr>
 			<td>
-				<a title="Écrire à {{ fleet.owner }}" href="{% url 'exile:mails' %}?subject=À propos de la flotte {{ fleet.name }}&to={{ fleet.owner }}" class="ally">[{{ fleet.tag }}] {{ fleet.name }}</a> (<script>document.write(({{ fleet.signature }}>0)?'{{ fleet.signature }}':'indéterminé'); </script>)
+				<a title="Écrire à {{ fleet.owner }}" href="{% url 'exile:mails' %}?subject=À propos de la flotte {{ fleet.name }}&to={{ fleet.owner }}" class="ally">{% if fleet.tag %}[{{ fleet.tag }}] {% endif %}{{ fleet.name }}</a> (<script>document.write(({{ fleet.signature }}>0)?'{{ fleet.signature }}':'indéterminé'); </script>)
 			</td>
 		</tr>
 	{% endfor %}
 	{% for k,fleet in fleets.fleet.friend.items %}
 		<tr>
 			<td>
-				<a title="Écrire à {{ fleet.owner }}" href="{% url 'exile:mails' %}?subject=À propos de la flotte {{ fleet.name }}&to={{ fleet.owner }}" class="friend">[{{ fleet.tag }}] {{ fleet.name }}</a> (<script>document.write(({{ fleet.signature }}>0)?'{{ fleet.signature }}':'indéterminé'); </script>)
+				<a title="Écrire à {{ fleet.owner }}" href="{% url 'exile:mails' %}?subject=À propos de la flotte {{ fleet.name }}&to={{ fleet.owner }}" class="friend">{% if fleet.tag %}[{{ fleet.tag }}] {% endif %}{{ fleet.name }}</a> (<script>document.write(({{ fleet.signature }}>0)?'{{ fleet.signature }}':'indéterminé'); </script>)
 			</td>
 		</tr>
 	{% endfor %}
 	{% for k,fleet in fleets.fleet.enemy.items %}
 		<tr>
 			<td>
-				<a title="Écrire à {{ fleet.owner }}" href="{% url 'exile:mails' %}?subject=À propos de la flotte {{ fleet.name }}&to={{ fleet.owner }}" class="enemy">[{{ fleet.tag }}] {{ fleet.name }}</a> (<script>document.write(({{ fleet.signature }}>0)?'{{ fleet.signature }}':'indéterminé'); </script>)
+				<a title="Écrire à {{ fleet.owner }}" href="{% url 'exile:mails' %}?subject=À propos de la flotte {{ fleet.name }}&to={{ fleet.owner }}" class="enemy">{% if fleet.tag %}[{{ fleet.tag }}] {% endif %}{{ fleet.name }}</a> (<script>document.write(({{ fleet.signature }}>0)?'{{ fleet.signature }}':'indéterminé'); </script>)
 			</td>
 		</tr>
 	{% endfor %}
