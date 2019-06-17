@@ -8512,6 +8512,7 @@ def chat(request):
         chatid = getChatId(chatid)
         if not chatid:
             return
+        print(chatid)
         refresh_userlist = (time.time() - request.session.get("lastchatactivity_" + str(chatid), 0)) > config.onlineusers_refreshtime
     #   if IsEmpty(Application("chat_lastmsg_" & chatid)) then Application("chat_lastmsg_" & chatid) = "0"
     #   if Session("lastchatmsg_" & chatid) <> Application("chat_lastmsg_" & chatid) then
@@ -8529,16 +8530,18 @@ def chat(request):
             gcontext["login"] = gcontext['exile_user'].login
             gcontext["chatid"] = chatid
             gcontext['refresh'] = {'line':{},'online_users':{}}
-            for re in res:
-                request.session["lastchatmsg_" + str(chatid)] = re[0]
-                line = {
-                    "lastmsgid": re[0],
-                    "datetime": re[1],
-                    "author": re[3],
-                    "line": re[4],
-                    "alliancetag": getAllianceTag(re[2]),
-                }
-                gcontext['refresh']["line"][re[0]] = line.copy()
+            print(res)
+            if res:
+                for re in res:
+                    request.session["lastchatmsg_" + str(chatid)] = re[0]
+                    line = {
+                        "lastmsgid": re[0],
+                        "datetime": re[1],
+                        "author": re[3],
+                        "line": re[4],
+                        "alliancetag": getAllianceTag(re[2]),
+                    }
+                    gcontext['refresh']["line"][re[0]] = line.copy()
             # update user lastactivity in the DB and retrieve users online only every 3 minutes
             if refresh_userlist:
                 if gcontext['exile_user'].privilege < 100: # prevent admin from showing their presence in chat
