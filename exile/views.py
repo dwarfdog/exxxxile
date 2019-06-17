@@ -252,8 +252,8 @@ def getpercent(current, max, slice):
     else:
         return slice*int(100 * current / max / slice)
 
-def isValidName(myName):
-    if len(myName) < 2 or len(myName) > 12:
+def isValidName(myName,limit=12):
+    if len(myName) < 2 or len(myName) > limit:
         return False
     pattern = re.compile("^[a-zA-Z0-9-_]+[a-zA-Z0-9-_ ]+[a-zA-Z0-9-_]+$")
     return pattern.match(myName)
@@ -5503,7 +5503,7 @@ def alliancecreate(request):
         name = request.POST.get("alliancename", "").strip()
         tag = request.POST.get("alliancetag", "").strip()
         description = strip_tags(request.POST.get("description", "").strip())
-        valid_name = isValidName(name)
+        valid_name = isValidName(name,32)
         valid_tag = gcontext['exile_user'].privilege > 100 or isValidAllianceTag(tag)
         valid_description = isValidDescription(description)
         if valid_name and valid_tag:
