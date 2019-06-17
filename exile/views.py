@@ -188,7 +188,7 @@ def getAllianceTag(allianceid):
             cursor.execute('SELECT tag FROM alliances WHERE id=%s', allianceid)
             res = cursor.fetchone()
             if res:
-                cache.set("AllianceTag_" + str(allianceid), res[0], None)
+                cache.set("AllianceTag_" + str(allianceid), res, None)
             else:
                 cache.set("AllianceTag_" + str(allianceid), '', None)
     return cache.get("AllianceTag_" + str(allianceid))
