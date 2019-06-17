@@ -3274,9 +3274,9 @@ def planet(request):
     try:
         fplanet = NavPlanet.objects.get(pk=pid)
     except (KeyError, NavPlanet.DoesNotExist):
-        return HttpResponseRedirect(reverse('exile:planet')+'?id='+gcontext['CurrentPlanet'])
+        return HttpResponseRedirect(reverse('exile:planet')+'?id='+str(gcontext['CurrentPlanet']))
     if fplanet.ownerid_id != gcontext['exile_user'].id:
-        return HttpResponseRedirect(reverse('exile:planet')+'?id='+gcontext['CurrentPlanet'])
+        return HttpResponseRedirect(reverse('exile:planet')+'?id='+str(gcontext['CurrentPlanet']))
     gcontext['CurrentPlanet'] = fplanet.id
     gcontext['planetid'] = gcontext['CurrentPlanet']
     gcontext['g'] = fplanet.galaxy.id
