@@ -82,9 +82,9 @@ function formatLine(author,line)
 		}
 
 		if(words[i].substr(0,7).toLowerCase() == 'http://' || words[i].substr(0,8).toLowerCase() == 'https://')
-			words[i] = '<a href="'+words[i]+'" target=_blank>'+addWbr(words[i])+'</a>';
-		else
-			words[i] = addWbr(words[i]);
+			words[i] = '<a href="'+words[i]+'" target=_blank nowrap>'+words[i]+'</a>';
+		//else
+		//	words[i] = addWbr(words[i]);
 	}
 
 	if(author == '{{ login|escapejs }}')
