@@ -8522,9 +8522,9 @@ def chat(request):
         print('refreshContent '+str(chatid))
         if chatid and not request.session.get("chat_joined_" + str(chatid), False):
             return
-        #chatid = getChatId(chatid)
-        #if not chatid:
-        #    return
+        chatid = getChatId(chatid)
+        if not chatid:
+            return
         refresh_userlist = (time.time() - request.session.get("lastchatactivity_" + str(chatid), 0)) > config.onlineusers_refreshtime
     #   if IsEmpty(Application("chat_lastmsg_" & chatid)) then Application("chat_lastmsg_" & chatid) = "0"
     #   if Session("lastchatmsg_" & chatid) <> Application("chat_lastmsg_" & chatid) then
