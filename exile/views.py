@@ -8529,7 +8529,7 @@ def chat(request):
     #   if IsEmpty(Application("chat_lastmsg_" & chatid)) then Application("chat_lastmsg_" & chatid) = "0"
     #   if Session("lastchatmsg_" & chatid) <> Application("chat_lastmsg_" & chatid) then
         # retrieve new chat lines
-        lastmsgid = request.session.get("lastchatmsg_" + str(chatid), 0)
+        lastmsgid = 0 #request.session.get("lastchatmsg_" + str(chatid), 0)
         with connection.cursor() as cursor:
             print("SELECT chat_lines.id, datetime, allianceid, login, message" +
                 " FROM chat_lines" +
