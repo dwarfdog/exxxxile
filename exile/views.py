@@ -8531,6 +8531,10 @@ def chat(request):
         # retrieve new chat lines
         lastmsgid = request.session.get("lastchatmsg_" + str(chatid), 0)
         with connection.cursor() as cursor:
+            print("SELECT chat_lines.id, datetime, allianceid, login, message" +
+                " FROM chat_lines" +
+                " WHERE chatid="+str(chatid)+" AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid="+str(chatid)+" ORDER BY datetime DESC OFFSET 100 LIMIT 1), "+str(lastmsgid)+")" +
+                " ORDER BY chat_lines.id")
             cursor.execute("SELECT chat_lines.id, datetime, allianceid, login, message" +
                 " FROM chat_lines" +
                 " WHERE chatid=%s AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid=%s ORDER BY datetime DESC OFFSET 100 LIMIT 1), %s)" +
