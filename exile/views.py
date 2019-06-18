@@ -161,6 +161,22 @@ def planetimg(id,floor):
         planetimg = "0" + str(planetimg)
     return str(planetimg)
 
+def checkVWPlanetListCache(request, force=False):
+    if force or not request.session.get("vwplanetlist", {}):
+        # retrieve Research info
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied, ceiling(ore/1000), ore*100/ore_capacity, ceiling(hydrocarbon/1000), hydrocarbon*100/hydrocarbon_capacity FROM vw_planets WHERE ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
+            res = cursor.fetchall()
+            if res:
+                tmp = []
+                for re in res:
+                    re = re + (planetimg(re[0],re[6]),)
+                    tmp.append(re)
+                request.session["vwplanetlist"] = tmp
+            else:
+                request.session["vwplanetlist"] = {}
+    return request.session.get("vwplanetlist")
+
 def checkPlanetListCache(request, force=False):
     if force or not request.session.get("planetlist", {}):
         # retrieve Research info
@@ -695,7 +711,7 @@ def logged(function):
         if not user.lastactivity:
             with connection.cursor() as cursor:
                 cursor.execute('UPDATE users SET lastactivity=now() WHERE id=%s', [user.id])
-        gcontext['planet_list'] = checkPlanetListCache(request, True)
+        gcontext['planet_list'] = checkVWPlanetListCache(request, True)
         gcontext['can_join_alliance'] = not gcontext['exile_user'].leave_alliance_datetime and (not gcontext['exile_user'].alliance_left or gcontext['exile_user'].alliance_left < time.time())
         planet = request.GET.get('planet',0)
         forced = False
@@ -2182,7 +2198,7 @@ def fleet(request):
                     hasAPlanetSelected = False
                     gcontext['move_fleet']['planetgroup'] = {'location':{}}
                     cpt = 0
-                    for i in checkPlanetListCache(request): #request.session.get('sPlanetList'):
+                    for i in checkPlanetListCache(request,True): #request.session.get('sPlanetList'):
                         pla = {
                             "index": cpt,
                             "name": i[1],
