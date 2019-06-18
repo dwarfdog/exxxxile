@@ -165,7 +165,7 @@ def checkPlanetListCache(request, force=False):
     if force or not request.session.get("planetlist", {}):
         # retrieve Research info
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
+            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied, ceiling(ore/1000), ore*100/ore_capacity, ceiling(hydrocarbon/1000), hydrocarbon*100/hydrocarbon_capacity FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
             res = cursor.fetchall()
             if res:
                 tmp = []

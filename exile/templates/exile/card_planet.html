@@ -1,14 +1,18 @@
 {% load static %}
 <div class="card" onclick="document.location.href='{% url 'exile:planet' %}?id={{ planet.0 }}';">
   <div class="infos">
-    <img src="{% static 'exile/assets/planets/p' %}{{ planet.10 }}.gif" alt="Planet" class="pla">
+    <img src="{% static 'exile/assets/planets/p' %}{{ planet.14 }}.gif" alt="Planet" class="pla">
+    {% if planet.5 %} <img style="position: absolute;top:8px;left:6px;" src="{% static 'exile/assets/interface/commander.gif' %}" class="smallicon" width=16 height=16 title="Commandant">{% endif %}
+    <p style="position: absolute;top:62px;left:-6px;font-size:0.9em;">{{ planet.2 }}.{{ planet.3 }}.{{ planet.4 }}</p>
     {{ planet.7 }}/{{ planet.6 }}&nbsp;<img src="{% static 'exile/assets/interface/floor.gif' %}" title="Terrain" width=16 height=16 style="vertical-align: middle;"><br/>
     {{ planet.9 }}/{{ planet.8 }}&nbsp;<img src="{% static 'exile/assets/interface/space.gif' %}" title="Espace" width=16 height=16 style="vertical-align: middle;"><br/>
-    {% if planet.5 %} <img src="{% static 'exile/assets/interface/commander.gif' %}" class="smallicon" width=10 height=6 title="Commandant">{% endif %}
+    {{ planet.10 }}k&nbsp;<img src="{% static 'exile/assets/interface/ore.gif' %}" title="Terrain" width=16 height=16 style="vertical-align: middle;"><br/>
+    <span style="border:1px solid grey;width:75px;float:right;margin:2px 0px;"><span title="{{ planet.11 }}% des capacités" style="background-color:{% if planet.11 > 90 %}red{% elif planet.11 > 75 %}orange{% else %}green{% endif %};width:{{ planet.11 }}%;height:2px;display:block;"></span></span>
+    {{ planet.12 }}k&nbsp;<img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Espace" width=16 height=16 style="vertical-align: middle;"><br/>
+    <span style="border:1px solid grey;width:75px;float:right;margin:2px 0px;"><span title="{{ planet.13 }}% des capacités" style="background-color:{% if planet.13 > 90 %}red{% elif planet.13 > 75 %}orange{% else %}green{% endif %};width:{{ planet.13 }}%;height:2px;display:block;"></span></span>
     <div style="clear:both;"></div>
   </div>
-  <div class="container">
+  <div class="container" style="font:size:0.7em;">
     <h4><b>{{ planet.1 }}</b></h4>
-    <p>{{ planet.2 }}.{{ planet.3 }}.{{ planet.4 }}</p>
   </div>
 </div> 
