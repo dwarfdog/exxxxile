@@ -736,7 +736,7 @@ def logged(function):
                     request.session['CurrentPlanet'] = fplanet.id
                     request.session['CurrentGalaxy'] = fplanet.galaxy_id
                     request.session['CurrentSector'] = fplanet.sector
-        if fplanet:
+        if fplanet and fplanet.ownerid_id == user.id:
             gcontext['planetid'] = gcontext['CurrentPlanet']
             gcontext['g'] = fplanet.galaxy.id
             gcontext['s'] = fplanet.sector
@@ -8500,7 +8500,10 @@ def reports(request):
 def chat(request):
     def getChatId(id):
         if not id and gcontext['exile_user'].alliance_id:
-            return retrieveAllianceChat(gcontext['exile_user'].alliance_id)
+            allychatid = retrieveAllianceChat(gcontext['exile_user'].alliance_id)
+            if allychatid:
+                addChat(allychatid)
+            return allychatid
         return id
     def addLine(chatid, msg):
         print('addLine '+str(chatid)+' '+msg)
