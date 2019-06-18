@@ -2320,25 +2320,36 @@ def fleet(request):
                 gcontext['action_result'] = "error_deploy_enemy_ships"
             elif res[0] == -11:
                 gcontext['action_result'] = "error_deploy_too_many_safe_planets"
-    def MoveFleet(fleetid):
-        try:
-            g = int(request.POST.get("g",-1))
-        except (KeyError, Exception):
-            g = -1
-        try:
-            s = int(request.POST.get("s",-1))
-        except (KeyError, Exception):
-            s = -1
-        try:
-            p = int(request.POST.get("p",-1))
-        except (KeyError, Exception):
-            p = -1
+    def MoveFleet(fleetid,pid=0):
+        if not pid:
+            try:
+                g = int(request.POST.get("g",-1))
+            except (KeyError, Exception):
+                g = -1
+            try:
+                s = int(request.POST.get("s",-1))
+            except (KeyError, Exception):
+                s = -1
+            try:
+                p = int(request.POST.get("p",-1))
+            except (KeyError, Exception):
+                p = -1
+        else:
+            planet = NavPlanet.objects.get(pk=pid)
+            if planet:
+                g = planet.galaxy_id
+                s = planet.sector
+                p = planet.planet
+            else:
+                return HttpResponse('KO')
         if g==-1 or s==-1 or p==-1:
             gcontext['move_fleet_result'] = "bad_destination"
             return
         with connection.cursor() as cursor:
             cursor.execute("SELECT sp_move_fleet(%s, %s, %s, %s, %s)", [gcontext['exile_user'].id, fleetid, g, s, p])
             res = cursor.fetchone()
+            if pid:
+                return HttpResponse('OK')
             if res:
                 if res[0] == 0:
                     if request.POST.get("movetype", "0") == "1":
@@ -2348,23 +2359,23 @@ def fleet(request):
             else:
                 res[0] = 0
             if res[0] == 0:
-                    gcontext['move_fleet_result'] = "ok"
+                gcontext['move_fleet_result'] = "ok"
             elif res[0] == -1: # fleet not found or busy
-                    log_notice(request, "fleet", "Move: cant move fleet", 0)
+                log_notice(request, "fleet", "Move: cant move fleet", 0)
             elif res[0] == -4: # new player or holidays protection
-                    gcontext['move_fleet_result'] = "new_player_protection"
+                gcontext['move_fleet_result'] = "new_player_protection"
             elif res[0] == -5: # long travel not possible
-                    gcontext['move_fleet_result'] = "long_travel_impossible"
+                gcontext['move_fleet_result'] = "long_travel_impossible"
             elif res[0] == -6: # not enough money
-                    gcontext['move_fleet_result'] = "not_enough_credits"
+                gcontext['move_fleet_result'] = "not_enough_credits"
             elif res[0] == -7:
-                    gcontext['move_fleet_result'] = "error_jump_from_require_empty_location"
+                gcontext['move_fleet_result'] = "error_jump_from_require_empty_location"
             elif res[0] == -8:
-                    gcontext['move_fleet_result'] = "error_jump_protected_galaxy"
+                gcontext['move_fleet_result'] = "error_jump_protected_galaxy"
             elif res[0] == -9:
-                    gcontext['move_fleet_result'] = "error_jump_to_require_empty_location"
+                gcontext['move_fleet_result'] = "error_jump_to_require_empty_location"
             elif res[0] == -10:
-                    gcontext['move_fleet_result'] = "error_jump_to_same_point_limit_reached"
+                gcontext['move_fleet_result'] = "error_jump_to_same_point_limit_reached"
     def Invade(fleetid, droppods, take):
         with connection.cursor() as cursor:
             cursor.execute("SELECT sp_invade_planet(%s, %s, %s)", [gcontext['exile_user'].id, fleetid, droppods])
@@ -2416,6 +2427,8 @@ def fleet(request):
                 with connection['exile_nexus'].cursor() as cursor:
                     cursor.execute("UPDATE nusers SET cheat_detected=now() WHERE id=%s", [gcontext['user'].id])
             MoveFleet(fleetid)
+        elif action == "move2":
+            return MoveFleet(fleetid,request.GET.get('pid', '0'))
         elif action == "share":
             with connection.cursor() as cursor:
                 cursor.execute("UPDATE fleets SET shared=not shared WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, fleetid])

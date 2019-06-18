@@ -19,6 +19,13 @@ function previousfleet(){
 		obj.selectedIndex=obj.options.length-1;
 	jumpf(obj);
 }
+
+var freefleetlist = new Array();
+{% for key,fle in fleetlist.items %}
+	{% if fleet.action == 0 %}
+		freefleetlist.push(new Array({{ fle.id }},'{{ fle.name }} ({{ fle.g }}.{{ fle.s }}.{{ fle.p }})'));
+	{% endif %}
+{% endfor %}
 </script>
 
 <style>

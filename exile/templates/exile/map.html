@@ -1,5 +1,25 @@
 {% load static %}
 <script>
+var x = null;
+var y = null;
+    
+document.addEventListener('mousemove', onMouseUpdate, false);
+document.addEventListener('mouseenter', onMouseUpdate, false);
+    
+function onMouseUpdate(e) {
+  x = e.pageX;
+  y = e.pageY;
+  //console.log(x+','+y);
+}
+
+function getMouseX() {
+  return x;
+}
+
+function getMouseY() {
+  return y;
+}
+
 var currGalaxy="";
 var currSector="";
 
@@ -238,25 +258,48 @@ function get_top(obj) {
 	return top;
 }
 
-function showmenu(objet,title,txt) {	
+function showmenu(objet,title,txt,width=200,xx=12,yy=-2) {
+	console.log(xx+','+yy);
 	var hint = $("hint");
 	var hinttext = $("hinttext");
 	hint.style.visibility = "hidden";
+	hint.style.width = width+'px';
 
 	var obj = $(objet);
 	var max = $("map").offsetWidth + get_left($("map"));
-	var x = (get_left(obj)+16);
-	var y = (get_top(obj)-2);
+	if(xx!=12){
+		var x = xx;
+		var y = yy;
+	}else{
+		var x = (get_left(obj)+xx);
+		var y = (get_top(obj)+yy);
+	}
 
 	hinttext.innerHTML = "<h1>" + title + "</h1>" + txt;
 
-	if (x + hint.offsetWidth > max) {
+	if (xx!=12 && x + hint.offsetWidth > max) {
 		x = x - hint.offsetWidth-16;
 	}
 	
 	hint.style.left = x + 'px';
 	hint.style.top = y + 'px';
 	hint.style.visibility = "visible";
+}
+
+function sendfleet(fleetid,pid){
+	openURL('{% url 'exile:fleet' %}?fleet='+fleetid+'&pid='+pid+'&action=move2', function(){document.location.reload(true);});
+}
+
+function fleetselector(plaid){
+	var buf = '';
+	for(var i =0;i<freefleetlist.length;i++){
+		buf += '<a href="#" onclick="sendfleet('+freefleetlist[i][0]+','+plaid+');return false;" nowrap>'+freefleetlist[i][1]+'</a><br/>';
+	}
+	return buf;
+}
+
+function showfleetselector(plaidx,plaid) {
+	showmenu('planett.'+plaidx,'Envoyer une flotte',fleetselector(plaid),240,getMouseX(),getMouseY());
 }
 
 function hidemenu() {
@@ -354,7 +397,7 @@ function loc(img,alliancetag,id,owner,name,rel,radar,jammer,ore,hydrocarbon,floo
 
 		{% if comment %}// display planet image or vortex{% endif %}
 		s+=	'<td align=center rowspan=4 width="64">'+
-			'<div><img class="planet" src="{% static 'exile/assets/planets/p' %}'+img+'.gif" width=64 height=64></div><div class=planettext>'+idx+'</div>'+
+			'<div><img class="planet" id="planett.'+idx+'" src="{% static 'exile/assets/planets/p' %}'+img+'.gif" width=64 height=64 oncontextmenu="showfleetselector('+idx+','+id+');return false;"></div><div class=planettext>'+idx+'</div>'+
 			'</td>';
 
 		{% if comment %}// display planet info: floor & space of the planet{% endif %}
