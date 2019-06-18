@@ -8687,7 +8687,7 @@ def chat(request):
     except (KeyError, Exception):
         chatid = 0
     gcontext["chatid"] = chatid
-    chatid = getChatId(chatid)
+    #chatid = getChatId(chatid)
     action = request.GET.get("a","")
     if action == "send":
         addLine(chatid, request.GET.get("l",""))
