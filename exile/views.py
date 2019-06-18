@@ -8519,6 +8519,7 @@ def chat(request):
     #       chatid = getChatId(chatid)
     #       connExecuteRetryNoRecords "INSERT INTO chat_onlineusers(chatid, userid) VALUES(" & chatid & "," & UserId & ")"
     def refreshContent(chatid):
+        print('refreshContent '+str(chatid))
         if chatid and not request.session.get("chat_joined_" + str(chatid), False):
             return
         #chatid = getChatId(chatid)
@@ -8535,6 +8536,8 @@ def chat(request):
                 " WHERE chatid=%s AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid=%s ORDER BY datetime DESC OFFSET 100 LIMIT 1), %s)" +
                 " ORDER BY chat_lines.id", [chatid, chatid, lastmsgid])
             res = cursor.fetchall()
+            print('chat_lines')
+            print(res)
             if not res and not refresh_userlist:
                 return
             # load the template
@@ -8555,6 +8558,7 @@ def chat(request):
             # update user lastactivity in the DB and retrieve users online only every 3 minutes
             if refresh_userlist:
                 if gcontext['exile_user'].privilege < 100: # prevent admin from showing their presence in chat
+                    print('add user to chat_onlineusers '+str(chatid))
                     cursor.execute("INSERT INTO chat_onlineusers(chatid, userid) VALUES(%s, %s)", [chatid, gcontext['exile_user'].id])
                 request.session["lastchatactivity_" + str(chatid)] = time.time()
                 # retrieve online users in chat
