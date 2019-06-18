@@ -8546,7 +8546,7 @@ def chat(request):
                 return
             # load the template
             gcontext["login"] = gcontext['exile_user'].login
-            gcontext["chatid"] = chatid
+            #gcontext["chatid"] = chatid
             gcontext['refresh'] = {'line':{},'online_users':{}}
             if res:
                 for re in res:
@@ -8686,6 +8686,7 @@ def chat(request):
         chatid = int(request.GET.get("id", "0"))
     except (KeyError, Exception):
         chatid = 0
+    gcontext["chatid"] = chatid
     chatid = getChatId(chatid)
     action = request.GET.get("a","")
     if action == "send":
