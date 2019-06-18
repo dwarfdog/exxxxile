@@ -8506,7 +8506,6 @@ def chat(request):
             return allychatid
         return id
     def addLine(chatid, msg):
-        print('addLine '+str(chatid)+' '+msg)
         msg = msg.strip()[:260]
         if msg:
     #       set oRs = connExecuteRetry("SELECT sp_chat_append
@@ -8515,11 +8514,9 @@ def chat(request):
             with connection.cursor() as cursor:
                 cursor.execute("INSERT INTO chat_lines(chatid, allianceid, userid, login, message) VALUES(%s, %s, %s, %s, %s)",
                     [chatid,gcontext['exile_user'].alliance_id,gcontext['exile_user'].id,gcontext['exile_user'].login,msg])
-                print("INSERT INTO chat_lines(chatid, allianceid, userid, login, message) VALUES("+str(chatid)+", "+str(gcontext['exile_user'].alliance_id)+", "+str(gcontext['exile_user'].id)+", "+gcontext['exile_user'].login+", "+msg+")")
     #       chatid = getChatId(chatid)
     #       connExecuteRetryNoRecords "INSERT INTO chat_onlineusers(chatid, userid) VALUES(" & chatid & "," & UserId & ")"
     def refreshContent(chatid):
-        print('refreshContent '+str(chatid))
         if chatid and not request.session.get("chat_joined_" + str(chatid), False):
             return
         chatid = getChatId(chatid)
@@ -8531,17 +8528,11 @@ def chat(request):
         # retrieve new chat lines
         lastmsgid = request.session.get("lastchatmsg_" + str(chatid), 0)
         with connection.cursor() as cursor:
-            print("SELECT chat_lines.id, datetime, allianceid, login, message" +
-                " FROM chat_lines" +
-                " WHERE chatid="+str(chatid)+" AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid="+str(chatid)+" ORDER BY datetime DESC OFFSET 100 LIMIT 1), "+str(lastmsgid)+")" +
-                " ORDER BY chat_lines.id")
             cursor.execute("SELECT chat_lines.id, datetime, allianceid, login, message" +
                 " FROM chat_lines" +
                 " WHERE chatid=%s AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid=%s ORDER BY datetime DESC OFFSET 100 LIMIT 1), %s)" +
                 " ORDER BY chat_lines.id", [chatid, chatid, lastmsgid])
             res = cursor.fetchall()
-            print('chat_lines')
-            print(res)
             if not res and not refresh_userlist:
                 return
             # load the template
@@ -8562,7 +8553,6 @@ def chat(request):
             # update user lastactivity in the DB and retrieve users online only every 3 minutes
             if refresh_userlist:
                 if gcontext['exile_user'].privilege < 100: # prevent admin from showing their presence in chat
-                    print('add user to chat_onlineusers '+str(chatid))
                     cursor.execute("INSERT INTO chat_onlineusers(chatid, userid) VALUES(%s, %s)", [chatid, gcontext['exile_user'].id])
                 request.session["lastchatactivity_" + str(chatid)] = time.time()
                 # retrieve online users in chat
