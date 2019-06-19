@@ -335,13 +335,8 @@ Chat.prototype = {
 
 		oChat.innerHTML = this.lines.join("<br/>")+'<div id="chatend"></div>';
 		if(this.linesAdded > this.lastLine)	{
-<<<<<<< HEAD
 			//setTimeout( function() { $('chatend').scrollIntoView(); }, 300);
 			oChat.scrollTop = 10000;//oChat.scrollHeight;
-=======
-			setTimeout( function() { $('chatline').scrollIntoView(); }, 300);
-			//oChat.scrollTop = oChat.scrollHeight;
->>>>>>> 90ddfd23807c8d31db25406684444626100dda41
 			this.lastLine = this.linesAdded;
 		}
 	},
