@@ -259,6 +259,7 @@ Chat.prototype = {
 		obj.style.visibility = 'hidden';
 		obj.style.display = 'none';
 		//setTimeout( function() { $('chatend').scrollIntoView(); }, 300);
+		//setTimeout( function() { oChat.scrollTop = oChat.scrollHeight; }, 300);
 		//oChat.scrollTop = oChat.scrollHeight;
 
 		oChatLine.value = this.line;
@@ -336,7 +337,8 @@ Chat.prototype = {
 		oChat.innerHTML = this.lines.join("<br/>")+'<div id="chatend"></div>';
 		if(this.linesAdded > this.lastLine)	{
 			//setTimeout( function() { $('chatend').scrollIntoView(); }, 300);
-			oChat.scrollTop = 10000;//oChat.scrollHeight;
+			//oChat.scrollTop = 10000;//oChat.scrollHeight;
+			setTimeout( function() { oChat.scrollTop = 10000; }, 300);
 			this.lastLine = this.linesAdded;
 		}
 	},
