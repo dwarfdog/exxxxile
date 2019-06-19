@@ -259,7 +259,8 @@ Chat.prototype = {
 		obj.style.visibility = 'hidden';
 		obj.style.display = 'none';
 
-		oChat.scrollTop = oChat.scrollHeight;
+		$('bottom').scrollIntoView();
+		//oChat.scrollTop = oChat.scrollHeight;
 
 		oChatLine.value = this.line;
 		oChatLine.focus();
@@ -333,9 +334,10 @@ Chat.prototype = {
 		this.loaded = true;
 		if(!this.active) return;
 
-		oChat.innerHTML = this.lines.join("<br/>");
+		oChat.innerHTML = this.lines.join("<br/>") + '<div id="bottom"></div>';
 		if(this.linesAdded > this.lastLine)	{
-			oChat.scrollTop = oChat.scrollHeight;
+			$('bottom').scrollIntoView();
+			//oChat.scrollTop = oChat.scrollHeight;
 			this.lastLine = this.linesAdded;
 		}
 	},
