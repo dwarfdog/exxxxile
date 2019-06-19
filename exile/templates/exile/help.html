@@ -280,6 +280,7 @@
 	[b]le texte[/b] pour écrire <b>le texte en gras</b><br/>
 	[i]le texte[/i] pour écrire <i>le texte en italique</i><br/>
 	[u]le texte[/u] pour souligner <u>le texte</u><br/>
+	[s]striked text[/s] pour barrer <strike>le texte</strike><br/>
 	<br/>
 	[color=#FF0000]rouge[/color] pour écrire <span style="color:#FF0000">en rouge en utilisant un code de couleur</span><br/>
 	[color=blue]bleu[/color] pour écrire <span style="color: blue">en bleu en utilisant la couleur en anglais</span><br/>
@@ -289,9 +290,26 @@
 	<br/>
 	[img]{% static 'exile/assets/interface/credits.gif' %}[/img] pour afficher une image <img src="{% static 'exile/assets/interface/credits.gif' %}"/><br/>
 	<br/>
+	[list][*]one[*]two[/list] pour créer des listes non-ordonnées<br/>
+	<ul><li>one</li><li>two</li></ul>
+	[list={option}][*]one[*]two[/list]	<br/>
+	<ol style="list-style-type:decimal;"><li>one</li><li>two</li></ol>
+	options liste ordonnée :<br/>
+	1: ordered list<br/>
+	01: ordered list (leading zero)<br/>
+	a: ordered list (lower alpha)<br/>
+	A: ordered list (upper alpha)<br/>
+	i: ordered list (lower roman)<br/>
+	I: ordered list (upper roman)<br/><br/>
+	[code][b]example[/b][/code] pour créer du text non formaté <code>[b]example[/b]</code><br/>
+	[quote]quoted string[/quote] pour créer des citations <blockquote>quoted string</blockquote><br/>
+	[center]example[/center] pour center le texte <div style="text-align:center;">example</div><br/>
 	Il est possible d'imbriquer les balises :<br/>
-	[u][b]mon texte[/b][/u] écrira <u><b>"mon texte" en gras et souligné</b></u><br/>
-			
+	[u][b]mon texte[/b][/u] écrira <u><b>"mon texte" en gras et souligné</b></u><br/><br/>
+	<h2>Smileys</h2>
+			{% for i,smiley in smileys.items %}
+				<div style="border:1px solid white;padding:4px 4px;float:left;margin-right:4px;">{{ smiley.code }} <img src="/{{ smiley.image }}"/></div>
+			{% endfor %}
 		</td>
 	</td>
 {% endif %}

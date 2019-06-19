@@ -9293,6 +9293,17 @@ def help(request):
                     if not ck in gcontext['category']:
                         gcontext['category'][ck] = {}
                     gcontext['category'][ck][re[0]] = ship.copy()
+        elif cat == "tags":
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT code, image FROM precise_bbcode_smileytag");
+                res = cursor.fetchall()
+                gcontext['smileys'] = {}
+                for re in res:
+                    smiley = {
+                        'code': re[0],
+                        'image': re[1],
+                    }
+                    gcontext['smileys'][re[0]] = smiley.copy()
         gcontext['tabnav'] = {'cat': cat}
     global gcontext
     context = gcontext
