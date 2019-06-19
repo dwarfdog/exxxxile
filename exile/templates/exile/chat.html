@@ -258,8 +258,7 @@ Chat.prototype = {
 		var obj = $('joinchatform');
 		obj.style.visibility = 'hidden';
 		obj.style.display = 'none';
-
-		$('chatline').scrollIntoView();
+		setTimeout( function() { $('chatline').scrollIntoView(); }, 300);
 		//oChat.scrollTop = oChat.scrollHeight;
 
 		oChatLine.value = this.line;
@@ -336,7 +335,7 @@ Chat.prototype = {
 
 		oChat.innerHTML = this.lines.join("<br/>");
 		if(this.linesAdded > this.lastLine)	{
-			$('chatline').scrollIntoView();
+			setTimeout( function() { $('chatline').scrollIntoView(); }, 300);
 			//oChat.scrollTop = oChat.scrollHeight;
 			this.lastLine = this.linesAdded;
 		}
