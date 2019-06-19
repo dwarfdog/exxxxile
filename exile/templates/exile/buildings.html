@@ -131,34 +131,44 @@ function writeBuilding(id,name,quantity,status,o,o2,h,h2,w,w2,e,e2,f,f2,s,s2,rem
 
 <table class="default">
 {% for k,cat in category.items %}
-<tr class="category">
-	<td colspan=4>
-	{% ifnotequal cat.items|length 0 %}
-	{% if k == 'category10' %}Colonie{% endif %}
-	{% if k == 'category11' %}Construction{% endif %}
-	{% if k == 'category20' %}Production{% endif %}
-	{% if k == 'category21' %}Production de minerai{% endif %}
-	{% if k == 'category22' %}Production d'hydrocarbure{% endif %}
-	{% if k == 'category23' %}Production d'énergie{% endif %}
-	{% if k == 'category30' %}Ressources humaines{% endif %}
-	{% if k == 'category31' %}Stockage de minerai{% endif %}
-	{% if k == 'category32' %}Stockage d'hydrocarbure{% endif %}
-	{% if k == 'category33' %}Stockage d'énergie{% endif %}
-	{% if k == 'category40' %}Armement{% endif %}
-	{% if k == 'category80' %}Espace{% endif %}
-	{% if k == 'category90' %}Défense{% endif %}
-	{% if k == 'category100' %}Artéfacts et reliques{% endif %}
-	{% if k == 'category110' %}Evénements{% endif %}
-	{% endifnotequal %}
-	</td>
-</tr>
-<script type="text/javascript">
-// {{ k }}
-{% for i,bui in cat.items %}
-	writeBuilding({{ bui.id }},'{{ bui.name|escapejs }}',{{ bui.quantity }},0{% if bui.isbuilding %}1{% endif %}{% if bui.isdestroying %}2{% endif %},'{{ bui.ore }}',0{% if bui.not_enough_ore %}1{% endif %},'{{ bui.hydrocarbon }}',0{% if bui.not_enough_hydrocarbon %}1{% endif %},'{{ bui.workers }}',0{% if bui.not_enough_workers %}1{% endif %},'{{ bui.energy }}',0{% if bui.not_enough_energy %}1{% endif %},'{{ bui.floor }}',0{% if bui.not_enough_floor %}1{% endif %},'{{ bui.space }}',0{% if bui.not_enough_space %}1{% endif %},'{{ bui.remainingtime }}',0{% if bui.buildings_required %}1{% endif %}{% if bui.limitreached %}2{% endif %}{% if bui.built %}3{% endif %}{% if bui.build %}4{% endif %}{% if bui.researches_required %}5{% endif %},{{ bui.time }},0{% if bui.workers_required %}1{% endif %}{% if bui.required %}2{% endif %}{% if bui.capacity %}3{% endif %}{% if bui.next_destruction_in %}4{% endif %}{% if bui.destroy %}5{% endif %},'{{ bui.nextdestroytime }}','{{ bui.prestige }}', 0{% if bui.not_enough_prestige %}1{% endif %});
-{% endfor %}
-</script>
-<tr class="clear"><td colspan=4>&nbsp;</td></tr>
+	<tr class="category">
+		<td colspan=4>
+		{% ifnotequal cat.items|length 0 %}
+		{% if k == 'category10' %}Colonie{% endif %}
+		{% if k == 'category11' %}Construction{% endif %}
+		{% if k == 'category20' %}Production{% endif %}
+		{% if k == 'category21' %}Production de minerai{% endif %}
+		{% if k == 'category22' %}Production d'hydrocarbure{% endif %}
+		{% if k == 'category23' %}Production d'énergie{% endif %}
+		{% if k == 'category30' %}Ressources humaines{% endif %}
+		{% if k == 'category31' %}Stockage de minerai{% endif %}
+		{% if k == 'category32' %}Stockage d'hydrocarbure{% endif %}
+		{% if k == 'category33' %}Stockage d'énergie{% endif %}
+		{% if k == 'category40' %}Armement{% endif %}
+		{% if k == 'category80' %}Espace{% endif %}
+		{% if k == 'category90' %}Défense{% endif %}
+		{% if k == 'category100' %}Artéfacts et reliques{% endif %}
+		{% if k == 'category110' %}Evénements{% endif %}
+		{% endifnotequal %}
+		</td>
+	</tr>
+	<script type="text/javascript">
+	// {{ k }}
+	{% for i,bui in cat.items %}
+		writeBuilding({{ bui.id }},'{{ bui.name|escapejs }}',{{ bui.quantity }},0{% if bui.isbuilding %}1{% endif %}{% if bui.isdestroying %}2{% endif %},'{{ bui.ore }}',0{% if bui.not_enough_ore %}1{% endif %},'{{ bui.hydrocarbon }}',0{% if bui.not_enough_hydrocarbon %}1{% endif %},'{{ bui.workers }}',0{% if bui.not_enough_workers %}1{% endif %},'{{ bui.energy }}',0{% if bui.not_enough_energy %}1{% endif %},'{{ bui.floor }}',0{% if bui.not_enough_floor %}1{% endif %},'{{ bui.space }}',0{% if bui.not_enough_space %}1{% endif %},'{{ bui.remainingtime }}',0{% if bui.buildings_required %}1{% endif %}{% if bui.limitreached %}2{% endif %}{% if bui.built %}3{% endif %}{% if bui.build %}4{% endif %}{% if bui.researches_required %}5{% endif %},{{ bui.time }},0{% if bui.workers_required %}1{% endif %}{% if bui.required %}2{% endif %}{% if bui.capacity %}3{% endif %}{% if bui.next_destruction_in %}4{% endif %}{% if bui.destroy %}5{% endif %},'{{ bui.nextdestroytime }}','{{ bui.prestige }}', 0{% if bui.not_enough_prestige %}1{% endif %});
+	{% endfor %}
+	</script>
+	<tr class="clear"><td colspan=4>&nbsp;</td></tr>
+	{% if test %}
+		<tr>
+			<td colspan=4>
+				{% for i,building in cat.items %}
+					{% include "exile/card_building.html" with building=building only %}
+				{% endfor %}
+			</td>
+		</tr>
+		<tr class="clear"><td colspan=4>&nbsp;</td></tr>
+	{% endif %}
 {% endfor %}
 
 </table>

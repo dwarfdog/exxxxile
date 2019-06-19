@@ -1,0 +1,19 @@
+{% load static %}
+{{ building.quantity }}
+<div class="card" onclick="" style="position:relative;">
+  <div class="infos">
+    <img src="{% static 'exile/assets/buildings/' %}{{ building.id }}.jpg" alt="{{ building.name }}" width=64 height=64 class="building" onmouseover="ddrivetip(desc({{ building.index }}))" onmouseout="hideddrivetip()">
+    {% if building.floor %}<span {% if bui.not_enough_floor %}class="notenough"{% endif %}>{{ building.floor }}</span>&nbsp;<img src="{% static 'exile/assets/interface/floor.gif' %}" title="Terrain" width=16 height=16 style="vertical-align: middle;"><br/>{% endif %}
+    {% if building.space %}<span {% if bui.not_enough_space %}class="notenough"{% endif %}>{{ building.space }}</span>&nbsp;<img src="{% static 'exile/assets/interface/space.gif' %}" title="Espace" width=16 height=16 style="vertical-align: middle;"><br/>{% endif %}
+    {% if building.ore %}<span {% if bui.not_enough_ore %}class="notenough"{% endif %}>{{ building.ore }}</span>&nbsp;<img src="{% static 'exile/assets/interface/ore.gif' %}" title="Minerai" width=16 height=16 style="vertical-align: middle;"><br/>{% endif %}
+    {% if building.hydrocarbon %}<span {% if bui.not_enough_hydrocarbon %}class="notenough"{% endif %}>{{ building.hydrocarbon }}</span>&nbsp;<img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width=16 height=16 style="vertical-align: middle;"><br/>{% endif %}
+    {% if building.workers %}<span {% if bui.not_enough_workers %}class="notenough"{% endif %}>{{ building.workers }}</span>&nbsp;<img src="{% static 'exile/assets/interface/workers_idle.gif' %}" title="Travailleurs" width=12 height=12 style="vertical-align: middle;"><br/>{% endif %}
+    {% if building.energy %}<span {% if bui.not_enough_energy %}class="notenough"{% endif %}>{{ building.energy }}</span>&nbsp;<img src="{% static 'exile/assets/interface/energy_available.gif' %}" title="Energie" width=12 height=12><br/>{% endif %}
+    {% if building.prestige %}<span {% if bui.not_enough_prestige %}class="notenough"{% endif %}>{{ building.prestige }}</span>&nbsp;<img src="{% static 'exile/assets/interface/prestige.gif' %}" title="Prestige" width=16 height=16><br/>{% endif %}
+    <div style="clear:both;"></div>
+  </div>
+  <div class="container" style="font:size:1em;">
+    <h4><a href="{% url 'exile:help' %}?cat=buildings#{{ building.id }}" onmouseover="ddrivetip(desc({{ building.index }}))" onmouseout="hideddrivetip()"><b>{{ building.name }}</b></a></h4>
+    <b><script>document.write(formattime({{ building.time }}));</script></b>
+  </div>
+</div> 

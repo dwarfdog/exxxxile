@@ -53,7 +53,7 @@ table.tableheader td { padding-right:8px; }
 	</tr>
 	<tr>
 		<td nowrap><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" width=16 height=16 class=res>{{ money }}</td>
-		<td nowrap><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width=16 height=16 class=res><span class="{% if medium_hydrocarbon %}med2{% endif %}{% if high_hydrocarbon %}high2{% endif %}">{{ hydrocarbon }}</span> / <span class="{% if medium_hydrocarbon %}=med2{% endif %}{% if high_hydrocarbon %}high2{% endif %}">{{ hydrocarbon_capacity }}</span> (<span class="{% if normal_hydrocarbon_production %}prod{% endif %}{% if medium_hydrocarbon_production %}medprod{% endif %}">+{{ hydrocarbon_production }}</span>)</td>
+		<td nowrap><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width=16 height=16 class=res><span class="{% if medium_hydrocarbon %}med2{% endif %}{% if high_hydrocarbon %}high2{% endif %}">{{ hydrocarbon }}</span> / <span class="{% if medium_hydrocarbon %}med2{% endif %}{% if high_hydrocarbon %}high2{% endif %}">{{ hydrocarbon_capacity }}</span> (<span class="{% if normal_hydrocarbon_production %}prod{% endif %}{% if medium_hydrocarbon_production %}medprod{% endif %}">+{{ hydrocarbon_production }}</span>)</td>
 		<td nowrap><img src="{% static 'exile/assets/interface/scientists.gif' %}" title="Scientifiques" width=16 height=16 class=res><span class="{% if scientists_low %}low{% endif %}">{{ scientists }}</span> / {{ scientists_capacity }}</td>
 		<td nowrap><img src="{% static 'exile/assets/interface/space.gif' %}" title="Espace" width=16 height=16 class=res>{{ space_occupied }} / {{ space }}</td>
 {% if special.special2 %}

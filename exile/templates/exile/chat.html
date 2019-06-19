@@ -46,7 +46,7 @@ Smileys.add('yikes.png', ':o',':O','=o','=O');
 Smileys.add('wink.png', ';)',';D');
 Smileys.add('hmm.png', ':/');
 Smileys.add('tongue.png', ':p',':P');
-Smileys.add('lol.png', ':lol:',':rofl');
+Smileys.add('lol.png', ':lol:',':rofl:');
 Smileys.add('mad.png', ':mad:');
 Smileys.add('roll.png', ':rolleyes:');
 Smileys.add('cool.png', ':cool:');
@@ -82,7 +82,7 @@ function formatLine(author,line)
 		}
 
 		if(words[i].substr(0,7).toLowerCase() == 'http://' || words[i].substr(0,8).toLowerCase() == 'https://')
-			words[i] = '<a href="'+words[i]+'" target=_blank nowrap>'+words[i]+'</a>';
+			words[i] = '<a href="'+words[i]+'" target="_blank" nowrap>'+words[i]+'</a>';
 		//else
 		//	words[i] = addWbr(words[i]);
 	}
