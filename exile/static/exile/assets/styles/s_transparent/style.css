@@ -97,7 +97,7 @@ div.indent { margin: 0.5em 0.5em; }
 div.headercredits { padding-top:4px; padding-bottom:4px; text-align: center; }
 div.clear { clear:both; }
 
-#chat { overflow:auto; /*height:490px;*/ color:#ccc; }
+#chat { overflow:auto; height:490px; color:#ccc; }
 #chat .highlight { color:#1DD1D3; }
 #chat .player { color:#FFFFFF; }
 #chat .newday { text-align:center; font-weight:bold; color:#FFFFFF; margin-top:5px; }

@@ -258,8 +258,7 @@ Chat.prototype = {
 		var obj = $('joinchatform');
 		obj.style.visibility = 'hidden';
 		obj.style.display = 'none';
-
-		$('chatline').scrollIntoView();
+		//setTimeout( function() { $('chatend').scrollIntoView(); }, 300);
 		//oChat.scrollTop = oChat.scrollHeight;
 
 		oChatLine.value = this.line;
@@ -334,10 +333,10 @@ Chat.prototype = {
 		this.loaded = true;
 		if(!this.active) return;
 
-		oChat.innerHTML = this.lines.join("<br/>");
+		oChat.innerHTML = this.lines.join("<br/>")+'<div id="chatend"></div>';
 		if(this.linesAdded > this.lastLine)	{
-			$('chatline').scrollIntoView();
-			//oChat.scrollTop = oChat.scrollHeight;
+			//setTimeout( function() { $('chatend').scrollIntoView(); }, 300);
+			oChat.scrollTop = 10000;//oChat.scrollHeight;
 			this.lastLine = this.linesAdded;
 		}
 	},
