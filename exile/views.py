@@ -702,6 +702,8 @@ def logged(function):
             user = Users.objects.get(pk=request.session.get('sUser', 0))
         except (KeyError, Users.DoesNotExist):
             return HttpResponseRedirect(reverse('exile:connect'))
+        if not user:
+            return HttpResponseRedirect(reverse('exile:connect'))
         gcontext['exile_user'] = user
         gcontext['dev'] = user.privilege >= 100
         if user.skin:
