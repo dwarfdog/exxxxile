@@ -113,7 +113,7 @@ function sig(signature){
 <tr class="item">
 <td>
 	{% for rid, re in research.items %}
-		<div><a href="{% url 'exile:research' %}#{{ re.researchid }}">{{ re.research }}</a> (<script>putcountdown1({{ re.time }}, "Terminé", "{% url 'exile:research' %}","La recherche {{ re.research|safe }} est terminée","/static/exile/assets/reports/300.jpg");</script>)</div>
+		<div><a href="{% url 'exile:research' %}#{{ re.researchid }}">{{ re.research }}</a> (<script>putcountdown1({{ re.time }}, "Terminé", "{% url 'exile:research' %}","La recherche {{ re.research|safe }} est terminée","{% static 'exile/assets/research/bg' %}{{ re.researchid }}.jpg");</script>)</div>
 	{% endfor %}
 	{% ifequal research|length 0 %}<div><a href="{% url 'exile:research' %}" title="Voir le laboratoire de recherches">Aucune recherche en cours</a></div>{% endifequal %}
 </td>
