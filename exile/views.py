@@ -256,7 +256,7 @@ def getPlanetName(request,relation, radar_strength, ownerName, planetName):
     elif relation == config.rFriend:
         getPlanetName = ownerName
     else:
-        if radar_strength > 0:
+        if radar_strength > 0 and ownerName:
             getPlanetName = ownerName
         else:
             getPlanetName = ''
