@@ -1,0 +1,44 @@
+{% load static %}
+<div class="card researchcard {% if research.researching %}running{% elif research.research %}available{% else %}unavailable{% endif %}" onclick="" style="float:left;margin:6px 12px 6px 6px;overflow:hidden;width:236px;height:131px;position:relative;background:{% if research.notresearchable or research.notenoughmoney %}repeating-linear-gradient(
+  45deg,
+  rgba(0, 0, 0, 0.2),
+  rgba(0, 0, 0, 0.2) 10px,
+  rgba(255, 0, 0, 0.3) 10px,
+  rgba(255, 0, 0, 0.3) 20px
+),{% elif research.complete %}repeating-linear-gradient(
+  45deg,
+  rgba(0, 0, 0, 0),
+  rgba(0, 0, 0, 0) 10px,
+  rgba(0, 0, 0, 0.4) 10px,
+  rgba(0, 0, 0, 0.4) 20px
+),{% endif %}url('{% static 'exile/assets/research/bg' %}{{ research.id }}.jpg');" onmouseover="ddrivetip(description{{ research.id }})" onmouseout="hideddrivetip()">
+  <div class="infos">
+    <span class="level" style="float:right;background:black;text-align:right;"><script>putlevel({{ research.level }},{{ research.levels }},0{% if research.leveling %}1{% endif %});</script><br/>
+        {% if research.cost %}<img src="{% static 'exile/assets/interface/credits.gif' %}" class=icon title="Crédits" width=16 height=16> {{ research.credits }}{% endif %}
+        {% if research.nocost %}-{% endif %}
+    </span>
+    <div style="clear:both;"></div>
+    <br/>
+    <div class="researchtime" style="text-align:center;">
+        <b style="text-shadow: 0px 0px 4px black;font-size:1.2em;">
+            {% if research.countdown %}<script>putcountdown1({{ research.remainingtime }},"","#","La recherche {{ research.name }} est terminée","{% static 'exile/assets/research/bg' %}{{ research.id }}.jpg");</script>{% endif %}
+            {% if research.researchtime %}<script>document.write(formattime({{ research.time }}));</script>{% endif %}
+            {% if research.noresearchtime %}-{% endif %}
+        </b>
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+  <div class="container" style="font:size:1em;background:rgb(0,0,0,0.7);position:absolute;bottom:0px;left:0px;width:240px;border-top:1px solid #777;padding:4px 0px;">
+    <h4><a href="{% url 'exile:help' %}?cat=researchs#{{ research.id }}"><b>{{ research.name }}</b></a></h4>
+    <b>
+        {% if research.complete %}&nbsp;{% endif %}
+        {% if research.busy %}&nbsp;{% endif %}
+        {% if research.notresearchable %}&nbsp;{% endif %}
+        {% if research.notenoughmoney %}&nbsp;{% endif %}
+        {% if research.research %}<a href="?a=research&r={{ research.id }}" title="Lancer la recherche sur {name}">rechercher</a>{% endif %}
+        {% if research.researching %}<script>putcountdown2({{ research.remainingtime }}, "<a href='?a=cancel&r={{ research.id }}' title='Annuler' onclick='return cancelresearch()'>annuler</a>", "<a href='{% url 'exile:research' %}'>terminé</a>");</script>{% endif %}
+        {% if research.auto %}(<a href="{% url 'exile:research' %}?a=stop&r={{ research.id }}">Automatique</a>){% endif %}
+        {% if research.manual %}(<a href="{% url 'exile:research' %}?a=continue&r={{ research.id }}"">Manuel</a>){% endif %}
+    </b>
+  </div>
+</div> 

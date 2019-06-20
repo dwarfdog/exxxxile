@@ -162,6 +162,7 @@ def planetimg(id,floor):
     return str(planetimg)
 
 def checkVWPlanetListCache(request, force=False):
+    global gcontext
     if force or not request.session.get("vwplanetlist", {}):
         # retrieve Research info
         with connection.cursor() as cursor:
@@ -178,6 +179,7 @@ def checkVWPlanetListCache(request, force=False):
     return request.session.get("vwplanetlist")
 
 def checkPlanetListCache(request, force=False):
+    global gcontext
     if force or not request.session.get("planetlist", {}):
         # retrieve Research info
         with connection.cursor() as cursor:
@@ -643,15 +645,17 @@ def header(request):
 
 def FillHeaderCredits(request):
     global gcontext
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT credits FROM users WHERE id=%s', [gcontext['exile_user'].id])
-        res = cursor.fetchone()
-        if not res:
-            raise Exception('can\'t get credits')
-        gcontext['credits'] = res[0]
-        t = loader.get_template('exile/header-credits.html')
-        info = t.render(gcontext, request)
-        gcontext['contextinfo'] = info
+    return
+    #no more need with topbar
+    #with connection.cursor() as cursor:
+    #    cursor.execute('SELECT credits FROM users WHERE id=%s', [gcontext['exile_user'].id])
+    #    res = cursor.fetchone()
+    #    if not res:
+    #        raise Exception('can\'t get credits')
+    #    gcontext['credits'] = res[0]
+    #    t = loader.get_template('exile/header-credits.html')
+    #    info = t.render(gcontext, request)
+    #    gcontext['contextinfo'] = info
 
 def construct(function):
     global gcontext, config
@@ -665,6 +669,7 @@ def construct(function):
         except (KeyError, NexusUsers.DoesNotExist):
             return HttpResponseRedirect(reverse('exile:logout'))
         gcontext = {
+            'test': settings.TEST,
             'config': config,
             'logged': request.session.get('logged', False),
             'user': user,
@@ -994,9 +999,9 @@ def overview(request):
                 request.session['stat_score'] = gcontext['exile_user'].score
                 request.session['stat_players'] = res[0]
                 request.session['stat_rank'] = res[1]
-            gcontext['stat_rank'] = res[1]
-            gcontext['stat_score'] = gcontext['exile_user'].score
-            gcontext['stat_players'] = res[0]
+                gcontext['stat_rank'] = res[1]
+                gcontext['stat_score'] = gcontext['exile_user'].score
+                gcontext['stat_players'] = res[0]
         else:
             gcontext['stat_rank'] = request.session.get('stat_rank', 0)
             gcontext['stat_score'] = request.session.get('stat_score', 0)
@@ -1199,14 +1204,14 @@ def overview(request):
         pass
     context['stat_victory_marks'] = context['exile_user'].prestige_points
     context['stat_maxcolonies'] = int(context['exile_user'].mod_planets)
-    try:
-        stat_rank_battle()
-    except (KeyError, Exception):
-        pass
-    try:
-        stat_empire()
-    except (KeyError, Exception):
-        pass
+    #try:
+    stat_rank_battle()
+    #except (KeyError, Exception):
+    #    pass
+    #try:
+    stat_empire()
+    #except (KeyError, Exception):
+    #    pass
     try:
         context['constructionyards'] = cur_buildings_constructions()
     except (KeyError, Exception):
@@ -3650,7 +3655,7 @@ def research(request):
             # list things that can be researched
             cursor.execute('SELECT researchid, category, total_cost, total_time, level, levels, researchable, buildings_requirements_met, status, ' +
                 ' (SELECT looping FROM researches_pending WHERE researchid = t.researchid AND userid=%s) AS looping, ' +
-                ' expiration_time IS NOT NULL ' +
+                ' expiration_time IS NOT NULL, planet_elements_requirements_met ' +
                 ' FROM sp_list_researches(%s) AS t ' +
                 ' WHERE level > 0 OR (researchable AND planet_elements_requirements_met)', [gcontext['exile_user'].id, gcontext['exile_user'].id])
             res = cursor.fetchall()
@@ -3686,7 +3691,7 @@ def research(request):
                     if re[4] < re[5] or re[10]:
                         research['time'] = re[3]
                         research['researchtime'] = True
-                        if not re[6] or not re[7]:
+                        if not re[6] or not re[7] or not re[11]:
                             research['notresearchable'] = True
                         elif underResearchCount > 0:
                             research['busy'] = True

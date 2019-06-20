@@ -1,5 +1,5 @@
 {% load static %}
-<div class="card" onclick="document.location.href='{% url 'exile:planet' %}?id={{ planet.0 }}';" style="position:relative;">
+<div class="card {% if planet.11 > 90 or planet.13 > 90 %}warning{% endif %}" onclick="document.location.href='{% url 'exile:planet' %}?id={{ planet.0 }}';" style="position:relative;">
   <div class="infos">
     <img src="{% static 'exile/assets/planets/p' %}{{ planet.14 }}.gif" alt="Planet" class="pla">
     {% if planet.5 %} <img style="position: absolute;top:8px;left:6px;" src="{% static 'exile/assets/interface/commander.gif' %}" class="smallicon" width=16 height=16 title="Commandant">{% endif %}

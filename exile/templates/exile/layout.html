@@ -11,7 +11,7 @@
 
 	<link href="{% static 'exile/assets/styles/reset.css' %}?v=2" type="text/css" rel="stylesheet" media="all" />
 	<link href="{% static 'exile/assets/styles/' %}{{ skin }}/style.css?v=3" type="text/css" rel="stylesheet" media="all"/>
-	<link href="{% static 'exile/assets/styles/card.css' %}?v=0" type="text/css" rel="stylesheet" media="all"/>
+	<link href="{% static 'exile/assets/styles/card.css' %}?v=1" type="text/css" rel="stylesheet" media="all"/>
 	<link rel="icon" href="{% static 'exile/assets/favicon.ico' %}" />
 
 	<script type="text/javascript" src="{% static 'exile/scripts/lang.js' %}?v=1"></script>
@@ -25,11 +25,20 @@
 
 
 <body {% if scrolly %} onload="loaded()"{% endif %}>
+	{% if exile_user %}
+		<div id="topbar" style="position:fixed;width:100%;text-align: center;z-index:10;">
+			<span style="padding:2px;border:1px solid #777;background:rgb(0,0,0,0.6);"><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="res" width=16 height=16>{{ exile_user.credits }}&nbsp;&nbsp;&nbsp;<img src="{% static 'exile/assets/interface/prestige.gif' %}" title="Prestige" class="icon" width=16 height=16> {{ exile_user.prestige_points }}</span>
+		</div>
+	{% endif %}
 
 <div id="hint" onclick="donothide(event)">
-<div class="rtop"><b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b></div>
-<div id="hinttext"></div>
-<div class="rbottom"><b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b></div>
+	<div class="rtop">
+		<b class="r1"></b><b class="r2"></b><b class="r3"></b><b class="r4"></b>
+	</div>
+	<div id="hinttext"></div>
+	<div class="rbottom">
+		<b class="r4"></b><b class="r3"></b><b class="r2"></b><b class="r1"></b>
+	</div>
 </div>
 
 <script>

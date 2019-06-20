@@ -35,58 +35,78 @@ function putlevel(level,levels,inprogress){
 </script>
 
 <div id="research">
-<table class="default" width="100%">
-<tr class="header">
-	<td colspan=1>Recherche</td><td>Crédits</td><td>Niveau</td><td>Temps</td><td>Action</td>
-</tr>
+	{% if test %}
+		{% for k,cat in category.items %}
+			{% ifnotequal cat.items|length 0 %}
+				<div class="rescat" style="border:1px solid #777;border-radius: 6px;padding:12px 6px 12px 12px;float: left;clear:left;background: rgb(0,0,0,0.5);margin-right: 10px;margin-bottom: 15px;display: block;position: relative;">
+					<b style="text-align:left;margin-top: -12px;background: #253453;border: 1px solid #777;position: absolute;top: 0px;left: 15px;padding: 4px;display: block;">
+						{% if k == 'category10' %}Technologies{% endif %}
+						{% if k == 'category20' %}Industrie{% endif %}
+						{% if k == 'category30' %}Empire{% endif %}
+						{% if k == 'category40' %}Recherche{% endif %}
+						{% if k == 'category50' %}Technologies militaires{% endif %}
+						{% if k == 'category90' %}Vaisseaux spatiaux{% endif %}
+					</b>
+					{% for i,research in cat.items %}
+						{% include "exile/card_research.html" with research=research only %}
+					{% endfor %}
+					<div style="clear:both;"></div>
+				</div>
+			{% endifnotequal %}
+		{% endfor %}
+	{% else %}
+		<table class="default" width="100%">
+			<tr class="header">
+				<td colspan=1>Recherche</td><td>Crédits</td><td>Niveau</td><td>Temps</td><td>Action</td>
+			</tr>
 
-{% for k,cat in category.items %}
-	<tr class="category">
-		<td colspan=5>
-		{% ifnotequal cat.items|length 0 %}
-		{% if k == 'category10' %}Technologies{% endif %}
-		{% if k == 'category20' %}Industrie{% endif %}
-		{% if k == 'category30' %}Empire{% endif %}
-		{% if k == 'category40' %}Recherche{% endif %}
-		{% if k == 'category50' %}Technologies militaires{% endif %}
-		{% if k == 'category90' %}Vaisseaux spatiaux{% endif %}
-		{% endifnotequal %}
-		&nbsp;</td>
-	</tr>
+			{% for k,cat in category.items %}
+				<tr class="category">
+					<td colspan=5>
+					{% ifnotequal cat.items|length 0 %}
+					{% if k == 'category10' %}Technologies{% endif %}
+					{% if k == 'category20' %}Industrie{% endif %}
+					{% if k == 'category30' %}Empire{% endif %}
+					{% if k == 'category40' %}Recherche{% endif %}
+					{% if k == 'category50' %}Technologies militaires{% endif %}
+					{% if k == 'category90' %}Vaisseaux spatiaux{% endif %}
+					{% endifnotequal %}
+					&nbsp;</td>
+				</tr>
+				{% for i,res in cat.items %}
+					<tr class="smallitem">
+						<!--<td align=center><img src="{% static 'exile/assets/research/r' %}{{ res.id }}.jpg" width=64 height=64 class="building" onmouseover="ddrivetip(description{{ res.id }})" onmouseout="hideddrivetip()"></td>-->
+						<td>
+							<a href="{% url 'exile:help' %}?cat=research#{{ res.id }}" onmouseover="ddrivetip(description{{ res.id }})" onmouseout="hideddrivetip()"><b>{{ res.name }}</b></a>
+						</td>
+						<td align=center>
+							{% if res.cost %}<img src="{% static 'exile/assets/interface/credits.gif' %}" class=icon title="Crédits" width=16 height=16> {{ res.credits }}{% endif %}
+							{% if res.nocost %}-{% endif %}
+						</td>
+						<td align=center>
+							<script>putlevel({{ res.level }},{{ res.levels }},0{% if res.leveling %}1{% endif %});</script>
+						</td>
 
-	{% for i,res in cat.items %}
-		<tr class="smallitem">
-			<!--<td align=center><img src="{% static 'exile/assets/research/r' %}{{ res.id }}.jpg" width=64 height=64 class="building" onmouseover="ddrivetip(description{{ res.id }})" onmouseout="hideddrivetip()"></td>-->
-			<td><a href="{% url 'exile:help' %}?cat=research#{{ res.id }}" onmouseover="ddrivetip(description{{ res.id }})" onmouseout="hideddrivetip()"><b>{{ res.name }}</b></a></td>
-			<td align=center>
-			{% if res.cost %}<img src="{% static 'exile/assets/interface/credits.gif' %}" class=icon title="Crédits" width=16 height=16> {{ res.credits }}{% endif %}
-			{% if res.nocost %}-{% endif %}
-			</td>
-			<td align=center>
-			<script>putlevel({{ res.level }},{{ res.levels }},0{% if res.leveling %}1{% endif %});</script>
-			</td>
+						<td align=center>
+							{% if res.countdown %}<script>putcountdown1({{ res.remainingtime }},"","#",,"La recherche {{ res.name }} est terminée","/static/exile/assets/reports/300.jpg");</script>{% endif %}
+							{% if res.researchtime %}<script>document.write(formattime({{ res.time }}));</script>{% endif %}
+							{% if res.noresearchtime %}-{% endif %}
+						</td>
 
-			<td align=center>
-			{% if res.countdown %}<script>putcountdown1({{ res.remainingtime }},"","#",,"La recherche {{ res.name }} est terminée","/static/exile/assets/reports/300.jpg");</script>{% endif %}
-			{% if res.researchtime %}<script>document.write(formattime({{ res.time }}));</script>{% endif %}
-			{% if res.noresearchtime %}-{% endif %}
-			</td>
-
-			<td align=center>
-				{% if res.complete %}-{% endif %}
-				{% if res.busy %}-{% endif %}
-				{% if res.notresearchable %}<span class="impossible">recherches impossibles</span>{% endif %}
-				{% if res.notenoughmoney %}<span class="notenough">fonds insuffisants</span>{% endif %}
-				{% if res.research %}<a href="?a=research&r={{ res.id }}" title="Lancer la recherche sur {name}">rechercher</a>{% endif %}
-				{% if res.researching %}<script>putcountdown2({{ res.remainingtime }}, "<a href='?a=cancel&r={{ res.id }}' title='Annuler' onclick='return cancelresearch()'>annuler</a>", "<a href='{% url 'exile:research' %}'>terminé</a>");</script>{% endif %}
-				{% if res.auto %}(<a href="{% url 'exile:research' %}?a=stop&r={{ res.id }}">Automatique</a>){% endif %}
-				{% if res.manual %}(<a href="{% url 'exile:research' %}?a=continue&r={{ res.id }}"">Manuel</a>){% endif %}
-			</td>
-		</tr>
-	{% endfor %}
-
-	<tr class="clear"><td colspan=5>&nbsp;</td></tr>
-{% endfor %}
-
-</table>
+						<td align=center>
+							{% if res.complete %}-{% endif %}
+							{% if res.busy %}-{% endif %}
+							{% if res.notresearchable %}<span class="impossible">recherches impossibles</span>{% endif %}
+							{% if res.notenoughmoney %}<span class="notenough">fonds insuffisants</span>{% endif %}
+							{% if res.research %}<a href="?a=research&r={{ res.id }}" title="Lancer la recherche sur {name}">rechercher</a>{% endif %}
+							{% if res.researching %}<script>putcountdown2({{ res.remainingtime }}, "<a href='?a=cancel&r={{ res.id }}' title='Annuler' onclick='return cancelresearch()'>annuler</a>", "<a href='{% url 'exile:research' %}'>terminé</a>");</script>{% endif %}
+							{% if res.auto %}(<a href="{% url 'exile:research' %}?a=stop&r={{ res.id }}">Automatique</a>){% endif %}
+							{% if res.manual %}(<a href="{% url 'exile:research' %}?a=continue&r={{ res.id }}"">Manuel</a>){% endif %}
+						</td>
+					</tr>
+				{% endfor %}
+				<tr class="clear"><td colspan=5>&nbsp;</td></tr>
+			{% endfor %}
+		</table>
+	{% endif %}
 </div>

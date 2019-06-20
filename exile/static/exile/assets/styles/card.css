@@ -14,6 +14,29 @@
 .card:hover {
     box-shadow: 0px 0px 6px 6px rgba(255,171,0,0.3);
 }
+.card.running {
+    box-shadow: 0px 0px 3px 3px rgba(60,160,255,0.8);
+    animation: pulseblue 1s infinite;
+}
+.card.running:hover {
+    box-shadow: 0px 0px 6px 6px rgba(60,160,255,0.8);
+    animation: none;
+}
+.card.available:hover {
+    box-shadow: 0px 0px 6px 6px rgba(50,255,50,0.5);
+}
+.card.unavailable:hover {
+    box-shadow: 0px 0px 6px 6px rgba(255,50,50,0.5);
+}
+.card.warning {
+    color:white;
+    box-shadow: 0px 0px 3px 3px rgba(255,40,40,0.8);
+    animation: pulsered 1s infinite;
+}
+.card.warning:hover {
+    box-shadow: 0px 0px 6px 6px rgba(255,40,40,0.8);
+    animation: none;
+}
 
 .card .infos {
     text-align: right;
@@ -26,4 +49,50 @@
     border-radius: 5px;
     float: left;
     margin: 0 2px 2px 0;
+}
+
+@-webkit-keyframes pulseblue {
+  0% {
+      -webkit-box-shadow: 0 0 10px 10px rgba(60,160,255, 0.8);
+  }
+  70% {
+      -webkit-box-shadow: 0 0 0 0 rgba(60,160,255, 0);
+  }
+  100% {
+      -webkit-box-shadow: 0 0 10px 10px rgba(60,160,255, 0.8);
+  }
+}
+@keyframes pulseblue {
+  0% {
+      box-shadow: 0 0 10px 10px rgba(60,160,255, 0.8);
+  }
+  70% {
+      box-shadow: 0 0 0 0 rgba(60,160,255, 0);
+  }
+  100% {
+      box-shadow: 0 0 10px 10px rgba(60,160,255, 0.8);
+  }
+}
+
+@-webkit-keyframes pulsered {
+  0% {
+      -webkit-box-shadow: 0 0 5px 5px rgba(255,50,50, 0.8);
+  }
+  70% {
+      -webkit-box-shadow: 0 0 0 0 rgba(255,50,50, 0.8);
+  }
+  100% {
+      -webkit-box-shadow: 0 0 5px 5px rgba(255,50,50, 0.8);
+  }
+}
+@keyframes pulsered {
+  0% {
+      box-shadow: 0 0 5px 5px rgba(255,50,50, 0.8);
+  }
+  70% {
+      box-shadow: 0 0 0 0 rgba(255,50,50, 0.8);
+  }
+  100% {
+      box-shadow: 0 0 5px 5px rgba(255,50,50, 0.8);
+  }
 }
