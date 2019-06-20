@@ -375,6 +375,7 @@ def IsPlayerAccount(request):
     return request.session.get('sPrivilege', -100) > -50 and request.session.get('sPrivilege') < 50
 
 def log_notice(request, title, details, level):
+    global gcontext
     with connection.cursor() as cursor:
         cursor.execute('INSERT INTO log_notices (username, title, details, url, level) VALUES( %s, %s, %s, %s ,%s)', [gcontext['exile_user'].login, title, details, request.path , level])
 
