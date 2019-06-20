@@ -9567,7 +9567,7 @@ def options(request):
     context['content'] = t.render(gcontext, request)
     return render(request, 'exile/layout.html', context)
 
-def FormatBattle(battleid, creator, pointofview, ispubliclink):
+def FormatBattle(request,battleid, creator, pointofview, ispubliclink):
     gcontext = request.session.get('gcontext',{})
     # Retrieve/assign battle info
     with connection.cursor() as cursor:
@@ -9760,7 +9760,7 @@ def battleview(request):
         res = cursor.fetchone()
         if not res:
             return HttpResponseRedirect(reverse('exile:reports'))
-        FormatBattle(id, creator, fromview, True)
+        FormatBattle(request,id, creator, fromview, True)
     context = gcontext
     t = loader.get_template('exile/battle.html')
     context['content'] = t.render(gcontext, request)
@@ -9798,7 +9798,7 @@ def battle(request):
                 if res:
                     creator = res[0] #fromview
         if display_battle:
-            FormatBattle(id, creator, fromview, False)
+            FormatBattle(request,id, creator, fromview, False)
         else:
             return HttpResponseRedirect(reverse('exile:reports'))
         context = gcontext
