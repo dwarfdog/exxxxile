@@ -709,6 +709,7 @@ def logged(function):
             return HttpResponseRedirect(reverse('exile:connect'))
         if not user:
             return HttpResponseRedirect(reverse('exile:connect'))
+        log_notice(request, 'login_check', 'exile_user='+str(user.id)+' nexus_user='+str(request.session.get('user_id', 0)), 1)
         gcontext['exile_user'] = user
         gcontext['dev'] = user.privilege >= 100
         if user.skin:
