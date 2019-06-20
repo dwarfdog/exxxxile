@@ -88,7 +88,7 @@ function putlevel(level,levels,inprogress){
 						</td>
 
 						<td align=center>
-							{% if res.countdown %}<script>putcountdown1({{ res.remainingtime }},"","#",,"La recherche {{ res.name }} est terminée","/static/exile/assets/reports/300.jpg");</script>{% endif %}
+							{% if res.countdown %}<script>putcountdown1({{ res.remainingtime }},"","#","La recherche {{ res.name }} est terminée","/static/exile/assets/reports/300.jpg");</script>{% endif %}
 							{% if res.researchtime %}<script>document.write(formattime({{ res.time }}));</script>{% endif %}
 							{% if res.noresearchtime %}-{% endif %}
 						</td>
