@@ -17,7 +17,6 @@ from django.apps import apps
 
 from exile.models import *
 
-gcontext = {}
 config = apps.get_app_config('exile')
 
 def retrieveAllianceChat(id):
@@ -162,7 +161,7 @@ def planetimg(id,floor):
     return str(planetimg)
 
 def checkVWPlanetListCache(request, force=False):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     if force or not request.session.get("vwplanetlist", {}):
         # retrieve Research info
         with connection.cursor() as cursor:
@@ -179,7 +178,7 @@ def checkVWPlanetListCache(request, force=False):
     return request.session.get("vwplanetlist")
 
 def checkPlanetListCache(request, force=False):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     if force or not request.session.get("planetlist", {}):
         # retrieve Research info
         with connection.cursor() as cursor:
@@ -244,8 +243,9 @@ def getResearchDescription(ResearchId):
             return research[2]
     return ''
 
-def getPlanetName(relation, radar_strength, ownerName, planetName):
-    global gcontext, config
+def getPlanetName(request,relation, radar_strength, ownerName, planetName):
+    global config
+    gcontext = request.session.get('gcontext',{})
     if relation == config.rSelf:
         getPlanetName = planetName
     elif relation == config.rAlliance:
@@ -356,8 +356,8 @@ function SetCurrentPlanet(planetid)
     SetCurrentPlanet = True
 end function
 """
-def hasRight(right):
-    global gcontext
+def hasRight(request,right):
+    gcontext = request.session.get('gcontext',{})
     if not gcontext['hasRight']:
         return True
     else:
@@ -375,7 +375,7 @@ def IsPlayerAccount(request):
     return request.session.get('sPrivilege', -100) > -50 and request.session.get('sPrivilege') < 50
 
 def log_notice(request, title, details, level):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     with connection.cursor() as cursor:
         cursor.execute('INSERT INTO log_notices (username, title, details, url, level) VALUES( %s, %s, %s, %s ,%s)', [gcontext['exile_user'].login, title, details, request.path , level])
 
@@ -384,12 +384,12 @@ def logout(request):
     return HttpResponseRedirect(reverse('nexus:logout'))
 
 def menu(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     t = loader.get_template('exile/menu.html')
     return t.render(gcontext, request)
 
 def fleetheader(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     if gcontext['CurrentFleet'] == 0:
         return ''
     with connection.cursor() as cursor:
@@ -462,7 +462,7 @@ def fleetheader(request):
                     fleet['s'] = re[13]
                     fleet['p'] = re[14]
                     fleet['relation'] = re[17]
-                    fleet['planetname'] = getPlanetName(re[17], re[35], re[16], re[11])
+                    fleet['planetname'] = getPlanetName(request,re[17], re[35], re[16], re[11])
                     if not fleet['planetname']:
                         fleet['planetname'] = re[16]
                 # Assign fleet destination planet
@@ -478,7 +478,7 @@ def fleetheader(request):
                     fleet['t_s'] = re[21]
                     fleet['t_p'] = re[22]
                     fleet['t_relation'] = re[25]
-                    fleet['t_planetname'] = getPlanetName(re[25], re[36], re[24], re[19])
+                    fleet['t_planetname'] = getPlanetName(request,re[25], re[36], re[24], re[19])
                 for i in range(0, ShipListCount):
                     if ShipListArray[i][0] == re[0]:
                         fleet['ship'][i] = {
@@ -512,7 +512,7 @@ def fleetheader(request):
     return t.render(tpl_header, request)
 
 def header(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     if gcontext['CurrentPlanet'] == 0:
         return
     tpl_header = {
@@ -645,7 +645,7 @@ def header(request):
     return t.render(tpl_header, request)
 
 def FillHeaderCredits(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     return
     #no more need with topbar
     #with connection.cursor() as cursor:
@@ -659,10 +659,10 @@ def FillHeaderCredits(request):
     #    gcontext['contextinfo'] = info
 
 def construct(function):
-    global gcontext, config
+    global config
 
     def decorator(request, *args, **kwargs):
-        global gcontext, config
+        global config
         if settings.MAINTENANCE:
             return HttpResponseRedirect(reverse('exile:maintenance'))
         try:
@@ -671,7 +671,8 @@ def construct(function):
             return HttpResponseRedirect(reverse('exile:logout'))
         gcontext = {
             'test': settings.TEST,
-            'config': config,
+            #'config': config,
+            'universe': config.universe,
             'logged': request.session.get('logged', False),
             'user': user,
             'timers_enabled': 'true',
@@ -682,15 +683,16 @@ def construct(function):
             'IsImpersonating':False,
             'skin':'s_transparent',
         }
+        request.session['gcontext'] = gcontext
         return function(request, *args, **kwargs)
 
     return decorator
 
 def admin(function):
-    global gcontext, config
+    global config
 
     def decorator(request, *args, **kwargs):
-        global gcontext
+        gcontext = request.session.get('gcontext',{})
         if gcontext['exile_user'].privilege < 100:
             return HttpResponseRedirect(reverse('exile:overview'))
         return function(request, *args, **kwargs)
@@ -698,10 +700,10 @@ def admin(function):
     return decorator
 
 def logged(function):
-    global gcontext, config
+    global config
 
     def decorator(request, *args, **kwargs):
-        global gcontext
+        gcontext = request.session.get('gcontext',{})
         if not request.session.get('sUser', 0) or not request.session.get('logged', False):
             return HttpResponseRedirect(reverse('exile:connect'))
         try:
@@ -812,11 +814,11 @@ def logged(function):
             cursor.execute("SELECT sp_log_activity(%s, %s, %s)", [gcontext['exile_user'].id, request.META['REMOTE_ADDR'], 0])
         if gcontext['hasRight'] and gcontext['exile_user'].security_level >= 3:
             gcontext["show_alliance"] = {'is_set':True}
-            if hasRight("leader") or hasRight("can_manage_description") or hasRight("can_manage_announce"):
+            if hasRight(request,"leader") or hasRight(request,"can_manage_description") or hasRight(request,"can_manage_announce"):
                 gcontext["show_alliance"]["show_management"] = True
-            if hasRight("leader") or hasRight("can_see_reports"):
+            if hasRight(request,"leader") or hasRight(request,"can_see_reports"):
                 gcontext["show_alliance"]["show_reports"] = True
-            if hasRight("leader") or hasRight("can_see_members_info"):
+            if hasRight(request,"leader") or hasRight(request,"can_see_members_info"):
                 gcontext["show_alliance"]["show_members"] = True
         if gcontext['exile_user'].security_level >= 3 and config.allowMercenary:
             gcontext["show_mercenary"] = True
@@ -857,7 +859,7 @@ def connect(request):
         with connection.cursor() as cursor:
             cursor.execute('SELECT id, lastplanetid, privilege, resets FROM sp_account_connect2(%s, %s, %s, %s, %s, %s, %s)', [context['user'].id, context['user'].lcid, address, addressForwarded, userAgent, browserid, context['user'].fingerprint])
             return cursor.fetchone()
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     #browserid = get_browserid(request)
     browserid = 0
@@ -880,7 +882,7 @@ def connect(request):
 @construct
 @logged
 def wait(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     return render(request, 'exile/wait.html', context)
 
@@ -923,7 +925,8 @@ def start(request):
             cursor.execute('SELECT sp_update_researches(%s)', [userId])
             cursor.execute('UPDATE users SET privilege=0, email=%s WHERE id=%s', [gcontext['user'].email, userId])
         return HttpResponseRedirect(reverse('exile:overview'))
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     if not config.registration['enabled'] or ( config.registration['until'] is not None and config.registration['until'] < time.time() ):
         return render(request, 'exile/start-closed.html', context)
@@ -961,28 +964,28 @@ def start(request):
 @construct
 @logged
 def holidays(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     return render(request, 'exile/holidays.html', context)
 
 @construct
 @logged
 def banned(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     return render(request, 'exile/banned.html', context)
 
 @construct
 @logged
 def locked(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     return render(request, 'exile/locked.html', context)
 
 @construct
 @logged
 def gameover(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     return render(request, 'exile/game-over.html', context)
 
@@ -1131,13 +1134,13 @@ def overview(request):
                 parseFleet = True
                 fleet = {
                     'signature': re[2],
-                    'f_planetname': getPlanetName(re[8], re[23], re[18], re[7]),
+                    'f_planetname': getPlanetName(request,re[8], re[23], re[18], re[7]),
                     'f_planetid': re[6],
                     'f_g': re[9],
                     'f_s': re[10],
                     'f_p': re[11],
                     'f_relation': re[8],
-                    't_planetname': getPlanetName(re[14], re[24], re[19], re[13]),
+                    't_planetname': getPlanetName(request,re[14], re[24], re[19], re[13]),
                     't_planetid': re[12],
                     't_g': re[15],
                     't_s': re[16],
@@ -1192,7 +1195,8 @@ def overview(request):
                 fleets[re[0]] = fleet.copy()
             return fleets
 
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'overview'
     gcontext['menu'] = menu(request)
     context = gcontext
@@ -1279,7 +1283,7 @@ def upkeep(request):
                 "ships_parked_estimated_cost": res[17],
                 "total_estimation": res[12] + res[13] + res[14] + res[15] + res[16] + res[17] + res[21],
             }
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'upkeep'
     gcontext['menu'] = menu(request)
     context = gcontext
@@ -1487,7 +1491,7 @@ def commanders(request):
         with connection.cursor() as cursor:
             cursor.execute('SELECT sp_commanders_train(%s, %s)', [gcontext['exile_user'].id, CommanderId])
             return HttpResponseRedirect(reverse('exile:commanders'))
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'commanders'
     gcontext['menu'] = menu(request)
     context = gcontext
@@ -1605,11 +1609,12 @@ def fleettrade(request):
                     return HttpResponseRedirect(reverse('exile:fleet') + "?id=" + str(fleetid) + "&trade=" + str(res[0]))
         except (KeyError, Exception):
             pass
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'fleets'
     gcontext['menu'] = menu(request)
     gcontext['can_command_alliance_fleets'] = -1
-    if gcontext['exile_user'].alliance_id and hasRight("can_order_other_fleets"):
+    if gcontext['exile_user'].alliance_id and hasRight(request,"can_order_other_fleets"):
         gcontext['can_command_alliance_fleets'] = gcontext['exile_user'].alliance_id
     gcontext['fleet_owner_id'] = gcontext['exile_user'].id
     try:
@@ -1814,7 +1819,7 @@ def fleetsplit(request):
     def ExecuteOrder(fleetid):
         if request.POST.get("split","") == "1":
             return SplitFleet(fleetid)
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'fleets'
     e_no_error = 0
     e_bad_name = 1
@@ -1848,7 +1853,7 @@ def fleetsplit(request):
 @construct
 @logged
 def fleetships(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     return render(request, 'exile/fleet-ships.html', context)
 
@@ -2097,7 +2102,7 @@ def fleet(request):
             gcontext['overview']["s"] = res[13]
             gcontext['overview']["p"] = res[14]
             gcontext['overview']["relation"] = res[17]
-            gcontext['overview']["planetname"] = getPlanetName(res[17], res[41], res[16], res[11])
+            gcontext['overview']["planetname"] = getPlanetName(request,res[17], res[41], res[16], res[11])
         #   if res[17] < rAlliance and not IsNull(res[16]):
         #       if res[41] > 0 or res[17] = rFriend:
         #           content.AssignValue "planetname", res[16]
@@ -2114,7 +2119,7 @@ def fleet(request):
                 gcontext['overview']["t_s"] = res[21]
                 gcontext['overview']["t_p"] = res[22]
                 gcontext['overview']["t_relation"] = res[25]
-                gcontext['overview']["t_planetname"] = getPlanetName(res[25], res[42], res[24], res[19])
+                gcontext['overview']["t_planetname"] = getPlanetName(request,res[25], res[42], res[24], res[19])
         #       if res[25] < rAlliance and not IsNull(res[24]):
         #           if res[42] > 0 or res[25] = rFriend:
         #               content.AssignValue "t_planetname", res[24]
@@ -2501,11 +2506,12 @@ def fleet(request):
             with connection.cursor() as cursor:
                 cursor.execute("SELECT sp_warp_fleet(%s, %s)", [gcontext['exile_user'].id, fleetid])
         return False
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['action_result'] = ""
     gcontext['move_fleet_result'] = ""
     gcontext['can_command_alliance_fleets'] = -1
-    if gcontext['exile_user'].alliance_id and hasRight("can_order_other_fleets"):
+    if gcontext['exile_user'].alliance_id and hasRight(request,"can_order_other_fleets"):
         gcontext['can_command_alliance_fleets'] = gcontext['exile_user'].alliance_id
     gcontext['fleet_owner_id'] = gcontext['exile_user'].id
     gcontext['selectedmenu'] = 'fleets_fleets'
@@ -2557,7 +2563,7 @@ def invasion(request):
             # compare the attacker name and defender name with the name of who is reading this report
             if re[4] != viewername and re[5] != viewername and gcontext['exile_user'].alliance_id:
                 # if we are not the attacker or defender, check if we can view this invasion as a member of our alliance of we are ambassador
-                if hasRight("can_see_reports"):
+                if hasRight(request,"can_see_reports"):
                     # find the name of the member that did this invasion, either the attacker or the defender
                     cursor.execute("SELECT login FROM users" +
                             " WHERE (login=%s OR login=%s) AND alliance_id=%s AND alliance_joined <= (SELECT time FROM invasions WHERE id=%s)",
@@ -2637,7 +2643,8 @@ def invasion(request):
                 gcontext["invasion_report"]["succeeded"] = True
             else:
                 gcontext["invasion_report"]["not_succeeded"] = True
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'invasion'
     try:
         invasionid = int(request.GET.get("id", "0"))
@@ -2674,7 +2681,7 @@ def fleets(request):
                     'id': re[0],
                     'label': re[1],
                 }
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'fleets'
     gcontext['menu'] = menu(request)
     context = gcontext
@@ -2756,7 +2763,7 @@ def fleetshandler(request):
                         fleet['s'] = re[13]
                         fleet['p'] = re[14]
                         fleet['relation'] = re[17]
-                        fleet['planetname'] = getPlanetName(re[17], re[35], re[16], re[11])
+                        fleet['planetname'] = getPlanetName(request,re[17], re[35], re[16], re[11])
                         if not fleet['planetname']:
                             fleet['planetname'] = re[16]
                     # Assign fleet destination planet
@@ -2772,7 +2779,7 @@ def fleetshandler(request):
                         fleet['t_s'] = re[21]
                         fleet['t_p'] = re[22]
                         fleet['t_relation'] = re[25]
-                        fleet['t_planetname'] = getPlanetName(re[25], re[36], re[24], re[19])
+                        fleet['t_planetname'] = getPlanetName(request,re[25], re[36], re[24], re[19])
                     for i in range(0, ShipListCount):
                         if ShipListArray[i][0] == re[0]:
                             fleet['ship'][i] = {
@@ -2790,7 +2797,8 @@ def fleetshandler(request):
                     fleet['resource'][5]['res_id'] = 5
                     fleet['resource'][5]['res_quantity'] = re[31]
                     gcontext['list']['fleet'][re[0]] = fleet.copy()
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     a = request.POST.get('a', request.GET.get('a', ''))
     if a == 'setcat':
@@ -2887,7 +2895,7 @@ def fleetsorbiting(request):
                     elif re[9] == 1:
                         fleet["ally"] = True
                     gcontext['planet'][re[0]]['fleet'][re[5]] = fleet.copy()
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'fleets_orbiting'
     gcontext['menu'] = menu(request)
     listFleetsOrbiting()
@@ -2938,7 +2946,7 @@ def fleetsstandby(request):
         #               "planet.ship.category"
                     }
                     gcontext['planet'][re[0]]['ship'][re[5]] = ship.copy()
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'fleets_standby'
     gcontext['menu'] = menu(request)
     ListStandby()
@@ -2983,7 +2991,7 @@ def fleetsshipsstats(request):
                 gcontext['total']['losses'] += re[3]
             if not gcontext['category']:
                 gcontext["no_ship"] = True
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'fleets_ships_stats'
     gcontext['menu'] = menu(request)
     ListShips()
@@ -3143,7 +3151,7 @@ def planets(request):
                 if re[0] == gcontext['CurrentPlanet']:
                     planet['highlight'] = True
                 gcontext['planets'][re[0]] = planet.copy()
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'planets'
     gcontext['menu'] = menu(request)
     context = gcontext
@@ -3309,7 +3317,8 @@ def planet(request):
                     fleet['owner'] = True
                 planet['fleets'][re[0]] = fleet.copy()
             gcontext['planet'] = planet
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     e_no_error = 0
     e_rename_bad_name = 1
     planet_error = e_no_error
@@ -3497,7 +3506,7 @@ def marketsell(request):
                     #Session("details") = "done:"&query
             if request.POST.get("rel") != 1:
                 log_notice(request, "market-sell", "hidden value is missing from form data", 1)
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     ExecuteOrder()
     DisplayMarket()
     gcontext['menu'] = menu(request)
@@ -3631,7 +3640,7 @@ def marketbuy(request):
                     #Session("details") = query
                     cursor.execute("SELECT * FROM sp_buy_resources(%s, %s, %s, %s)", [gcontext['exile_user'].id, planetid, ore*1000, hydrocarbon*1000])
                     #Session("details") = "done:"&query
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     ExecuteOrder()
     DisplayMarket()
     gcontext['menu'] = menu(request)
@@ -3716,7 +3725,7 @@ def research(request):
     def CancelResearch(ResearchId):
         with connection.cursor() as cursor:
             cursor.execute('SELECT * FROM sp_cancel_research(%s, %s)', [gcontext['exile_user'].id, ResearchId])
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'research'
     gcontext['menu'] = menu(request)
     context = gcontext
@@ -3744,7 +3753,7 @@ def research(request):
 @construct
 @logged
 def researchoverview(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['menu'] = menu(request)
     t = loader.get_template('exile/research-overview.html')
@@ -3842,7 +3851,7 @@ def alliance(request):
                             member += 1
                     alliance['members']['total'] = member
                 gcontext['alliance'] = alliance.copy()
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'noalliance'
     tag = request.GET.get("tag",'')
     if tag:
@@ -3955,11 +3964,11 @@ def alliancemanage(request):
             gcontext['error'][gcontext['changes_status']] = True
         gcontext['nav'] = {}
         gcontext['nav']['cat'+str(gcontext['cat'])] = {'selected': True}
-        if hasRight("leader") or hasRight("can_manage_description"):
+        if hasRight(request,"leader") or hasRight(request,"can_manage_description"):
             gcontext['nav']['cat1'] = True
-        if hasRight("leader") or hasRight("can_manage_announce"):
+        if hasRight(request,"leader") or hasRight(request,"can_manage_announce"):
             gcontext['nav']['cat2'] = True
-        if hasRight("leader"):
+        if hasRight(request,"leader"):
             gcontext['nav']['cat3'] = True
     def SaveGeneral():
         logo = request.POST.get("logo", "").strip()
@@ -4037,13 +4046,13 @@ def alliancemanage(request):
                         " WHERE allianceid=%s AND rankid=%s",
                         [name, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15,
                         gcontext['exile_user'].alliance_id, re[0], cenabled, c0, gcontext['exile_user'].alliance_id, re[1]])
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'alliance_manage'
     gcontext['changes_status'] = ''
     gcontext['error'] = {}
     if not gcontext['exile_user'].alliance_id:
         return HttpResponseRedirect(reverse('exile:alliance'))
-    if not (hasRight("leader") or hasRight("can_manage_description") or hasRight("can_manage_announce")):
+    if not (hasRight(request,"leader") or hasRight(request,"can_manage_description") or hasRight(request,"can_manage_announce")):
         return HttpResponseRedirect(reverse('exile:alliance'))
     try:
         cat = int(request.GET.get("cat", '1'))
@@ -4051,11 +4060,11 @@ def alliancemanage(request):
         cat = 1
     if cat < 1 or cat > 3:
         cat = 1
-    if cat == 3 and not hasRight("leader"):
+    if cat == 3 and not hasRight(request,"leader"):
         cat=1
-    if cat == 1 and not (hasRight("leader") or hasRight("can_manage_description")):
+    if cat == 1 and not (hasRight(request,"leader") or hasRight(request,"can_manage_description")):
         cat=2
-    if cat == 2 and not (hasRight("leader") or hasRight("can_manage_announce")):
+    if cat == 2 and not (hasRight(request,"leader") or hasRight(request,"can_manage_announce")):
         cat=1
     if request.POST.get("submit", "") != "":
         if cat == 1:
@@ -4131,7 +4140,7 @@ def alliancemembers(request):
                 " WHERE alliance_id=%s" +
                 " ORDER BY " + orderby, [gcontext['exile_user'].id, gcontext['exile_user'].alliance_id])
             res = cursor.fetchall()
-            if hasRight("can_kick_player"):
+            if hasRight(request,"can_kick_player"):
                 gcontext['members']['recruit'] = True
             else:
                 gcontext['members']['viewonly'] = True
@@ -4164,7 +4173,7 @@ def alliancemembers(request):
                     member["hours"] = 0
                     member["days"] = 0
                 member['player']["orientation" + str(re[12])] = True
-                if re[5] > gcontext['exile_user'].alliance_rank.rankid and hasRight("can_kick_player"):
+                if re[5] > gcontext['exile_user'].alliance_rank.rankid and hasRight(request,"can_kick_player"):
                     member["kick_price"] = re[9]
                 else:
                     member["kick_price"] = 0
@@ -4198,7 +4207,7 @@ def alliancemembers(request):
                         member['player']['1weekplus'] = True
                     elif re[3] > 14*24:
                         member['player']['2weeksplus'] = True
-                if hasRight("leader"):
+                if hasRight(request,"leader"):
                     if re[5] > gcontext['exile_user'].alliance_rank.rankid or re[8] == gcontext['exile_user'].id:
                         member['player']['manage'] = True
                     else:
@@ -4206,7 +4215,7 @@ def alliancemembers(request):
                 if re[13] > 0:
                     member['player']["leaving_time"] = re[13]
                 elif re[13] == 0:
-                    if hasRight("can_kick_player"):
+                    if hasRight(request,"can_kick_player"):
                         if re[5] > gcontext['exile_user'].alliance_rank.rankid:
                             member['player']["kick"] = True
                         else:
@@ -4225,7 +4234,7 @@ def alliancemembers(request):
             else:
                 gcontext["members"]["score_na"] = True
     def displayInvitations():
-        if hasRight("can_invite_player"):
+        if hasRight(request,"can_invite_player"):
             with connection.cursor() as cursor:
                 gcontext['invitations'] = {'inv':{}}
                 cursor.execute("SELECT recruit.login, created, recruiters.login, declined" +
@@ -4260,7 +4269,7 @@ def alliancemembers(request):
                 displayMembers()
         elif cat == 2:
                 displayInvitations()
-        if hasRight("can_invite_player"):
+        if hasRight(request,"can_invite_player"):
             gcontext['nav'] = {
                 'cat1': {'fake':True},
                 'cat2': {'fake':True},
@@ -4286,11 +4295,11 @@ def alliancemembers(request):
             if ar > 0:
                 return HttpResponseRedirect(reverse('exile:alliance'))
             return False
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'alliance_members'
     if not gcontext['exile_user'].alliance_id:
         return HttpResponseRedirect(reverse('exile:alliance'))
-    if not hasRight("leader") and not hasRight("can_see_members_info"):
+    if not hasRight(request,"leader") and not hasRight(request,"can_see_members_info"):
         return HttpResponseRedirect(reverse('exile:alliance'))
     gcontext['invitation_success'] = ""
     try:
@@ -4303,17 +4312,17 @@ def alliancemembers(request):
     action = request.GET.get("a", "").strip()
     username = request.POST.get("name", "").strip()
     if cat == 1:
-        if hasRight("leader") and request.POST.get("submit", ""):
+        if hasRight(request,"leader") and request.POST.get("submit", ""):
             r = SaveRanks()
             if r:
                 return r
-        if hasRight("can_kick_player"):
+        if hasRight(request,"can_kick_player"):
             if action == "kick":
                 username = request.GET.get("name", "").strip()
                 with connection.cursor() as cursor:
                     cursor.execute("SELECT sp_alliance_kick_member(%s, %s)", [gcontext['exile_user'].id, username])
     elif cat == 2 and username:
-        if hasRight("can_invite_player"):
+        if hasRight(request,"can_invite_player"):
             with connection.cursor() as cursor:
                 cursor.execute("SELECT sp_alliance_invite(%s, %s)", [gcontext['exile_user'].id, username])
                 res = cursor.fetchone()
@@ -4401,22 +4410,22 @@ def alliancenaps(request):
                     nap["locs_shared"] = True
                 else:
                     nap["locs_not_shared"] = True
-                if hasRight("can_create_nap"):
+                if hasRight(request,"can_create_nap"):
                     nap["toggle_share_locs"] = True
                 if re[8]:
                     nap["radars_shared"] = True
                 else:
                     nap["radars_not_shared"] = True
-                if hasRight("can_create_nap"):
+                if hasRight(request,"can_create_nap"):
                     nap["toggle_share_radars"] = True
-                if hasRight("can_break_nap"):
+                if hasRight(request,"can_break_nap"):
                     if not re[6]:
                         nap["break"] = True
                     else:
                         nap["broken"] = True
                 gcontext["naps"]['nap'][i] = nap.copy()
                 i += 1
-            if hasRight("can_break_nap") and (i > 0):
+            if hasRight(request,"can_break_nap") and (i > 0):
                 gcontext["naps"]["break"] = True
             if not i:
                 gcontext["naps"]["nonaps"] = True
@@ -4492,7 +4501,7 @@ def alliancenaps(request):
             displayPropositions()
         elif cat == 3:
             displayRequests()
-        if hasRight("can_create_nap") or hasRight("can_break_nap"):
+        if hasRight(request,"can_create_nap") or hasRight(request,"can_break_nap"):
             with connection.cursor() as cursor:
                 gcontext["nav"] = {'cat1':{},'cat2':{},'cat3':{}}
                 cursor.execute("SELECT int4(count(*)) FROM alliances_naps_offers" +
@@ -4510,9 +4519,9 @@ def alliancenaps(request):
                 gcontext["nav"]["cat" + str(cat)]["selected"] = True
                 gcontext["nav"]["cat1"]['fake'] = True
                 gcontext["nav"]["cat2"]['fake'] = True
-                if hasRight("can_create_nap"):
+                if hasRight(request,"can_create_nap"):
                     gcontext["nav"]["cat3"]['fake'] = True
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['invitation_success'] = gcontext['break_success'] = gcontext['nap_success'] = ""
     try:
         cat = int(request.GET.get("cat","1"))
@@ -4520,9 +4529,9 @@ def alliancenaps(request):
         cat = 1
     if cat < 1 or cat > 3:
         cat = 1
-    if not hasRight("can_create_nap") and cat == 3:
+    if not hasRight(request,"can_create_nap") and cat == 3:
         cat = 1
-    if not (hasRight("can_create_nap") or hasRight("can_break_nap")) and cat != 1:
+    if not (hasRight(request,"can_create_nap") or hasRight(request,"can_break_nap")) and cat != 1:
         cat = 1
     # Process actions
     # redirect the player to the alliance page if he is not part of an alliance
@@ -4681,11 +4690,11 @@ def alliancetributes(request):
                     "name": re[3],
                     "credits": re[4],
                 }
-                if hasRight("can_break_nap"):
+                if hasRight(request,"can_break_nap"):
                     gcontext["tributes_sent"]["item"]["cancel"] = True
                 gcontext["tributes_sent"]["item"][i] = item.copy()
                 i += 1
-            if hasRight("can_break_nap") and (i > 0):
+            if hasRight(request,"can_break_nap") and (i > 0):
                 gcontext["tributes_sent"]["cancel"] = True
             if i == 0:
                 gcontext["tributes_sent"]["none"] = True
@@ -4707,10 +4716,10 @@ def alliancetributes(request):
             'cat1':{'fake':True},
             'cat2':{'fake':True},
         }
-        if hasRight("can_create_nap"):
+        if hasRight(request,"can_create_nap"):
             gcontext['nav']["cat3"] = {'fake':True}
         gcontext['nav']["cat"+str(cat)]["selected"] = True
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'alliance_tributes'
     gcontext['invitation_success'] = gcontext['cease_success'] = ""
     try:
@@ -4719,7 +4728,7 @@ def alliancetributes(request):
         cat = 1
     if cat < 1 or cat > 3:
         cat = 1
-    if not (hasRight("can_create_nap") or hasRight("can_break_nap")) and cat == 3:
+    if not (hasRight(request,"can_create_nap") or hasRight(request,"can_break_nap")) and cat == 3:
         cat = 1
     # Process actions
     # redirect the player to the alliance page if he is not part of an alliance
@@ -4812,7 +4821,7 @@ def alliancewars(request):
                     "tag": re[2],
                     "name": re[3],
                 }
-                if hasRight("can_break_nap"):
+                if hasRight(request,"can_break_nap"):
                     if not re[4]:
                         if re[7]:
                             if re[8]:
@@ -4835,7 +4844,7 @@ def alliancewars(request):
                     war["cant_fight"] = True
                 gcontext['wars']['war'][i] = war.copy()
                 i += 1
-            if hasRight("can_break_nap") and (i > 0):
+            if hasRight(request,"can_break_nap") and (i > 0):
                 gcontext['wars']['cease'] = True
             if i == 0:
                 gcontext['wars']['nowars'] = True
@@ -4871,10 +4880,10 @@ def alliancewars(request):
         elif cat == 2:
             displayDeclaration()
         gcontext['nav'] = {'cat1':{'fake':True}}
-        if hasRight("can_create_nap"):
+        if hasRight(request,"can_create_nap"):
             gcontext['nav']["cat2"] = {'fake':True}
         gcontext['nav']["cat"+str(cat)]["selected"] = True
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'alliance_wars'
     gcontext['result'] = gcontext['cease_success'] = ""
     try:
@@ -4883,7 +4892,7 @@ def alliancewars(request):
         cat = 1
     if cat < 1 or cat > 2:
         cat = 1
-    if not (hasRight("can_create_nap") or hasRight("can_break_nap")) and cat != 1:
+    if not (hasRight(request,"can_create_nap") or hasRight(request,"can_break_nap")) and cat != 1:
         cat = 1
     # Process actions
     # redirect the player to the alliance page if he is not part of an alliance
@@ -4970,12 +4979,12 @@ def alliancewallet(request):
             elif gcontext["money_error"] == e_little_vilain:
                 gcontext["little_vilain"] = True
             gcontext["cat1"] = {'fake':True}
-            if hasRight("can_ask_money"):
+            if hasRight(request,"can_ask_money"):
                 gcontext["cat2"] = {'fake':True}
             gcontext["cat3"] = {'fake':True}
-            if hasRight("can_change_tax_rate"):
+            if hasRight(request,"can_change_tax_rate"):
                 gcontext["cat4"] = {'fake':True}
-            if hasRight("leader"):
+            if hasRight(request,"leader"):
                 gcontext["cat5"] = {'fake':True}
             gcontext["cat"+str(cat)]["selected"] = True
             t = loader.get_template(gcontext['wallet_tpl'])
@@ -5135,7 +5144,7 @@ def alliancewallet(request):
                     gcontext["request"]["denied"] = True
                 else:
                     gcontext["request"]["submitted"] = True
-            if hasRight("can_accept_money_requests"):
+            if hasRight(request,"can_accept_money_requests"):
                 # List money requests
                 cursor.execute("SELECT r.id, datetime, login, r.credits, r.description" +
                         " FROM alliances_wallet_requests r" +
@@ -5168,7 +5177,7 @@ def alliancewallet(request):
                 gcontext["give"] = {"can_give":True}
             else:
                 gcontext["give"] = {"can_give_after_a_week":True}
-            if hasRight("can_accept_money_requests"):
+            if hasRight(request,"can_accept_money_requests"):
                 # list gifts for the last 7 days
                 cursor.execute("SELECT datetime, credits, source, description" +
                     " FROM alliances_wallet_journal" +
@@ -5243,7 +5252,7 @@ def alliancewallet(request):
                 gcontext['day'][i] = day.copy()
                 i += 1
             DisplayPage(cat)
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'alliance_wallet'
     selected_menu = "alliance.wallet"
     e_no_error = 0
@@ -5302,9 +5311,9 @@ def alliancewallet(request):
         category = int(request.GET.get("cat", "1"))
     except (KeyError, Exception):
         category = 1
-    if not hasRight("can_ask_money") and category == 2:
+    if not hasRight(request,"can_ask_money") and category == 2:
         category = 1
-    if not hasRight("can_change_tax_rate") and category == 4:
+    if not hasRight(request,"can_change_tax_rate") and category == 4:
         category = 1
     if category == 2:
         DisplayRequests(2)
@@ -5401,7 +5410,8 @@ def alliancereports(request):
                     msg["building"] = getBuildingLabel(re[32])
                 gcontext['messages'][i] = msg.copy()
                 i += 1
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'alliance_reports'
     try:
         cat = int(request.GET.get("cat", "0"))
@@ -5409,7 +5419,7 @@ def alliancereports(request):
         cat = 0
     if not gcontext['exile_user'].alliance_id:
         return HttpResponseRedirect(reverse('exile:alliance'))
-    if not hasRight("can_see_reports"):
+    if not hasRight(request,"can_see_reports"):
         return HttpResponseRedirect(reverse('exile:alliance'))
     display_reports(cat)
     context = gcontext
@@ -5473,7 +5483,7 @@ def allianceinvitations(request):
                 if leave_status != "":
                     gcontext["leave"][leave_status] = True
         FillHeaderCredits(request)
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     if not gcontext['exile_user'].alliance_id:
         gcontext['selectedmenu'] = 'noalliance_invitations'
     else:
@@ -5538,7 +5548,7 @@ def alliancecreate(request):
             gcontext["create"] = True
         else:
             gcontext["cant_create"] = True
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'noalliance_create'
     name = ""
     tag = ""
@@ -5688,7 +5698,7 @@ def map(request):
         #               else
         #                   content.AssignValue "f_planetname", re[12]
         #               end if
-                        radar["f_planetname"] = getPlanetName(re[18], re[28], re[17], re[12])
+                        radar["f_planetname"] = getPlanetName(request,re[18], re[28], re[17], re[12])
                         radar["f_planetid"] = re[11]
                         radar["f_g"] = re[13]
                         radar["f_s"] = re[14]
@@ -5712,7 +5722,7 @@ def map(request):
         #               else
         #                   content.AssignValue "t_planetname", re[20]
         #               end if
-                        radar["t_planetname"] = getPlanetName(re[26], re[29], re[25], re[20])
+                        radar["t_planetname"] = getPlanetName(request,re[26], re[29], re[25], re[20])
                         radar["t_planetid"] = re[19]
                         radar["t_g"] = re[21]
                         radar["t_s"] = re[22]
@@ -5901,7 +5911,7 @@ def map(request):
                 if re[12]:
                     pla["alliancetag"] = re[12]
                 rel = re[5]
-                if rel == config.rAlliance and not hasRight("can_use_alliance_radars"):
+                if rel == config.rAlliance and not hasRight(request,"can_use_alliance_radars"):
                     rel = config.rWar
                 if rel == config.rFriend and not re[25] and re[3] != 3:
                     rel = config.rWar
@@ -5920,7 +5930,7 @@ def map(request):
                         #    alliance and own planets 
                         #    planets where we got a fleet or (a fleet of an alliance member and can_use_alliance_radars)
                         #    planets that our radar can detect
-                        if (hasRight("can_use_alliance_radars") and ( (rel >= config.rAlliance) or fleet[5] )) or radarstrength > re[9] or fleet[10]:
+                        if (hasRight(request,"can_use_alliance_radars") and ( (rel >= config.rAlliance) or fleet[5] )) or radarstrength > re[9] or fleet[10]:
                             fleetcount += 1
                             fle = {
                                 "fleetid": 0,
@@ -5945,7 +5955,7 @@ def map(request):
                             elif fleet[3] == config.rAlliance:
                                 allyfleetcount += 1
                                 friendfleetcount += 1
-                                if hasRight("can_order_other_fleets") and fleet[9]:
+                                if hasRight(request,"can_order_other_fleets") and fleet[9]:
                                     fle["fleetid"] = fleet[1]
                             elif fleet[3] == config.rFriend:
                                 friendfleetcount += 1
@@ -6098,7 +6108,8 @@ def map(request):
             # Display fleets movements according to player radar strength
             if radarstrength > 0:
                 displayRadar(galaxy, sector, radarstrength)
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'map'
     gcontext['menu'] = menu(request)
     # Retrieve galaxy/sector to display
@@ -6280,7 +6291,7 @@ def rankingalliances(request):
                     alli["war"] = True
                 gcontext['alliances'][re[0]] = alli.copy()
                 i += 1
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'ranking'
     DisplayRankingAlliances(request.GET.get("tag",""), request.GET.get("name", ""))
     context = gcontext
@@ -6469,7 +6480,7 @@ def rankingplayers(request):
                     player['name'] = ''
                 gcontext["player"][i] = player.copy()
                 i += 1
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'ranking_players'
     #if gcontext['exile_user'].privilege < 100:
     #   return HttpResponseRedirect(reverse('exile:overview'))
@@ -6483,7 +6494,7 @@ def rankingplayers(request):
 @construct
 @logged
 def rankinggalaxies(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['menu'] = menu(request)
     t = loader.get_template('exile/ranking-galaxies.html')
@@ -6493,7 +6504,7 @@ def rankinggalaxies(request):
 @construct
 @logged
 def rankingsearch(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['menu'] = menu(request)
     t = loader.get_template('exile/ranking-search.html')
@@ -6859,7 +6870,7 @@ def production(request):
         elif cat == 3:
                 displayReceiveSendEnergy(action)
                 gcontext['nav'] = {'cat3': True}
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'production'
     gcontext['menu'] = menu(request)
     context = gcontext
@@ -7141,7 +7152,7 @@ def buildings(request):
     def DestroyBuilding(BuildingId):
         with connection.cursor() as cursor:
             cursor.execute('SELECT sp_destroy_building(%s, %s, %s)', [gcontext['exile_user'].id, gcontext['CurrentPlanet'],BuildingId ])
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     retrieveBuildingsReqCache()
     context = gcontext
     gcontext['selectedmenu'] = 'buildings'
@@ -7465,7 +7476,7 @@ def shipyard(request):
             return HttpResponseRedirect(reverse('exile:shipyard') + "?recycle=1")
         else:
             return HttpResponseRedirect(reverse('exile:shipyard') + "?f=" + str(ShipFilter))
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = "shipyard_all"
     Action = request.GET.get("a", "").lower()
     gcontext['action_button'] = 'Construire'
@@ -7591,7 +7602,7 @@ def training(request):
     def CancelTraining(queueId):
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM sp_cancel_training(%s, %s)", [gcontext['CurrentPlanet'], queueId])
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['train_error'] = ''
     gcontext['showHeader'] = True
     train_error = 0
@@ -7776,7 +7787,8 @@ def orbit(request):
             cursor.execute("DELETE FROM fleets WHERE size=0 AND id=%s AND ownerid=%s", [fleetid, gcontext['exile_user'].id])
             if cant_use_ship and gcontext['fleet_creation_error'] == "":
                 gcontext['fleet_creation_error'] = "ship_cant_be_used"
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['fleet_creation_error'] = ""
     gcontext['selectedmenu'] = 'orbit'
     gcontext['menu'] = menu(request)
@@ -8049,7 +8061,7 @@ def mails(request):
             for re in res:
                 gcontext['to']["to_user"][re[0]] = re[0]
             if gcontext['hasRight']:
-                if hasRight("can_mail_alliance"):
+                if hasRight(request,"can_mail_alliance"):
                     gcontext["sendalliance"] = {'fake':True}
             if config.hasAdmins:
                 gcontext["sendadmins"] = {'fake':True}
@@ -8087,7 +8099,8 @@ def mails(request):
             if bbcode:
                 gcontext["bbcode"] = True
             FillHeaderCredits(request)
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'mails'
     gcontext['mail_tpl'] = 'mails'
     sendmail_status=""
@@ -8273,16 +8286,16 @@ def nation(request):
             elif re[3] > config.rFriend: # display planets & fleets of alliance members if has the rights for it
                 if re[3] == config.rAlliance:
                     gcontext["ally"] = True
-                    show_details = hasRight("leader") or hasRight("can_see_members_info")
+                    show_details = hasRight(request,"leader") or hasRight(request,"can_see_members_info")
                 else:
                     gcontext["self"] = True
                     show_details = True
                 if show_details:
                     gcontext["allied"] = {'planet':{},'fleet':{}}
                     if re[3] == config.rAlliance:
-                        if not hasRight("leader"):
+                        if not hasRight(request,"leader"):
                             show_details = False
-                    if show_details: #re[3] = rSelf or hasRight("leader") ) then
+                    if show_details: #re[3] = rSelf or hasRight(request,"leader") ) then
                         # view current nation planets
                         cursor.execute("SELECT name, galaxy, sector, planet, id FROM vw_planets WHERE ownerid=%s ORDER BY id", [re[7]])
                         oPlanetsRs = cursor.fetchall()
@@ -8303,7 +8316,7 @@ def nation(request):
                         " action, signature, sp_get_user_rs(ownerid, planet_galaxy, planet_sector), sp_get_user_rs(ownerid, destplanet_galaxy, destplanet_sector)" \
                         " FROM vw_fleets WHERE ownerid=" + str(re[7])
                     if re[3] == config.rAlliance:
-                        if not hasRight("leader"):
+                        if not hasRight(request,"leader"):
                             query += " AND action <> 0"
                     query += " ORDER BY planetid, upper(name)"
                     cursor.execute(query)
@@ -8325,7 +8338,7 @@ def nation(request):
                         else:
                             fleet["time"] = 0
                         fleet["relation"] = oFleet[12]
-                        fleet["planetname"] = getPlanetName(oFleet[12], oFleet[23], oFleet[11], oFleet[6])
+                        fleet["planetname"] = getPlanetName(request,oFleet[12], oFleet[23], oFleet[11], oFleet[6])
             #           if oFleetsRs(12) < rAlliance and not IsNull(oFleetsRs(11)) then
             #               if oFleetsRs(23) > 0 or oFleetsRs(12) = rFriend then
             #                   content.AssignValue "planetname", oFleetsRs(11)
@@ -8350,7 +8363,7 @@ def nation(request):
                             fleet["t_s"] = oFleet[16]
                             fleet["t_p"] = oFleet[17]
                             fleet["t_relation"] = oFleet[20]
-                            fleet["t_planetname"] = getPlanetName(oFleet[20], oFleet[24], oFleet[19], oFleet[14])
+                            fleet["t_planetname"] = getPlanetName(request,oFleet[20], oFleet[24], oFleet[19], oFleet[14])
             #               if oFleetsRs(20) < rAlliance and not IsNull(oFleetsRs(19)) then
             #                   if oFleetsRs(24) > 0 or oFleetsRs(20) = rFriend then
             #                       content.AssignValue "t_planetname", oFleetsRs(19)
@@ -8395,7 +8408,8 @@ def nation(request):
                 gcontext['alliances'][i] = ally.copy()
                 i += 1
         return False
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'nation'
     gcontext['menu'] = menu(request)
@@ -8520,7 +8534,7 @@ def reports(request):
                 # flag all reports as read
                 if cat == 0:
                     cursor.execute("UPDATE reports SET read_date = now() WHERE ownerid = %s AND read_date is NULL AND datetime <= now()", [gcontext['exile_user'].id])
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     try:
         cat = int(request.GET.get("cat", 0))
     except (KeyError, Exception):
@@ -8704,7 +8718,8 @@ def chat(request):
         with connection.cursor() as cursor:
             cursor.execute("DELETE FROM users_chats WHERE userid=%s AND chatid=%s", [gcontext['exile_user'].id, chatid])
             cursor.execute("DELETE FROM chat WHERE id > 0 AND NOT public AND name IS NOT NULL AND id=%s AND (SELECT count(1) FROM users_chats WHERE chatid=chat.id) = 0", [chatid])
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'chat'
     if request.session.get("chatinstance",-1) == -1:
         request.session["chatinstance"] = 0
@@ -8753,7 +8768,7 @@ def notes(request):
                 gcontext["notes"] = ""
             if gcontext["notes_status"]:
                 gcontext["error"] = True
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['notes_status'] = gcontext["notes"] = ""
     notes = request.POST.get("notes","").strip()
     if request.POST.get("submit",""):
@@ -8774,7 +8789,7 @@ def notes(request):
 @construct
 @logged
 def mercenaryintelligence(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'mercenaryintelligence'
     gcontext['menu'] = menu(request)
@@ -8786,7 +8801,7 @@ def mercenaryintelligence(request):
 @logged
 @admin
 def exileversion(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'exileversion'
     gcontext['menu'] = menu(request)
@@ -8798,7 +8813,7 @@ def exileversion(request):
 @logged
 @admin
 def devlogerrors(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'log_errors'
     gcontext['menu'] = menu(request)
@@ -8810,7 +8825,7 @@ def devlogerrors(request):
 @logged
 @admin
 def devlognotices(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'log_notices'
     gcontext['menu'] = menu(request)
@@ -8884,7 +8899,7 @@ def devmulti(request):
                     item["can_ban_multi2"] = True
                 gcontext["item"][i] = item.copy()
                 i += 1
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'log_multi'
     gcontext['menu'] = menu(request)
     DisplayForm()
@@ -8897,7 +8912,7 @@ def devmulti(request):
 @logged
 @admin
 def devoptions(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'help'
     gcontext['menu'] = menu(request)
@@ -8909,7 +8924,7 @@ def devoptions(request):
 @logged
 @admin
 def devfleets(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'help'
     gcontext['menu'] = menu(request)
@@ -8921,7 +8936,7 @@ def devfleets(request):
 @logged
 @admin
 def devconnections(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'help'
     gcontext['menu'] = menu(request)
@@ -8933,7 +8948,7 @@ def devconnections(request):
 @logged
 @admin
 def devmultiusers(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'help'
     gcontext['menu'] = menu(request)
@@ -8945,7 +8960,7 @@ def devmultiusers(request):
 @logged
 @admin
 def devexpenses(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'help'
     gcontext['menu'] = menu(request)
@@ -8957,7 +8972,7 @@ def devexpenses(request):
 @logged
 @admin
 def devplayas(request):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'help'
     gcontext['menu'] = menu(request)
@@ -9146,7 +9161,7 @@ def devstats(request):
                     proc["error"] = True
                 gcontext["server"][i] = proc.copy()
                 i += 1
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'stats'
     try:
         cat = int(request.GET.get("cat", "0"))
@@ -9314,7 +9329,7 @@ def help(request):
                     }
                     gcontext['smileys'][re[0]] = smiley.copy()
         gcontext['tabnav'] = {'cat': cat}
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'help'
     gcontext['menu'] = menu(request)
@@ -9447,7 +9462,8 @@ def options(request):
             gcontext['nav']["cat3"]['fake'] = True
         if gcontext['showSubmit']:
             gcontext["submit"] = {'fake':True}
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'options'
     if request.GET.get("frame","") == "1":
         with connection.cursor() as cursor:
@@ -9552,7 +9568,7 @@ def options(request):
     return render(request, 'exile/layout.html', context)
 
 def FormatBattle(battleid, creator, pointofview, ispubliclink):
-    global gcontext
+    gcontext = request.session.get('gcontext',{})
     # Retrieve/assign battle info
     with connection.cursor() as cursor:
         cursor.execute("SELECT time, planetid, name, galaxy, sector, planet, rounds," +
@@ -9715,7 +9731,8 @@ def FormatBattle(battleid, creator, pointofview, ispubliclink):
             cpt += 1
 
 def battleview(request):
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     battlekey = request.GET.get("key", "").strip()
     if not battlekey:
         return HttpResponseRedirect(reverse('exile:reports'))
@@ -9752,7 +9769,8 @@ def battleview(request):
 @construct
 @logged
 def battle(request):
-    global gcontext, config
+    global config
+    gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'battles'
     try:
         id = int(request.GET.get("id", 0))
@@ -9772,7 +9790,7 @@ def battle(request):
         res = cursor.fetchone()
         display_battle = res
         if not display_battle and gcontext['exile_user'].alliance_id:
-            if hasRight("can_see_reports"):
+            if hasRight(request,"can_see_reports"):
                 # check if it is a report from alliance reports
                 cursor.execute("SELECT owner_id FROM battles_ships WHERE battleid=%s AND (SELECT alliance_id FROM users WHERE id=owner_id)=%s LIMIT 1", [id, gcontext['exile_user'].alliance_id])
                 res = cursor.fetchone()
