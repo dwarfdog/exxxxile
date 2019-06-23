@@ -614,7 +614,7 @@ tiptext = $("hinttext");
 <table class=default width="100%">
 	<tr class="category">
 		<td>
-			{{ overview.fleetname }} ({{ overview.fleet_signature }}){% if shiplist.manage %} - <a href="{% url 'exile:fleetships' %}?id={{ overview.fleetid }}">Gérer vaisseaux</a>{% endif %}{% if shiplist.split %} - <a href="{% url 'exile:fleetsplit' %}?id={{ overview.fleetid }}">Scinder</a>{% endif %}
+			{{ overview.fleetname }} ({{ overview.fleet_signature }}){% if overview.shiplist.manage %} - <a href="{% url 'exile:fleetships' %}?id={{ overview.fleetid }}">Gérer vaisseaux</a>{% endif %}{% if shiplist.split %} - <a href="{% url 'exile:fleetsplit' %}?id={{ overview.fleetid }}">Scinder</a>{% endif %}
 		</td>
 	</tr>
 	{% for k,ship in shiplist.items %}

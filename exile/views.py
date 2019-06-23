@@ -1853,9 +1853,118 @@ def fleetsplit(request):
 @construct
 @logged
 def fleetships(request):
+    # display fleet info
+    def DisplayFleet(fleetid):
+        # retrieve fleet name, size, position, destination
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," +
+                " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," +
+                " cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" +
+                " FROM vw_fleets WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id,fleetid])
+            re = cursor.fetchone()
+            # if fleet doesn't exist, redirect to the list of fleets
+            if not re:
+                return HttpResponseRedirect(reverse('exile:fleets'))
+            # if fleet is moving or engaged, go back to the fleets
+            if re[7] or re[3]:
+                return HttpResponseRedirect(reverse('exile:fleet')+'?id='+str(fleetid))
+            gcontext["fleetid"] = fleetid
+            gcontext["fleetname"] = re[1]
+            gcontext["size"] = re[4]
+            gcontext["speed"] = re[6]
+            gcontext["fleet_capacity"] = re[18]
+            gcontext["fleet_load"] = re[19] + re[20] + re[21] + re[22] + re[23]
+            shipCount = 0
+            gcontext["shiplist"] = {}
+            if re[17] == config.rSelf:
+                # retrieve the list of ships in the fleet
+                cursor.execute("SELECT db_ships.id, db_ships.capacity," +
+                    "COALESCE((SELECT quantity FROM fleets_ships WHERE fleetid=%s AND shipid = db_ships.id), 0)," +
+                    "COALESCE((SELECT quantity FROM planet_ships WHERE planetid=(SELECT planetid FROM fleets WHERE id=%s) AND shipid = db_ships.id), 0)" +
+                    " FROM db_ships" +
+                    " ORDER BY db_ships.category, db_ships.label", [fleetid, fleetid])
+                res = cursor.fetchall()
+                gcontext['ship'] = {}
+                for re in res:
+                    if re[2] > 0 or re[3] > 0:
+                        shipCount += 1
+                        ship = {
+                            "id": re[0],
+                            "name": getShipLabel(re[0]),
+                            "cargo_capacity": re[1],
+                            "quantity": re[2],
+                            "available": re[3],
+                        }
+                        gcontext['ship'][re[0]] = ship.copy()
+                gcontext["shiplist"]["can_manage"] = True
+            return False
+    # Transfer ships between the planet and the fleet
+    def TransferShips(fleetid):
+        ShipsRemoved = 0
+        with connection.cursor() as cursor:
+        # if units are removed, the fleet may be destroyed so retrieve the planetid where the fleet is
+            cursor.execute("SELECT planetid FROM fleets WHERE id=%s", [fleetid])
+            re = cursor.fetchone()
+            if not re:
+                fleet_planet = -1
+            else:
+                fleet_planet = re[0]
+            # retrieve the list of all existing ships
+            shipsArray = retrieveShipsCache()
+            # for each ship id, check if the player wants to add ships of this kind
+            for i in shipsArray:
+                shipid = i[0]
+                try:
+                    quantity = int(request.POST.get("addship" + str(shipid), '0'))
+                except (KeyError, Exception):
+                    quantity = 0
+                if quantity > 0:
+                    #print("SELECT sp_transfer_ships_to_fleet("+str(gcontext['exile_user'].id)+", "+str(fleetid)+", "+str(shipid)+", "+str(quantity)+")")
+                    cursor.execute("SELECT sp_transfer_ships_to_fleet(%s, %s, %s, %s)", [gcontext['exile_user'].id, fleetid, shipid, quantity])
+            # for each ship id, check if the player wants to remove ships of this kind
+            for i in shipsArray:
+                shipid = i[0]
+                try:
+                    quantity = int(request.POST.get("removeship" + str(shipid), '0'))
+                except (KeyError, Exception):
+                    quantity = 0
+                if quantity > 0:
+                    ShipsRemoved += quantity
+                    #print("SELECT sp_transfer_ships_to_planet("+str(gcontext['exile_user'].id)+", "+str(fleetid)+", "+str(shipid)+", "+str(quantity)+")")
+                    cursor.execute("SELECT sp_transfer_ships_to_planet(%s, %s, %s, %s)", [gcontext['exile_user'].id, fleetid, shipid, quantity])
+            if ShipsRemoved > 0:
+                cursor.execute("SELECT id FROM fleets WHERE id=%s", [fleetid])
+                re = cursor.fetchone()
+                if not re:
+                    if fleet_planet > 0:
+                        return HttpResponseRedirect(reverse('exile:orbit')+'?planet='+str(fleet_planet))
+                    else:
+                        return HttpResponseRedirect(reverse('exile:fleets'))
+            return False
+    def ExecuteOrder(fleetid):
+        if request.POST.get("transfer_ships","0") == "1":
+            return TransferShips(fleetid)
+    global config
     gcontext = request.session.get('gcontext',{})
+    gcontext['selectedmenu'] = 'fleets_fleets'
+    gcontext['menu'] = menu(request)
+    e_no_error = 0
+    e_bad_destination = 1
+    fleet_error = e_no_error
+    fleetid = request.GET.get("id")
+    if not fleetid or not fleetid.isdigit():
+        return HttpResponseRedirect(reverse('exile:fleets'))
+    fleetid = int(fleetid)
+    r = ExecuteOrder(fleetid)
+    if r:
+        return r
+    r = DisplayFleet(fleetid)
+    if r:
+        return r
     context = gcontext
-    return render(request, 'exile/fleet-ships.html', context)
+    t = loader.get_template('exile/fleet-ships.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
 
 @construct
 @logged
@@ -4285,7 +4394,8 @@ def alliancemembers(request):
                     ar = int(request.POST.get('player' + str(re[0]), '100'))
                 except (KeyError, Exception):
                     ar = 100
-                cursor.execute(" UPDATE users SET alliance_rank=(SELECT id FROM alliances_ranks WHERE rankid=%s AND alliance_id=%s) WHERE id=%s AND alliance_id=%s AND (alliance_rank > 0 OR id=%s)",
+                print("UPDATE users SET alliance_rank=(SELECT id FROM alliances_ranks WHERE rankid="+str(ar)+" AND alliance_id="+str(gcontext['exile_user'].alliance_id)+") WHERE id="+str(re[0])+" AND alliance_id="+str(gcontext['exile_user'].alliance_id)+" AND (alliance_rank > 0 OR id="+str(gcontext['exile_user'].id)+")")
+                cursor.execute("UPDATE users SET alliance_rank=(SELECT id FROM alliances_ranks WHERE rankid=%s AND alliance_id=%s) WHERE id=%s AND alliance_id=%s AND (alliance_rank > 0 OR id=%s)",
                     [ar, gcontext['exile_user'].alliance_id, re[0], gcontext['exile_user'].alliance_id, gcontext['exile_user'].id])
             # if leader demotes himself
             try:

@@ -1,6 +1,7 @@
+{% load static %}
 <script>
 var fleetcapacity=0;
-var fleetload={fleet_load};
+var fleetload={{ fleet_load }};
 var ships=new Array();
 
 function updatecargo() {
@@ -34,7 +35,7 @@ function remove_all() {
 function submitchanges() {
 	if(fleetload > fleetcapacity)
 	{
-		alert("La capacité de votre flotte est plus faible que son chargement actuel");
+		alert("La capacitÃ© de votre flotte est plus faible que son chargement actuel");
 		return false;
 	}
 	else
@@ -43,38 +44,39 @@ function submitchanges() {
 </script>
 
 <div id="fleetships">
-<form method="post" action="fleet-ships.asp?id={fleetid}" name="ships">
-<input type="hidden" name="transfer_ships" value="1">
-<table class="default">
-	<tr class="title"><td colspan="6">{fleetname} - Gestion des vaisseaux</td></tr>
-	<tr class="header"><td>Vaisseau</td><td>Cargo</td><td>Quantité</td><td>Retirer</td><td>Au sol</td><td>Ajouter</td></tr>
-	[[ship]]
-	<tr>
-		<td>{name}</td>
-		<td align=right>{cargo_capacity:n}</td>
-		<td align=right>{quantity:n}</td>
-		<td><input type="text" id="removeship{id}" name="removeship{id}" size=8> <a href="javascript:setval('removeship{id}', {quantity})">max</a></td>
-		<td align=right>{available:n}</td>
-		<td><input type="text" id="addship{id}" name="addship{id}" size=8> <a href="javascript:setval('addship{id}', {available})">max</a></td>
-		<script>ships.push(new Array({id},{cargo_capacity},{quantity},{available}));</script>
-	</tr>
-	[/ship]]
-	<tr>
-		<td colspan=2>&nbsp;</td>
-		<td colspan=2 align=center><a href="javascript:remove_all()">Tout retirer</a></td>
-		<td colspan=2 align=center><a href="javascript:add_all()">Tout ajouter</a></td>
-	</tr>
+	<form method="post" action="{% url 'exile:fleetships' %}?id={{ fleetid }}" name="ships">
+		{% csrf_token %}
+		<input type="hidden" name="transfer_ships" value="1">
+		<table class="default">
+			<tr class="title"><td colspan="6">{{ fleetname }} - Gestion des vaisseaux</td></tr>
+			<tr class="header"><td>Vaisseau</td><td>Cargo</td><td>QuantitÃ©</td><td>Retirer</td><td>Au sol</td><td>Ajouter</td></tr>
+			{% for i,sh in ship.items %}
+				<tr>
+					<td>{{ sh.name }}</td>
+					<td align=right>{{ sh.cargo_capacity }}</td>
+					<td align=right>{{ sh.quantity }}</td>
+					<td><input type="text" id="removeship{{ sh.id }}" name="removeship{{ sh.id }}" size=8> <a href="javascript:setval('removeship{{ sh.id }}', {{ sh.quantity }})">max</a></td>
+					<td align=right>{{ sh.available }}</td>
+					<td><input type="text" id="addship{{ sh.id }}" name="addship{{ sh.id }}" size=8> <a href="javascript:setval('addship{{ sh.id }}', {{ sh.available }})">max</a></td>
+					<script>ships.push(new Array({{ sh.id }},{{ sh.cargo_capacity }},{{ sh.quantity }},{{ sh.available }}));</script>
+				</tr>
+			{% endfor %}
+			<tr>
+				<td colspan=2>&nbsp;</td>
+				<td colspan=2 align=center><a href="javascript:remove_all()">Tout retirer</a></td>
+				<td colspan=2 align=center><a href="javascript:add_all()">Tout ajouter</a></td>
+			</tr>
 
-	<tr>
-	<td>Capacité</td>
-	<td colspan=6>
-	<span id="load">{fleet_load:n}</span> / <span id="capacity">{fleet_capacity:n}</span> unités
-	</td>
-	</tr>
-	<tr><td colspan=6 align=center>
-	<input type="button" value="< Retour" onclick="javascript:window.location.href='fleet.asp?id={fleetid}'">&nbsp;<input type="button" value="Transférer" onclick="javascript:submitchanges()">
-	</td></tr>
-</table>
-</form>
-<script>window.setTimeout("updatecargo()", 100);</script>
+			<tr>
+			<td>CapacitÃ©</td>
+			<td colspan=6>
+			<span id="load">{{ fleet_load }}</span> / <span id="capacity">{{ fleet_capacity }}</span> unitÃ©s
+			</td>
+			</tr>
+			<tr><td colspan=6 align=center>
+			<input type="button" value="< Retour" onclick="javascript:window.location.href='{% url 'exile:fleet' %}?id={{ fleetid }}'">&nbsp;<input type="button" value="TransfÃ©rer" onclick="javascript:submitchanges()">
+			</td></tr>
+		</table>
+	</form>
+	<script>window.setTimeout("updatecargo()", 100);</script>
 </div>
