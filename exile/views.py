@@ -4394,8 +4394,8 @@ def alliancemembers(request):
                     ar = int(request.POST.get('player' + str(re[0]), '100'))
                 except (KeyError, Exception):
                     ar = 100
-                print("UPDATE users SET alliance_rank=(SELECT id FROM alliances_ranks WHERE rankid="+str(ar)+" AND alliance_id="+str(gcontext['exile_user'].alliance_id)+") WHERE id="+str(re[0])+" AND alliance_id="+str(gcontext['exile_user'].alliance_id)+" AND (alliance_rank > 0 OR id="+str(gcontext['exile_user'].id)+")")
-                cursor.execute("UPDATE users SET alliance_rank=(SELECT id FROM alliances_ranks WHERE rankid=%s AND alliance_id=%s) WHERE id=%s AND alliance_id=%s AND (alliance_rank > 0 OR id=%s)",
+                print("UPDATE users SET alliance_rank=(SELECT id FROM alliances_ranks WHERE rankid="+str(ar)+" AND allianceid="+str(gcontext['exile_user'].alliance_id)+") WHERE id="+str(re[0])+" AND alliance_id="+str(gcontext['exile_user'].alliance_id)+" AND (alliance_rank > 0 OR id="+str(gcontext['exile_user'].id)+")")
+                cursor.execute("UPDATE users SET alliance_rank=(SELECT id FROM alliances_ranks WHERE rankid=%s AND allianceid=%s) WHERE id=%s AND alliance_id=%s AND (alliance_rank > 0 OR id=%s)",
                     [ar, gcontext['exile_user'].alliance_id, re[0], gcontext['exile_user'].alliance_id, gcontext['exile_user'].id])
             # if leader demotes himself
             try:
