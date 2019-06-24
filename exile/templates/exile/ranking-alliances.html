@@ -2,14 +2,14 @@
 <table class="default" width="600">
 
 <tr class="header">
-<td><a href="?col=7[[r7]]&r=7[/r7]][[search_params]]&a={param_a}[/search_params]]">Tag</a>&nbsp;<a href="?col=1[[r1]]&r=1[/r1]][[search_params]]&a={param_a}[/search_params]]">Alliance</a></td>
+<td><a href="?col=7{% if r7 %}&r=7{% endif %}{% if search_params %}&a={{ param_a }}{% endif %}">Tag</a>&nbsp;<a href="?col=1{% if r1 %}&r=1{% endif %}{% if search_params %}&a={{ param_a }}{% endif %}">Alliance</a></td>
 {% if hide %}
-<td><a href="?col=2[[r2]]&r=2[/r2]][[search_params]]&a={param_a}[/search_params]]">Score</a></td>
-<td><a href="?col=5[[r5]]&r=5[/r5]][[search_params]]&a={param_a}[/search_params]]">Moyenne</a></td>
+<td><a href="?col=2{% if r2 %}&r=2{% endif %}{% if search_params %}&a={{ param_a }}{% endif %}">Score</a></td>
+<td><a href="?col=5{% if r5 %}&r=5{% endif %}{% if search_params %}&a={{ param_a }}{% endif %}">Moyenne</a></td>
 {% endif %}
-<td><a href="?col=3[[r3]]&r=3[/r3]][[search_params]]&a={param_a}[/search_params]]">Membres</a></td>
-<td><a href="?col=4[[r4]]&r=4[/r4]][[search_params]]&a={param_a}[/search_params]]">Colonies</a></td>
-<td><a href="?col=6[[r6]]&r=6[/r6]][[search_params]]&a={param_a}[/search_params]]">Date de création</a></td>
+<td><a href="?col=3{% if r3 %}&r=3{% endif %}{% if search_params %}&a={{ param_a }}{% endif %}">Membres</a></td>
+<td><a href="?col=4{% if r4 %}&r=4{% endif %}{% if search_params %}&a={{ param_a }}{% endif %}">Colonies</a></td>
+<td><a href="?col=6{% if r6 %}&r=6{% endif %}{% if search_params %}&a={{ param_a }}{% endif %}">Date de création</a></td>
 </tr>
 
 {% if nav %}
