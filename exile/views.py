@@ -2004,7 +2004,7 @@ def fleet(request):
                 " (SELECT prestige_points >= sp_get_prestige_cost_for_new_planet(planets) FROM users WHERE id=ownerid) AS can_take_planet," + # 58
                 " (SELECT sp_get_prestige_cost_for_new_planet(planets) FROM users WHERE id=ownerid) AS prestige_cost" + # 59
                 " FROM vw_fleets as f" +
-                " WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, gcontext['exile_user'].id, gcontext['exile_user'].id, fleetid])
+                " WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, gcontext['exile_user'].id, gcontext['fleet_owner_id'], fleetid])
             res = cursor.fetchone()
             # if fleet doesnt exist, redirect to the last known planet orbit or display the fleets list
             if not res:
@@ -2126,7 +2126,7 @@ def fleet(request):
                     " FROM vw_commanders AS c" +
                     "   LEFT JOIN fleets ON (c.fleetid=fleets.id AND c.ownerid=fleets.ownerid AND NOT engaged AND action=0)" +
                     " WHERE c.ownerid=%s" +
-                    " ORDER BY c.fleetid IS NOT NULL, c.planetid IS NOT NULL, c.fleetid, c.planetid ", [gcontext['exile_user'].id])
+                    " ORDER BY c.fleetid IS NOT NULL, c.planetid IS NOT NULL, c.fleetid, c.planetid ", [gcontext['fleet_owner_id']])
             res2 = cursor.fetchall()
             gcontext['overview']['optgroup'] = {'none':{},'planet':{},'fleet':{}}
             for re in res2:
@@ -2442,7 +2442,7 @@ def fleet(request):
                 gcontext['shiplist'][re[0]] = ship.copy()
     def InstallBuilding(fleetid, shipid):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT sp_start_ship_building_installation(%s, %s, %s)", [gcontext['exile_user'].id, fleetid, shipid])
+            cursor.execute("SELECT sp_start_ship_building_installation(%s, %s, %s)", [gcontext['fleet_owner_id'], fleetid, shipid])
             res = cursor.fetchone()
             if not res:
                 return
@@ -2485,16 +2485,16 @@ def fleet(request):
             gcontext['move_fleet_result'] = "bad_destination"
             return
         with connection.cursor() as cursor:
-            cursor.execute("SELECT sp_move_fleet(%s, %s, %s, %s, %s)", [gcontext['exile_user'].id, fleetid, g, s, p])
+            cursor.execute("SELECT sp_move_fleet(%s, %s, %s, %s, %s)", [gcontext['fleet_owner_id'], fleetid, g, s, p])
             res = cursor.fetchone()
             if pid:
                 return HttpResponse('OK')
             if res:
                 if res[0] == 0:
                     if request.POST.get("movetype", "0") == "1":
-                        cursor.execute("UPDATE fleets SET next_waypointid = sp_create_route_unload_move(planetid) WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, fleetid])
+                        cursor.execute("UPDATE fleets SET next_waypointid = sp_create_route_unload_move(planetid) WHERE ownerid=%s AND id=%s", [gcontext['fleet_owner_id'], fleetid])
                     elif request.POST.get("movetype", "0") ==  "2":
-                        cursor.execute("UPDATE fleets SET next_waypointid = sp_create_route_recycle_move(planetid) WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, fleetid])
+                        cursor.execute("UPDATE fleets SET next_waypointid = sp_create_route_recycle_move(planetid) WHERE ownerid=%s AND id=%s", [gcontext['fleet_owner_id'], fleetid])
             else:
                 res[0] = 0
             if res[0] == 0:
@@ -2517,7 +2517,7 @@ def fleet(request):
                 gcontext['move_fleet_result'] = "error_jump_to_same_point_limit_reached"
     def Invade(fleetid, droppods, take):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT sp_invade_planet(%s, %s, %s)", [gcontext['exile_user'].id, fleetid, droppods])
+            cursor.execute("SELECT sp_invade_planet(%s, %s, %s)", [gcontext['fleet_owner_id'], fleetid, droppods])
             res = cursor.fetchone()
             if res[0] == -1:
                 gcontext['action_result'] = "error_soldiers"
@@ -2553,11 +2553,11 @@ def fleet(request):
             if commanderid != 0:
                 # assign new commander
                 with connection.cursor() as cursor:
-                    cursor.execute("SELECT sp_commanders_assign(%s, %s, null, %s)", [gcontext['exile_user'].id, commanderid, fleetid])
+                    cursor.execute("SELECT sp_commanders_assign(%s, %s, null, %s)", [gcontext['fleet_owner_id'], commanderid, fleetid])
             else:
                 # unassign current fleet commander
                 with connection.cursor() as cursor:
-                    cursor.execute("UPDATE fleets SET commanderid=NULL WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, fleetid])
+                    cursor.execute("UPDATE fleets SET commanderid=NULL WHERE ownerid=%s AND id=%s", [gcontext['fleet_owner_id'], fleetid])
                     cursor.execute("SELECT sp_update_fleet_bonus(%s)", [fleetid])
         elif action == "move":
             loop = request.POST.get('loop', '0')
@@ -2570,29 +2570,29 @@ def fleet(request):
             return MoveFleet(fleetid,request.GET.get('pid', '0'))
         elif action == "share":
             with connection.cursor() as cursor:
-                cursor.execute("UPDATE fleets SET shared=not shared WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, fleetid])
+                cursor.execute("UPDATE fleets SET shared=not shared WHERE ownerid=%s AND id=%s", [gcontext['fleet_owner_id'], fleetid])
         elif action == "abandon":
             #response.write "SELECT sp_abandon_fleet(" & UserId & "," & fleetid & ")"
             with connection.cursor() as cursor:
                 cursor.execute("SELECT sp_abandon_fleet(%s, %s)", [gcontext['exile_user'].id, fleetid])
         elif action == "attack":
             with connection.cursor() as cursor:
-                cursor.execute("UPDATE fleets SET attackonsight=firepower > 0 WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, fleetid])
+                cursor.execute("UPDATE fleets SET attackonsight=firepower > 0 WHERE ownerid=%s AND id=%s", [gcontext['fleet_owner_id'], fleetid])
         elif action == "defend":
             with connection.cursor() as cursor:
-                cursor.execute("UPDATE fleets SET attackonsight=false WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, fleetid])
+                cursor.execute("UPDATE fleets SET attackonsight=false WHERE ownerid=%s AND id=%s", [gcontext['fleet_owner_id'], fleetid])
         elif action == "recycle":
             with connection.cursor() as cursor:
-                cursor.execute("SELECT sp_start_recycling(%s, %s)", [gcontext['exile_user'].id, fleetid])
+                cursor.execute("SELECT sp_start_recycling(%s, %s)", [gcontext['fleet_owner_id'], fleetid])
                 res = cursor.fetchone()
                 if res[0] == -2:
                     gcontext['action_result'] = "error_recycling"
         elif action == "stoprecycling":
             with connection.cursor() as cursor:
-                cursor.execute("SELECT sp_cancel_recycling(%s, %s)", [gcontext['exile_user'].id, fleetid])
+                cursor.execute("SELECT sp_cancel_recycling(%s, %s)", [gcontext['fleet_owner_id'], fleetid])
         elif action == "stopwaiting":
             with connection.cursor() as cursor:
-                cursor.execute( "SELECT sp_cancel_waiting(%s ,%s)", [gcontext['exile_user'].id, fleetid])
+                cursor.execute( "SELECT sp_cancel_waiting(%s ,%s)", [gcontext['fleet_owner_id'], fleetid])
         elif action == "merge":
             try:
                 destfleetid = int(request.GET.get("with", 0))
@@ -2602,7 +2602,7 @@ def fleet(request):
                 cursor.execute("SELECT sp_merge_fleets(%s, %s, %s)", [gcontext['exile_user'].id, fleetid, destfleetid])
         elif action == "return":
             with connection.cursor() as cursor:
-                cursor.execute("SELECT sp_cancel_move(%s, %s)", [gcontext['exile_user'].id, fleetid])
+                cursor.execute("SELECT sp_cancel_move(%s, %s)", [gcontext['fleet_owner_id'], fleetid])
         elif action == "install":
             try:
                 shipid = int(request.GET.get("s", 0))
@@ -2613,7 +2613,7 @@ def fleet(request):
                 return r
         elif action == "warp":
             with connection.cursor() as cursor:
-                cursor.execute("SELECT sp_warp_fleet(%s, %s)", [gcontext['exile_user'].id, fleetid])
+                cursor.execute("SELECT sp_warp_fleet(%s, %s)", [gcontext['fleet_owner_id'], fleetid])
         return False
     global config
     gcontext = request.session.get('gcontext',{})
