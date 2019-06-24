@@ -820,6 +820,8 @@ def logged(function):
                 gcontext["show_alliance"]["show_reports"] = True
             if hasRight(request,"leader") or hasRight(request,"can_see_members_info"):
                 gcontext["show_alliance"]["show_members"] = True
+            if hasRight(request,"leader") or hasRight(request,"can_order_other_fleets"):
+                gcontext["show_alliance"]["show_fleets"] = True
         if gcontext['exile_user'].security_level >= 3 and config.allowMercenary:
             gcontext["show_mercenary"] = True
         return function(request, *args, **kwargs)
@@ -2009,8 +2011,9 @@ def fleet(request):
             # if fleet doesnt exist, redirect to the last known planet orbit or display the fleets list
             if not res:
                 return HttpResponseRedirect(reverse('exile:fleets'))
-            gcontext['CurrentFleet'] = fleetid
-            request.session['CurrentFleet'] = fleetid
+            if gcontext['fleet_owner_id'] == gcontext['exile_user'].id:
+                gcontext['CurrentFleet'] = fleetid
+                request.session['CurrentFleet'] = fleetid
             gcontext['overview'] = {
                 'actions':{'action':{}},
                 'shiplist':{},
@@ -4187,6 +4190,126 @@ def alliancemanage(request):
     context = gcontext
     gcontext['menu'] = menu(request)
     t = loader.get_template('exile/alliance-manage.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
+def alliancefleets(request):
+    def getAllyFleets():
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT fleetid, fleets_ships.shipid, quantity' +
+                ' FROM fleets' +
+                ' INNER JOIN fleets_ships ON (fleets.id=fleets_ships.fleetid)' +
+                ' INNER JOIN users ON (users.id=fleets.ownerid)' +
+                ' WHERE shared AND users.alliance_id=%s' +
+                ' ORDER BY fleetid, fleets_ships.shipid', [gcontext['exile_user'].alliance_id])
+            res = cursor.fetchall()
+            if not res:
+                ShipListCount = -1
+            else:
+                ShipListArray = res
+                ShipListCount = len(res)
+            cursor.execute('SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername,' + # 0 1 2 3 4 5 6 7 8 9
+                ' planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation,' + # 10 11 12 13 14 15 16 17
+                ' destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation,' + # 18 19 20 21 22 23 24 25
+                ' cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers,' + # 26 27 28 29 30 31
+                ' recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action,' + # 32 33 34
+                '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %s)) AS from_radarstrength, ' + # 35
+                '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %s)) AS to_radarstrength' +
+                " FROM vw_fleets as f" +
+                " WHERE shared AND owner_alliance_id=%s", [gcontext['exile_user'].id, gcontext['exile_user'].id, gcontext['exile_user'].alliance_id])
+            res = cursor.fetchall()
+            gcontext['list'] = {'fleet': {}}
+            if not res:
+                pass
+            else:
+                for re in res:
+                    fleet = {}
+                    fleet['ship'] = {}
+                    fleet['resource'] = {1:{},2:{},3:{},4:{},5:{}}
+                    fleet['id'] = re[0]
+                    fleet['name'] = re[1]
+                    fleet['size'] = re[4]
+                    fleet['signature'] = re[5]
+                    fleet['cargo_load'] = re[27]+re[28]+re[29]+re[30]+re[31]
+                    fleet['cargo_capacity'] = re[26]
+                    fleet['cargo_ore'] = re[27]
+                    fleet['cargo_hydrocarbon'] = re[28]
+                    fleet['cargo_scientists'] = re[29]
+                    fleet['cargo_soldiers'] = re[30]
+                    fleet['cargo_workers'] = re[31]
+                    fleet['commandername'] = re[9]
+                    if not re[9]:
+                        fleet['commandername'] = ''
+                    fleet['action'] = abs(re[34])
+                    if re[3]:
+                        fleet['action'] = "x"
+                    if re[2]:
+                        fleet['stance'] = 1
+                    else:
+                        fleet['stance'] = 0
+                    if re[7]:
+                        fleet['time'] = re[7]
+                    else:
+                        fleet['time'] = 0
+                    # Assign fleet current planet
+                    fleet['planetid'] = 0
+                    fleet['g'] = 0
+                    fleet['s'] = 0
+                    fleet['p'] = 0
+                    fleet['relation'] = 0
+                    fleet['planetname'] = ""
+                    if re[10]:
+                        fleet['planetid'] = re[10]
+                        fleet['g'] = re[12]
+                        fleet['s'] = re[13]
+                        fleet['p'] = re[14]
+                        fleet['relation'] = re[17]
+                        fleet['planetname'] = getPlanetName(request,re[17], re[35], re[16], re[11])
+                        if not fleet['planetname']:
+                            fleet['planetname'] = re[16]
+                    # Assign fleet destination planet
+                    fleet['t_planetid'] = 0
+                    fleet['t_g'] = 0
+                    fleet['t_s'] = 0
+                    fleet['t_p'] = 0
+                    fleet['t_relation'] = 0
+                    fleet['t_planetname'] = ""
+                    if re[18]:
+                        fleet['t_planetid'] = re[18]
+                        fleet['t_g'] = re[20]
+                        fleet['t_s'] = re[21]
+                        fleet['t_p'] = re[22]
+                        fleet['t_relation'] = re[25]
+                        fleet['t_planetname'] = getPlanetName(request,re[25], re[36], re[24], re[19])
+                    for i in range(0, ShipListCount):
+                        if ShipListArray[i][0] == re[0]:
+                            fleet['ship'][i] = {
+                                'ship_label':getShipLabel(ShipListArray[i][1]),
+                                'ship_quantity': ShipListArray[i][2],
+                            }
+                    fleet['resource'][1]['res_id'] = 1
+                    fleet['resource'][1]['res_quantity'] = re[27]
+                    fleet['resource'][2]['res_id'] = 2
+                    fleet['resource'][2]['res_quantity'] = re[28]
+                    fleet['resource'][3]['res_id'] = 3
+                    fleet['resource'][3]['res_quantity'] = re[29]
+                    fleet['resource'][4]['res_id'] = 4
+                    fleet['resource'][4]['res_quantity'] = re[30]
+                    fleet['resource'][5]['res_id'] = 5
+                    fleet['resource'][5]['res_quantity'] = re[31]
+                    gcontext['list']['fleet'][re[0]] = fleet.copy()
+    gcontext = request.session.get('gcontext',{})
+    gcontext['selectedmenu'] = 'alliance_fleets'
+    if not gcontext['exile_user'].alliance_id:
+        return HttpResponseRedirect(reverse('exile:alliance'))
+    if not hasRight(request,"leader") and not hasRight(request,"can_order_other_fleets"):
+        return HttpResponseRedirect(reverse('exile:alliance'))
+    getAllyFleets()
+    context = gcontext
+    gcontext['menu'] = menu(request)
+    t = loader.get_template('exile/alliance-fleets.html')
     context['content'] = t.render(gcontext, request)
     return render(request, 'exile/layout.html', context)
 
@@ -8423,7 +8546,7 @@ def nation(request):
                     query = "SELECT id, name, attackonsight, engaged, remaining_time, " \
                         " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, sp_relation(planet_ownerid, ownerid)," \
                         " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, sp_relation(destplanet_ownerid, ownerid)," \
-                        " action, signature, sp_get_user_rs(ownerid, planet_galaxy, planet_sector), sp_get_user_rs(ownerid, destplanet_galaxy, destplanet_sector)" \
+                        " action, signature, sp_get_user_rs(ownerid, planet_galaxy, planet_sector), sp_get_user_rs(ownerid, destplanet_galaxy, destplanet_sector), shared" \
                         " FROM vw_fleets WHERE ownerid=" + str(re[7])
                     if re[3] == config.rAlliance:
                         if not hasRight(request,"leader"):
@@ -8443,6 +8566,10 @@ def nation(request):
                             "s": oFleet[8],
                             "p": oFleet[9],
                         }
+                        if oFleet[25]:
+                            fleet['shared'] = True
+                        else:
+                            fleet['shared'] = False
                         if oFleet[4]:
                             fleet["time"] = oFleet[4]
                         else:

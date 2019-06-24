@@ -153,6 +153,9 @@ putMenu("{% url 'exile:research' %}","research","Recherche",2);
 		{% if show_alliance.show_members %}
 			putMenu("{% url 'exile:alliancemembers' %}","alliance_members","Membres",3);
 		{% endif %}
+		{% if show_alliance.show_fleets %}
+			putMenu("{% url 'exile:alliancefleets' %}","alliance_fleets","Flottes",3);
+		{% endif %}
 		putMenu("{% url 'exile:alliancenaps' %}","alliance_naps","PNA",3);
 		putMenu("{% url 'exile:alliancetributes' %}","alliance_tributes","Tributs",3);
 		putMenu("{% url 'exile:alliancewars' %}","alliance_wars","Guerres",3);

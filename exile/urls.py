@@ -30,6 +30,7 @@ urlpatterns = [
     path('research-overview', views.researchoverview, name='researchoverview'),
     path('alliance-manage', views.alliancemanage, name='alliancemanage'),
     path('alliance-members', views.alliancemembers, name='alliancemembers'),
+    path('alliance-fleets', views.alliancefleets, name='alliancefleets'),
     path('alliance-naps', views.alliancenaps, name='alliancenaps'),
     path('alliance-tributes', views.alliancetributes, name='alliancetributes'),
     path('alliance-wars', views.alliancewars, name='alliancewars'),
