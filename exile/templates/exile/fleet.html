@@ -228,20 +228,14 @@ tiptext = $("hinttext");
 			<select name='commander'>
 				{% if overview.unassign %}<option value='0'>Aucun</option>{% endif %}
 				{% if overview.none %}<option value='0'>Aucun</option>{% endif %}
-				{% for k,item in overview.optgroup.none.items %}
-					<optgroup label='Non affectés'>
-						{% if item.option %}<option value={{ item.cmd_id }}{% if item.option.selected %} selected{% endif %}>&middot;&nbsp;{{ item.cmd_name }}{% if item.option.assigned %} ({{ item.name }}){% endif %}{% if item.option.unavailable %} (Indisponible){% endif %}</option>{% endif %}
-					</optgroup>
-				{% endfor %}
-				{% for k,item in overview.optgroup.planet.items %}
-					<optgroup label='sur Planètes'>
-						{% if item.option %}<option value={{ item.cmd_id }}{% if item.option.selected %} selected{% endif %}>&middot;&nbsp;{{ item.cmd_name }}{% if item.option.assigned %} ({{ item.name }}){% endif %}{% if item.option.unavailable %} (Indisponible){% endif %}</option>{% endif %}
-					</optgroup>
-				{% endfor %}
-				{% for k,item in overview.optgroup.fleet.items %}
-					<optgroup label='sur Flottes'>
-						{% if item.option %}<option value={{ item.cmd_id }}{% if item.option.selected %} selected{% endif %}>&middot;&nbsp;{{ item.cmd_name }}{% if item.option.assigned %} ({{ item.name }}){% endif %}{% if item.option.unavailable %} (Indisponible){% endif %}</option>{% endif %}
-					</optgroup>
+				{% for key,optgrp in overview.optgroup.items %}
+					{% if optgrp %}
+						<optgroup label="{% if key == 'fleet' %}sur Flottes{% elif key == 'planet' %}sur Planètes{% elif key == 'none' %}Non affectés{% endif %}">
+							{% for i,cmd in optgrp.items %}
+								<option value="{{ cmd.cmd_id }}" {% if cmd.cmd_option.selected %}selected="selected"{% endif %}>&middot;&nbsp;{{ cmd.cmd_name }}{% if cmd.cmd_option.assigned %} ({{ cmd.name }}){% endif %}{% if cmd.cmd_option.unavailable %} (Indisponible){% endif %}</option>
+							{% endfor %}
+						</optgroup>
+					{% endif %}
 				{% endfor %}
 			</select>
 			&nbsp;<input type=submit class=submit value='OK'>

@@ -57,9 +57,9 @@ function confirmWorkers(id) { return window.confirm('Êtes-vous sûr de vouloir 
 	{% if planet.unassign %}<option value='0'>Renvoyer</option>{% else %}<option value='0'>Aucun</option>{% endif %}
 	{% for key,optgroup in planet.optgroups.items %}
 		{% if optgroup %}
-			<optgroup label='{% if key == 'fleet' %}sur Flottes{% elif key == 'planet' %}sur Planètes{% elif key == 'none' %}Non affectés{% endif %}'>
+			<optgroup label="{% if key == 'fleet' %}sur Flottes{% elif key == 'planet' %}sur Planètes{% elif key == 'none' %}Non affectés{% endif %}">
 				{% for i,cmd in optgroup.items %}
-					<option value={{ cmd.cmd_id }}{% if cmd.cmd_option.selected %} selected="selected"{% endif %}>&middot;&nbsp;{{ cmd.cmd_name }}{% if cmd.cmd_option.assigned %} ({{ cmd.name }}){% endif %}{% if cmd.cmd_option.unavailable %} (Indisponible){% endif %}</option>
+					<option value="{{ cmd.cmd_id }}"" {% if cmd.cmd_option.selected %}selected="selected"{% endif %}>&middot;&nbsp;{{ cmd.cmd_name }}{% if cmd.cmd_option.assigned %} ({{ cmd.name }}){% endif %}{% if cmd.cmd_option.unavailable %} (Indisponible){% endif %}</option>
 				{% endfor %}
 			</optgroup>
 		{% endif %}
