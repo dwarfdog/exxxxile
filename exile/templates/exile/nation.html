@@ -58,7 +58,7 @@
 			<table class="clear" width="100%">
 			{% for i,fle in allied.fleet.items %}
 				<tr>
-					<td nowrap>{% if fle.owned or (fle.ally and fle.shared) %}<a href="{% url 'exile:fleet' %}?id={{ fle.fleetid }}">{% endif %}{% if fle.ally %}<span class="ally">{% endif %}{{ fle.fleetname }}{% if fle.owned or (fle.ally and fle.shared) %}</a>{% endif %}{% if fle.ally %}</span>{% endif %}&nbsp;({{ fle.signature }})</td>
+					<td nowrap>{% if fle.owned %}<a href="{% url 'exile:fleet' %}?id={{ fle.fleetid }}">{% elif fle.ally and fle.shared %}<a href="{% url 'exile:fleet' %}?id={{ fle.fleetid }}">{% endif %}{% if fle.ally %}<span class="ally">{% endif %}{{ fle.fleetname }}{% if fle.owned %}</a>{% elif fle.ally and fle.shared %}</a>{% endif %}{% if fle.ally %}</span>{% endif %}&nbsp;({{ fle.signature }})</td>
 					<td><script>putplanet("{{ fle.planetid }}","{{ fle.planetname }}","{{ fle.g }}","{{ fle.s }}","{{ fle.p }}",{{ fle.relation }});</script></td>
 					<td nowrap>
 					{% if fle.recycling %}
