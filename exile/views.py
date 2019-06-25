@@ -4445,6 +4445,7 @@ def alliancemembers(request):
                     else:
                         member['player']['cant_manage'] = True
                 if re[13] > 0:
+                    member['player']["leaving"] = True
                     member['player']["leaving_time"] = re[13]
                 elif re[13] == 0:
                     if hasRight(request,"can_kick_player"):
