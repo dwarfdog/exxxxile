@@ -1,17 +1,13 @@
 {% load static %}{% load tz %}
 {% if members %}
 	<script>
-	{% for i,member in members.items %}
-		{% if member.recruit %}
-			function showKick(name)
-			{
-				$("kick"+name).style.display = "none";
-				$("kickConfirm"+name).style.display = "block";
-				$("kickConfirm"+name).style.visibility = "visible";
-				return false;
-			}
-		{% endif %}
-	{% endfor %}
+	function showKick(name)
+	{
+		$("kick"+name).style.display = "none";
+		$("kickConfirm"+name).style.display = "block";
+		$("kickConfirm"+name).style.visibility = "visible";
+		return false;
+	}
 
 	var ranks = new Array();
 	{% for i,rank in  members.rank.items %}

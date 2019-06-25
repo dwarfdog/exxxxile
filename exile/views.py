@@ -4549,7 +4549,7 @@ def alliancemembers(request):
             r = SaveRanks()
             if r:
                 return r
-        if hasRight(request,"can_kick_player"):
+        if hasRight(request,"leader") or hasRight(request,"can_kick_player"):
             if action == "kick":
                 username = request.GET.get("name", "").strip()
                 with connection.cursor() as cursor:
