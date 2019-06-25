@@ -1,6 +1,6 @@
 {% load static %}{% load tz %}
 {% if request %}
-    <form action="?cat={walletpage}" method="post">
+    <form action="?cat={{ walletpage }}" method="post">
         {% csrf_token %}
         <table class="default" width="100%">
         <tr class="title"><td>Demande de financement</td></tr>

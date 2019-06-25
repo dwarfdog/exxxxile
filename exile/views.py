@@ -5471,7 +5471,8 @@ def alliancewallet(request):
                 if re[2] > maxValue:
                     maxValue = re[2]
                 avgValue = avgValue + re[1] + re[2]
-            avgValue = avgValue / (len(res)*2)
+            if len(res):
+                avgValue = avgValue / (len(res)*2)
             gcontext['day'] = {}
             i = 0
             for re in res:
@@ -5517,15 +5518,15 @@ def alliancewallet(request):
         gcontext['credit'] = 0
         description = ""
         with connection.cursor() as cursor:
-            cursor.execute("SELECT sp_alliance_money_request(%s, %s, %s)", [gcontext['exile_user'].id, credits, description])
+            cursor.execute("SELECT sp_alliance_money_request(%s, %s, %s)", [gcontext['exile_user'].id, gcontext['credit'], description])
     if gcontext['credit']:
         if request.POST.get("request",""):
             with connection.cursor() as cursor:
-                cursor.execute("SELECT sp_alliance_money_request(%s, %s, %s)", [gcontext['exile_user'].id, credits, description])
+                cursor.execute("SELECT sp_alliance_money_request(%s, %s, %s)", [gcontext['exile_user'].id, gcontext['credit'], description])
         elif request.POST.get("give","") and (gcontext['credit'] > 0):
             if can_give_money():
                 with connection.cursor() as cursor:
-                    cursor.execute("SELECT sp_alliance_transfer_money(%s, %s, %s, 0)", [gcontext['exile_user'].id, credits, description])
+                    cursor.execute("SELECT sp_alliance_transfer_money(%s, %s, %s, 0)", [gcontext['exile_user'].id, gcontext['credit'], description])
                     re = cursor.fetchone()
                     if re[0]:
                         gcontext["money_error"] = e_not_enough_money

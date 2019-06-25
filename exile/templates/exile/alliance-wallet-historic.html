@@ -1,20 +1,28 @@
 {% load static %}{% load tz %}
 <table class="default" width="100%">
-	<tr class=item><td>
-		<table class="clear">
-		<tr valign=bottom>
-			{% for i,d in day.items %}
-				<td>
-					<img src="{% static 'exile/assets/interface/income.gif' %}" width=15 height={{ d.income_height }} title="Entrée: {{ d.income }}" />
-					<img src="{% static 'exile/assets/interface/outcome.gif' %}" width=15 height={{ d.outcome_height }} title="Sortie: {{ d.outcome }}" />
-				</td>
-			{% endfor %}
-		</tr>
-		<tr>
-			{% for i,d in day.items %}
-				<td align=center style="writing-mode:vertical-lr;padding-left:10px;">{{ d.datetime|timezone:"Europe/Paris"|date:"d/m/Y" }}</td>
-			{% endfor %}
-		</tr>
-		</table>
-		</td></tr>
+	<tr class=item>
+		<td>
+			<table class="clear">
+				{% if day %}
+					<tr valign=bottom>
+						{% for i,d in day.items %}
+							<td>
+								<img src="{% static 'exile/assets/interface/income.gif' %}" width=15 height={{ d.income_height }} title="Entrée: {{ d.income }}" />
+								<img src="{% static 'exile/assets/interface/outcome.gif' %}" width=15 height={{ d.outcome_height }} title="Sortie: {{ d.outcome }}" />
+							</td>
+						{% endfor %}
+					</tr>
+					<tr>
+						{% for i,d in day.items %}
+							<td align=center style="writing-mode:vertical-lr;padding-left:10px;">{{ d.datetime|timezone:"Europe/Paris"|date:"d/m/Y" }}</td>
+						{% endfor %}
+					</tr>
+				{% else %}
+					<tr>
+						<td align=center>Aucune opération</td>
+					</tr>
+				{% endif %}
+			</table>
+		</td>
+	</tr>
 </table>
