@@ -89,7 +89,7 @@ class Command(BaseCommand):
             possible_targets = {}
             possible_targets_stats = {}
             for ship in ships:
-                counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])] = {'killed':{},'damages':0,'before':0,'after':0,'mod_shield':0, 'mod_handling':0, 'mod_tracking_speed':0, 'mod_damage':0}
+                counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])] = {'killed':{}, 'damages':0, 'before':0, 'after':0, 'mod_shield':0, 'mod_handling':0, 'mod_tracking_speed':0, 'mod_damage':0}
                 if not ship[0] in possible_targets.keys():
                     possible_targets[ship[0]] = list(filter(lambda x: x[0] in players[ship[0]]['enemies'], ships))
                     shot = ship[10]
@@ -123,6 +123,7 @@ class Command(BaseCommand):
                 for ship in ships:
                     if r == 0:
                         counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['before'] += 1
+                        counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['shield'] = ship[4]
                         if counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['mod_shield'] == 0:
                             counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['mod_shield'] = ship[11]
                         if counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['mod_handling'] == 0:
@@ -153,7 +154,6 @@ class Command(BaseCommand):
                             target[4] -= degats
                         if target[4] > 0:
                             counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['damages'] += degats
-                            target[4] = target[4] + (shield-target[4])/2 # les shields se rechargent de la moitié de leurs pertes si ils n'ont pas été détruits
                             continue
                         if target[3] > 0:
                             target[3] -= degats
@@ -163,6 +163,9 @@ class Command(BaseCommand):
                                     counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]] = 0
                                 counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]] += 1
                                 del possible_targets[ship[0]][target_index]
+                for ship in ships:
+                    if ship[4] > 0:
+                        ship[4] = ship[4] + (counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['shield']-ship[4])/2 # les shields se rechargent de la moitié de leurs pertes si ils n'ont pas été détruits
                 if targets == 0: # battle finished ?!
                     r -= 1
                     break

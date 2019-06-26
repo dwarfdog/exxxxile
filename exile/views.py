@@ -1264,7 +1264,7 @@ def upkeep(request):
                 "commanders_quantity": res[18],
                 "commanders_salary": res[19],
                 "commanders_cost": res[20],
-                "commanders_estimated_cost": res[21],
+                "commanders_estimated_cost": int(res[21]),
                 "scientists_quantity": res[0],
                 "soldiers_quantity": res[1],
                 "planets_quantity": res[2],
@@ -1283,7 +1283,7 @@ def upkeep(request):
                 "ships_estimated_cost": res[15],
                 "ships_in_position_estimated_cost": res[16],
                 "ships_parked_estimated_cost": res[17],
-                "total_estimation": res[12] + res[13] + res[14] + res[15] + res[16] + res[17] + res[21],
+                "total_estimation": int(res[12] + res[13] + res[14] + res[15] + res[16] + res[17] + res[21]),
             }
     gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'upkeep'
