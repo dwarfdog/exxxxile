@@ -592,6 +592,8 @@ def header(request):
         tmp = request.GET.copy()
         tmp.pop('planet', None)
         tmp.pop('fleet', None)
+        tmp.pop('a', None)
+        tmp.pop('action', None)
         url_extra_params = urlencode(tmp, doseq=True)
         if url_extra_params != "":
             tpl_header["url"] = "?" + url_extra_params + "&planet="
