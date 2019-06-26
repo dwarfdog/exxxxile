@@ -502,6 +502,8 @@ def fleetheader(request):
     tmp = request.GET.copy()
     tmp.pop('fleet', None)
     tmp.pop('planet', None)
+    tmp.pop('a', None)
+    tmp.pop('action', None)
     url_extra_params = urlencode(tmp, doseq=True)
     if url_extra_params != "":
         tpl_header["urlf"] = "?" + url_extra_params + "&fleet="
