@@ -727,6 +727,7 @@ def logged(function):
             with connection.cursor() as cursor:
                 cursor.execute('UPDATE users SET lastactivity=now() WHERE id=%s', [user.id])
         gcontext['planet_list'] = checkVWPlanetListCache(request, True)
+        gcontext['plaurl'] = reverse('exile:planet')
         gcontext['can_join_alliance'] = not gcontext['exile_user'].leave_alliance_datetime and (not gcontext['exile_user'].alliance_left or gcontext['exile_user'].alliance_left < time.time())
         planet = request.GET.get('planet',0)
         forced = False
@@ -3626,6 +3627,7 @@ def marketsell(request):
     ExecuteOrder()
     DisplayMarket()
     gcontext['menu'] = menu(request)
+    gcontext['plaurl'] = reverse('exile:marketsell')
     context = gcontext
     t = loader.get_template('exile/market-sell.html')
     context['content'] = t.render(gcontext, request)
@@ -3760,6 +3762,7 @@ def marketbuy(request):
     ExecuteOrder()
     DisplayMarket()
     gcontext['menu'] = menu(request)
+    gcontext['plaurl'] = reverse('exile:marketbuy')
     gcontext['contextinfo'] = header(request)
     context = gcontext
     t = loader.get_template('exile/market-buy.html')
@@ -7112,6 +7115,7 @@ def production(request):
     gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'production'
     gcontext['menu'] = menu(request)
+    gcontext['plaurl'] = reverse('exile:production')
     context = gcontext
     gcontext['contextinfo'] = header(request)
     displayPage(True)
@@ -7396,6 +7400,7 @@ def buildings(request):
     context = gcontext
     gcontext['selectedmenu'] = 'buildings'
     gcontext['menu'] = menu(request)
+    gcontext['plaurl'] = reverse('exile:buildings')
     Action = request.GET.get("a",'').lower()
     BuildingId = int(request.GET.get("b", 0))
     if BuildingId != 0:
@@ -7747,6 +7752,7 @@ def shipyard(request):
         ListShips()
     context = gcontext
     gcontext['menu'] = menu(request)
+    gcontext['plaurl'] = reverse('exile:shipyard')
     gcontext['contextinfo'] = header(request)
     t = loader.get_template('exile/shipyard.html')
     context['content'] = t.render(gcontext, request)
@@ -7865,6 +7871,7 @@ def training(request):
         return HttpResponseRedirect(reverse('exile:training'))
     gcontext['selectedmenu'] = 'training'
     gcontext['menu'] = menu(request)
+    gcontext['plaurl'] = reverse('exile:training')
     gcontext['contextinfo'] = header(request)
     DisplayTraining()
     context = gcontext
@@ -8031,6 +8038,7 @@ def orbit(request):
     gcontext['fleet_creation_error'] = ""
     gcontext['selectedmenu'] = 'orbit'
     gcontext['menu'] = menu(request)
+    gcontext['plaurl'] = reverse('exile:orbit')
     if request.GET.get("a", "") == "new":
         NewFleet()
     DisplayFleets()

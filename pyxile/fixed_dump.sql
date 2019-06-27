@@ -892,7 +892,7 @@ BEGIN
 
 		alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 
 
 	IF NOT FOUND THEN
@@ -977,7 +977,7 @@ BEGIN
 	-- find the alliance id of the user and check if he can break NAPs for his alliance
 	SELECT INTO aid alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to break the NAP
 		RETURN 1;
@@ -1324,7 +1324,7 @@ BEGIN
 
 		alliance_id, login
 	FROM users
-	WHERE id=_userid AND (SELECT can_invite_player FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_invite_player FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -1491,7 +1491,7 @@ BEGIN
 
 		alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to accept the NAP
 		RETURN 1;
@@ -1599,7 +1599,7 @@ BEGIN
 
 		alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_accept_money_requests FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_accept_money_requests FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found
 		RETURN 1;
@@ -1642,7 +1642,7 @@ DECLARE
 BEGIN
 	SELECT INTO r_user alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_accept_money_requests FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_accept_money_requests FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found
 		RETURN 1;
@@ -1677,7 +1677,7 @@ BEGIN
 
 		login, alliance_id, alliance_rank
 	FROM users
-	WHERE id=_userid AND (SELECT can_ask_money FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank) AND (now()-game_started > INTERVAL '2 weeks');
+	WHERE id=_userid AND (SELECT can_ask_money FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank) AND (now()-game_started > INTERVAL '2 weeks');
 	IF NOT FOUND THEN
 		-- user not found
 		RETURN 1;
@@ -1745,7 +1745,7 @@ BEGIN
 	-- check that the player $1 can request a NAP
 	SELECT INTO user id, alliance_id
 	FROM users
-	WHERE id=$1 AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=$1 AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -6640,7 +6640,7 @@ BEGIN
 	SELECT INTO r_user
 		alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to accept the NAP
@@ -6711,7 +6711,7 @@ BEGIN
 	-- find the alliance id of the user and check if he can break NAPs for his alliance
 	SELECT INTO aid alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to break the NAP
 		RETURN 1;
@@ -10014,7 +10014,7 @@ BEGIN
 	SELECT INTO r_user
 		alliance_id, login
 	FROM users
-	WHERE id=_userid AND (SELECT can_invite_player FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_invite_player FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -10064,7 +10064,7 @@ BEGIN
 	IF FOUND AND r_user.alliance_rank <> 0 THEN
 		-- promote this user as the new alliance leader
 		UPDATE users SET
-			alliance_rank = 0
+			alliance_rank = (SELECT id FROM alliances_ranks WHERE rankid=0 AND allianceid=_alliance_id)
 		WHERE id=r_user.id AND alliance_id=_allianceid;
 	ELSEIF NOT FOUND THEN
 		-- if no members are part of this alliance then delete the alliance
@@ -10152,7 +10152,7 @@ BEGIN
 	SELECT INTO aid
 		alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to accept the NAP
 		RETURN 1;
@@ -10241,7 +10241,7 @@ BEGIN
 		alliance_id, login, alliances.tag, alliances.name
 	FROM users
 		INNER JOIN alliances ON (alliances.id=users.alliance_id)
-	WHERE users.id=_userid AND (SELECT can_invite_player FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE users.id=_userid AND (SELECT can_invite_player FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -10382,7 +10382,7 @@ BEGIN
 		users.id, login, alliance_id, alliance_rank, alliances.tag, alliances.name
 	FROM users
 		INNER JOIN alliances ON (alliances.id=alliance_id)
-	WHERE users.id=_userid AND (SELECT can_kick_player FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE users.id=_userid AND (SELECT can_kick_player FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -10539,7 +10539,7 @@ BEGIN
 	SELECT INTO r_user
 		alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_accept_money_requests FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_accept_money_requests FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found
 		RETURN 1;
@@ -10581,7 +10581,7 @@ DECLARE
 BEGIN
 	SELECT INTO r_user alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_accept_money_requests FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_accept_money_requests FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found
 		RETURN 1;
@@ -10615,7 +10615,7 @@ BEGIN
 	SELECT INTO r_user
 		login, alliance_id, alliance_rank
 	FROM users
-	WHERE id=_userid AND (SELECT can_ask_money FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank) AND (now()-game_started > INTERVAL '2 weeks');
+	WHERE id=_userid AND (SELECT can_ask_money FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank) AND (now()-game_started > INTERVAL '2 weeks');
 	IF NOT FOUND THEN
 		-- user not found
 		RETURN 1;
@@ -10677,7 +10677,7 @@ BEGIN
 	SELECT INTO r_user
 		alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to accept the NAP
@@ -10756,7 +10756,7 @@ BEGIN
 	-- find the alliance id of the user and check if he can break NAPs for his alliance
 	SELECT INTO aid alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to break the NAP
 		RETURN 1;
@@ -10787,9 +10787,9 @@ BEGIN
 	IF FOUND THEN
 		-- warn the target alliance leaders that this alliance broke the NAP
 		INSERT INTO reports(ownerid, type, subtype, allianceid)
-		SELECT id, 1, 71, aid
+		SELECT users.id, 1, 71, aid
 		FROM users
-			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 		WHERE alliance_id=targetaid AND (r.leader OR r.can_create_nap);	
 	END IF;
 	
@@ -10816,7 +10816,7 @@ BEGIN
 	-- check that the player $1 can request a NAP
 	SELECT INTO user id, alliance_id
 	FROM users
-	WHERE id=$1 AND (SELECT leader OR can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=$1 AND (SELECT leader OR can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -10875,7 +10875,7 @@ BEGIN
 	SELECT INTO aid
 		alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to accept the NAP
 		RETURN 1;
@@ -10924,7 +10924,7 @@ BEGIN
 	-- check that the player $1 can request a NAP
 	SELECT INTO user id, alliance_id
 	FROM users
-	WHERE id=$1 AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=$1 AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -11007,7 +11007,7 @@ BEGIN
 	-- check that the player $1 can request a NAP
 	SELECT INTO user id, alliance_id
 	FROM users
-	WHERE id=$1 AND (SELECT leader OR can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=$1 AND (SELECT leader OR can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -11051,7 +11051,7 @@ BEGIN
 	-- check that the player $1 can request a NAP
 	SELECT INTO user id, alliance_id
 	FROM users
-	WHERE id=$1 AND (SELECT leader OR can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=$1 AND (SELECT leader OR can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -11102,7 +11102,7 @@ BEGIN
 	-- check that the player $1 can request a NAP
 	SELECT INTO user id, alliance_id
 	FROM users
-	WHERE id=$1 AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=$1 AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		RETURN 1;
 	END IF;
@@ -11191,7 +11191,7 @@ BEGIN
 	SELECT INTO r_user
 		login, alliance_id
 	FROM users
-	WHERE id=$1 AND (SELECT can_change_tax_rate FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=$1 AND (SELECT can_change_tax_rate FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to set the tax rates
 		RETURN 1;
@@ -11315,7 +11315,7 @@ BEGIN
 	-- find the alliance id of the user and check if he can cease wars for his alliance
 	SELECT INTO aid alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to cease the war
 		RETURN 1;
@@ -11358,7 +11358,7 @@ BEGIN
 	-- find the alliance id of the user and check if he can create NAPs for his alliance
 	SELECT INTO aid alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to declare war
 		RETURN 1;
@@ -11471,7 +11471,7 @@ BEGIN
 	SELECT INTO r_user
 		id, privilege, alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to declare war
 		RETURN 1;
@@ -11529,7 +11529,7 @@ BEGIN
 	INSERT INTO reports(ownerid, type, subtype, allianceid)
 	SELECT id, 1, 60, r_user.alliance_id
 	FROM users
-		INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+		INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 	WHERE alliance_id=r_target.id AND (r.leader OR r.can_create_nap);
 
 	RETURN 0;
@@ -11554,7 +11554,7 @@ BEGIN
 	-- find the alliance id of the user and check if he can pay wars for his alliance
 	SELECT INTO aid alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to pay the war
 		RETURN 1;
@@ -11614,7 +11614,7 @@ BEGIN
 	-- find the alliance id of the user and check if he can stop wars for his alliance
 	SELECT INTO aid alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to stop the war
 		RETURN 1;
@@ -11636,7 +11636,7 @@ BEGIN
 		INSERT INTO reports(ownerid, type, subtype, allianceid, userid)
 		SELECT id, 1, 63, targetaid, _userid
 		FROM users
-			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 		WHERE alliance_id=aid AND (r.leader OR r.can_create_nap);	
 
 
@@ -11644,7 +11644,7 @@ BEGIN
 		INSERT INTO reports(ownerid, type, subtype, allianceid)
 		SELECT id, 1, 62, aid
 		FROM users
-			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 		WHERE alliance_id=targetaid AND (r.leader OR r.can_create_nap);	
 	END IF;
 	
@@ -11670,7 +11670,7 @@ RETURN 0;
 	-- find the alliance id of the user and check if he can cease wars for his alliance
 	SELECT INTO aid alliance_id
 	FROM users
-	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND rankid=alliance_rank);
+	WHERE id=_userid AND (SELECT can_break_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
 		-- user not found or doesn't have the rights to cease the war
 		RETURN 1;
@@ -11695,7 +11695,7 @@ RETURN 0;
 		INSERT INTO reports(ownerid, type, subtype, allianceid)
 		SELECT id, 1, 61, aid
 		FROM users
-			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 		WHERE alliance_id=targetaid AND (r.leader OR r.can_create_nap);
 	END IF;
 
@@ -11708,7 +11708,7 @@ RETURN 0;
 		INSERT INTO reports(ownerid, type, subtype, allianceid)
 		SELECT id, 1, 62, aid
 		FROM users
-			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 		WHERE alliance_id=targetaid AND (r.leader OR r.can_create_nap);	
 	END IF;
 	
@@ -20447,14 +20447,14 @@ BEGIN
 			INSERT INTO reports(ownerid, type, subtype, allianceid, credits) 
 			SELECT id, 1, 50, r_tribute.target_allianceid, r_tribute.credits
 			FROM users
-				INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+				INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 			WHERE alliance_id=r_tribute.allianceid AND (r.leader OR r.can_create_nap);
 
 			-- warn the target alliance leaders that the tribute was not paid
 			INSERT INTO reports(ownerid, type, subtype, allianceid, credits)
 			SELECT id, 1, 51, r_tribute.allianceid, r_tribute.credits
 			FROM users
-				INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+				INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 			WHERE alliance_id=r_tribute.target_allianceid AND (r.leader OR r.can_create_nap);
 		END IF;
 		
@@ -20531,7 +20531,7 @@ BEGIN
 		INSERT INTO reports(ownerid, type, subtype, allianceid)
 		SELECT id, 1, 62, r_war.allianceid1
 		FROM users
-			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+			INNER JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 		WHERE alliance_id=r_war.allianceid2 AND (r.leader OR r.can_create_nap);	
 	END LOOP;
 
@@ -21285,7 +21285,7 @@ BEGIN
 		(SELECT count(DISTINCT galaxy) FROM nav_planet WHERE ownerid=users.id) AS galaxies,
 		(SELECT galaxy FROM nav_planet WHERE ownerid=users.id LIMIT 1) AS galaxy
 	FROM users
-		LEFT JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.rankid=users.alliance_rank)
+		LEFT JOIN alliances_ranks AS r ON (r.allianceid=users.alliance_id AND r.id=users.alliance_rank)
 	WHERE id=$1;
 	
 	IF NOT FOUND THEN
