@@ -46,7 +46,7 @@ function confirmBreakPact(tag,name) {
 			<td>
 			{% if nap.toggle_share_radars %}<a href="?cat={{ cat }}&a=shareradars&tag={{ nap.tag }}">{% endif %}{% if nap.radars_shared %}Oui{% endif %}{% if nap.radars_not_shared %}Non{% endif %}{% if nap.toggle_share_radars %}</a>{% endif %}
 			</td>
-			{% if nap.break %}<td><a href="?cat={{ nap.cat }}&a=break&tag={{ tag }}" onclick="return confirmBreakPact('{{ nap.tag }}','{{ nap.name }}')">Rompre</a></td>{% endif %}
+			{% if nap.break %}<td><a href="?cat={{ nap.cat }}&a=break&tag={{ nap.tag }}" onclick="return confirmBreakPact('{{ nap.tag }}','{{ nap.name }}')">Rompre</a></td>{% endif %}
 			{% if nap.broken %}<td>Rompu</td>{% endif %}
 			</tr>
 		{% endfor %}
