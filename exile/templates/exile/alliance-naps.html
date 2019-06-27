@@ -55,10 +55,10 @@ function confirmBreakPact(tag,name) {
 		{% endif %}
 		{% if naps.message %}
 			<tr><td colspan=5 class="error">
-			{% if naps.messagenorights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
-			{% if naps.messageunknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
-			{% if naps.messagenap_not_found %}Nous n'avons aucun pacte avec cette alliance{% endif %}
-			{% if naps.messagenot_enough_credits %}L'alliance ne dispose pas d'assez de crédits pour rompre le pacte{% endif %}
+			{% if naps.message.norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
+			{% if naps.message.unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
+			{% if naps.message.nap_not_found %}Nous n'avons aucun pacte avec cette alliance{% endif %}
+			{% if naps.message.not_enough_credits %}L'alliance ne dispose pas d'assez de crédits pour rompre le pacte{% endif %}
 			</td></tr>
 		{% endif %}
 	</table>

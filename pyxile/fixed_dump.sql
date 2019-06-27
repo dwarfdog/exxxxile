@@ -1386,7 +1386,7 @@ BEGIN
 
 		UPDATE users SET
 
-			alliance_rank = 0
+			alliance_rank = (SELECT id FROM alliances_ranks WHERE rankid=0 AND allianceid=_allianceid LIMIT 1)
 
 		WHERE id=r_user.id AND alliance_id=_allianceid;
 
@@ -19664,6 +19664,7 @@ BEGIN
 	LOOP
 		UPDATE users SET
 			alliance_id = NULL,
+			alliance_rank = NULL,
 			leave_alliance_datetime = NULL
 		WHERE id=r_user.id;
 	END LOOP;
