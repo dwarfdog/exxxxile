@@ -64,7 +64,7 @@ function showAddressee(obj)
 			<td width="1%">Objet</td>
 			<td nowrap><input type="text" name="subject" value="{{ subject }}" size=64 maxlength=64>
 			{% if send_credits %}
-				<span id="sendcreditsbox"{% if hide %} style="visibility:hidden"{% endif %}>&nbsp;
+				<span id="sendcreditsbox"{% if send_credits.hide %} style="visibility:hidden"{% endif %}>&nbsp;
 				<input type="checkbox" class="checkbox" name="sendcredits" id="sendcredits" value="1">
 				<label for="sendcredits">Joindre la somme</label>&nbsp;
 				<img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width=16 height=16> 

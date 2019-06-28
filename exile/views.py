@@ -728,7 +728,7 @@ def logged(function):
                 cursor.execute('UPDATE users SET lastactivity=now() WHERE id=%s', [user.id])
         gcontext['planet_list'] = checkVWPlanetListCache(request, True)
         gcontext['plaurl'] = reverse('exile:planet')
-        gcontext['can_join_alliance'] = not gcontext['exile_user'].leave_alliance_datetime and (not gcontext['exile_user'].alliance_left or gcontext['exile_user'].alliance_left < time.time())
+        gcontext['can_join_alliance'] = not gcontext['exile_user'].leave_alliance_datetime and (not gcontext['exile_user'].alliance_left or gcontext['exile_user'].alliance_left < datetime.datetime.now())
         planet = request.GET.get('planet',0)
         forced = False
         if planet and planet.isdigit():
