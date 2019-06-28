@@ -267,6 +267,39 @@
 		{% endfor %}
 		<tr class="clear"><td colspan=2>&nbsp;</td></tr>
 	{% endfor %}
+
+	{% if tree %}
+		{% for shipid,ship in tree.items %}
+			{% if ship.buildings or ship.research %}
+				<tr valign="top" class="item">
+					<td>
+						<div class="label">{{ ship.label }}</div>
+						<div class="description">{{ ship.description|safe }}</div>
+						{% if ship.buildings %}
+							<div class="required">Bâtiments requis</div>
+								<ul class="requirements">
+									{% for j,bui in ship.buildings.items %}
+										<li>{{ bui }}</li>
+									{% endfor %}
+								</ul>
+							</div>
+							<br/>
+						{% endif %}
+						{% if ship.research %}
+							<div class="required">Recherches requises</div>
+								<ul class="requirements">
+									{% for j,bui in ship.research.items %}
+										<li>{{ bui.label }} <img src="{% static 'exile/assets/research/level' %}5_{{ bui.level }}.gif" alt="Niveau {{ bui.level }}"></li>
+									{% endfor %}
+								</ul>
+							</div>
+							<br/>
+						{% endif %}
+					</td>
+				</tr>
+			{% endif %}
+		{% endfor %}
+	{% endif %}
 {% endif %}
 
 

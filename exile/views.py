@@ -103,7 +103,7 @@ def retrieveShipsCache():
     if not cache.get('db_ships'):
         # retrieve general Ships info
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, label, description FROM db_Ships ORDER BY category, id')
+            cursor.execute('SELECT id, label, description, buildable FROM db_Ships ORDER BY category, id')
             res = cursor.fetchall()
             if res:
                 cache.add('db_ships', res.copy(), None)
@@ -145,7 +145,7 @@ def retrieveResearchCache():
     if not cache.get('db_research'):
         # retrieve Research info
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, label, description FROM db_Research')
+            cursor.execute('SELECT id, label, description FROM db_research')
             res = cursor.fetchall()
             if res:
                 cache.add('db_research', res.copy(), None)
@@ -9568,6 +9568,28 @@ def help(request):
                     if not ck in gcontext['category']:
                         gcontext['category'][ck] = {}
                     gcontext['category'][ck][re[0]] = ship.copy()
+            shipbreq = retrieveShipsReqCache()
+            shiprreq = retrieveShipsReqRCache()
+            gcontext['tree'] = {}
+            for ship in retrieveShipsCache():
+                if not ship[3]:
+                    continue
+                shipp = {
+                    'id': ship[0],
+                    'label': ship[1],
+                    'description': ship[2],
+                    'buildings': {},
+                    'research': {}
+                }
+                for i in shipbreq:
+                    print(i[0])
+                    print(i[1])
+                    if i[0] == ship[0]:
+                        shipp['buildings'][i[1]] = getBuildingLabel(i[1])
+                for i in shiprreq:
+                    if i[0] == ship[0]:
+                        shipp['research'][i[1]] = {'label': getResearchLabel(i[1]),'level': i[2]}
+                gcontext['tree'][ship[0]] = shipp.copy()
         elif cat == "tags":
             with connection.cursor() as cursor:
                 cursor.execute("SELECT code, image FROM precise_bbcode_smileytag");
