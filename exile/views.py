@@ -5545,7 +5545,7 @@ def alliancewallet(request):
         taxrates = int(request.POST.get("taxrates", "0"))
     except (KeyError, Exception):
         taxrates = 0
-    if taxrates:
+    if request.POST.get("taxrates",""):
         with connection.cursor() as cursor:
             cursor.execute("SELECT sp_alliance_set_tax(%s, %s)", [gcontext['exile_user'].id, taxrates])
     # retrieve which page is displayed
