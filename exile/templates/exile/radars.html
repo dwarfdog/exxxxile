@@ -1,0 +1,120 @@
+{% load static %}
+<script>
+
+function getRelationClass(rel) {
+	switch(rel){
+		case 2: return "self"; break;
+		case 1: return "ally"; break;
+		case 0:	return "friend"; break;
+		case -1: return "enemy"; break;
+		case -2: return "enemy"; break;
+		case -3: return "neutral"; break;
+	}
+	return "";
+}
+
+
+function r(rel,tag,owner,fleetid,fleet,sig,f_id,f_name,f_g,f_s,f_p,f_rel,t_id,t_name,t_g,t_s,t_p,t_rel,time,losing) {
+	var c = getRelationClass(rel);
+
+	var s = '<tr class="smallitem"><td>';
+	if(tag != '') s+= '<a href="{% url 'exile:alliance' %}?tag='+tag+'" class='+c+'>['+tag+']</a> ';
+	s+= '<a href="{% url 'exile:nation' %}?name='+owner+'" title="Voir les informations sur '+owner+'" class="'+c+'">'+owner+'</a></td><td>';
+	if(rel==2)
+		s+= '<a href="{% url 'exile:fleet' %}?id='+fleetid+'" class="self">'+fleet+'</a>';
+	else
+		s+= '<a href="{% url 'exile:mails' %}?to='+owner+'" class="'+c+'" title="Envoyer un message à '+owner+'">'+fleet+'</a>';
+
+	if(sig > 0)
+		s+= ' ('+formatnumber(sig)+')';
+	else
+		s+= ' (indéterminé)';
+	s+= '</td><td>';
+
+	if(f_id != '')
+		s+= planet_str(f_id,f_name,f_g,f_s,f_p,f_rel);
+	else
+		s+= '<span class="grey">Inconnue</span>';
+	
+	s+= '</td><td>';
+	
+	if(t_id != '')
+		s+= planet_str(t_id,t_name,t_g,t_s,t_p,t_rel);
+	else
+		s+= '<span class="grey">Inconnue</span>';
+
+	s+= '</td><td>'
+	
+	if(losing)
+		s+= 'Perte du signal :&nbsp;<script>putcountdown1('+time+', "Signal perdu", "{% url 'exile:overview' %}");</'+'script>';
+	else
+		s+= '<script>putcountdown1('+time+', "Arrivé", "{% url 'exile:overview' %}");</'+'script>';
+		
+	s+= '</td></tr>';
+
+	document.write(s);
+}
+</script>
+
+<div id="radars">
+	<p align="center">
+		<table>
+			{% if radar.items %}
+				<tr>
+					<td colspan="2">
+						<div>
+							<table class="default" width="100%">
+								<tr class="title"><td colspan="5">Activité Radar Globale (vos planètes)</td></tr>
+								<tr class="header"><td>Nation</td><td>Flotte</td><td>Origine</td><td>Destination</td><td>Temps restant</td></tr>
+								{% for i,pla in radar.items %}
+									<tr class="header"><td colspan="5">{{ i }}</td></tr>
+									{% if pla.moving %}
+										<tr class="category"><td colspan="5">Mouvements des flottes</td></tr>
+										<script>
+											{% for k,fle in pla.moving.fleet.items %}
+												r({{ fle.relation }},"{{ fle.alliancetag }}","{{ fle.name|escapejs }}","{{ fle.fleetid }}","{{ fle.fleetname|escapejs }}",{{ fle.signature }},"{{ fle.f_planetid }}","{{ fle.f_planetname|escapejs }}","{{ fle.f_g }}","{{ fle.f_s }}","{{ fle.f_p }}",{{ fle.f_relation }},"{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }},{{ fle.time }}, {% if fle.losing %}true{% endif %}{% if fle.timeleft %}false{% endif %});
+											{% endfor %}
+										</script>
+										{% if pla.moving.nofleets %}
+											<tr class="smallitem"><td colspan="5" align="center">Aucun mouvement détecté</td></tr>
+										{% endif %}
+									{% endif %}
+
+									{% if pla.entering %}
+										<tr class="category"><td colspan="5">Flottes entrant dans vos secteurs</td></tr>
+										<script>
+											{% for k,fle in pla.entering.fleet.items %}
+												r({{ fle.relation }},"{{ fle.alliancetag }}","{{ fle.name|escapejs }}","{{ fle.fleetid }}","{{ fle.fleetname|escapejs }}",{{ fle.signature }},"{{ fle.f_planetid }}","{{ fle.f_planetname|escapejs }}","{{ fle.f_g }}","{{ fle.f_s }}","{{ fle.f_p }}",{{ fle.f_relation }},"{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }},{{ fle.time }}, {% if fle.losing %}true{% endif %}{% if fle.timeleft %}false{% endif %});
+											{% endfor %}
+										</script>
+										{% if pla.entering.nofleets %}
+											<tr class="smallitem"><td align="center" colspan="5">Aucune flotte détectée</td></tr>
+										{% endif %}
+									{% endif %}
+
+									{% if pla.leaving %}
+										<tr class="category"><td colspan="5">Flottes sortant de vos secteurs</td></tr>
+										<script>
+											{% for k,fle in pla.leaving.fleet.items %}
+												r({{ fle.relation }},"{{ fle.alliancetag }}","{{ fle.name|escapejs }}","{{ fle.fleetid }}","{{ fle.fleetname|escapejs }}",{{ fle.signature }},"{{ fle.f_planetid }}","{{ fle.f_planetname|escapejs }}","{{ fle.f_g }}","{{ fle.f_s }}","{{ fle.f_p }}",{{ fle.f_relation }},"{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }},{{ fle.time }}, {% if fle.losing %}true{% endif %}{% if fle.timeleft %}false{% endif %});
+											{% endfor %}
+										</script>
+										{% if pla.leaving.nofleets %}
+											<tr class="smallitem"><td colspan="5" align="center">Aucune flotte détectée</td></tr>
+										{% endif %}
+									{% endif %}
+								{% endfor %}
+							</table>
+						</div>
+					</td>
+				</tr>
+			{% else %}
+					<tr>
+						<td colspan="2">
+							Vous ne contrôlez aucun radar actif.
+						</td>
+					</tr>
+			{% endif %}
+		</table>
+	</p>
+</div>

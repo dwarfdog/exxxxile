@@ -5822,6 +5822,184 @@ def alliancecreate(request):
 
 @construct
 @logged
+def radars(request):
+    def displayRadar(planetid, planame, radarstrength):
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT v.id, v.name, attackonsight, engaged, size, signature, speed, remaining_time, ' +
+                ' ownerid, owner_name, owner_relation, ' +
+                ' planetid, planet_name, planet_galaxy, planet_sector, planet_planet, ' +
+                ' planet_ownerid, planet_owner_name, planet_owner_relation, ' +
+                ' destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, ' +
+                ' destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation, total_time, ' +
+                ' from_radarstrength, to_radarstrength, alliances.tag, radar_jamming, destplanet_radar_jamming ' +
+                ' FROM vw_fleets_moving v ' +
+                '   LEFT JOIN alliances ON alliances.id = owner_alliance_id ' +
+                ' WHERE userid=%(userid)s AND ( planetid = %(planetid)s OR destplanetid = %(planetid)s ) ' +
+                ' ORDER BY remaining_time', {'userid': gcontext['exile_user'].id, 'planetid': planetid})
+            res = cursor.fetchall()
+            relation = -100 # -100 = do not display the fleet
+            loosing_time = 0 # seconds before our radar loses the fleet
+            remaining_time = 0 # seconds before the fleet ends its travel
+            movement_type = ""
+            movingfleetcount = 0 # fleets moving inside the sector
+            enteringfleetcount = 0 # fleets entering the sector
+            leavingfleetcount = 0 # fleets leaving the sector
+            gcontext['radar'] = {}
+            gcontext['radar'][planame] = {
+                'moving': {'fleet': {}},
+                'leaving': {'fleet': {}},
+                'entering': {'fleet': {}},
+            }
+            i=0
+            for re in res:
+                relation = re[10]
+                remaining_time = re[7]
+                loosing_time = -1
+                display_from = True
+                display_to = True
+                # do not display NAP/enemy fleets moving to/from unknown planet if fleet is not within radar range
+                if relation <= config.rFriend:
+                    # compute how far our radar can detect fleets
+                    # highest radar strength * width of a sector / speed * nbr of second in one hour
+                    radarSpotting = math.sqrt(radarstrength)*6*1000/re[6]*3600
+                    if re[28] == 0:
+                        if re[7] < radarSpotting:
+                            # incoming fleet is detected by our radar
+                            display_from = False
+                        else:
+                            relation = -100
+                    elif re[29] == 0:
+                        if re[27]-re[7] < radarSpotting:
+                            # outgoing fleet is still detected by our radar
+                            loosing_time = int(radarSpotting-(re[27]-re[7]))
+                            display_to = False
+                        else:
+                            relation = -100
+                    else:
+                        remaining_time = re[7]
+                if relation > -100:
+                    radar = {
+                        "id": re[8],
+                        "name": re[9],
+                        "fleetid": re[0],
+                        "fleetname": re[1],
+                        "signature": re[5],
+                        "relation": relation,
+                        "moving": {},
+                        "leaving": {},
+                        "entering": {},
+                        "alliancetag": '',
+                    }
+                    if re[30]:
+                        radar["alliancetag"] = re[30]
+                    # determine the type of movement : intrasector, intersector (entering, leaving)
+                    # also don't show signature of enemy fleets if we don't know or can't spy on the source AND target coords
+                    # re[18]
+                    if re[13] == galaxy and re[14] == sector:
+                        if re[21] == galaxy and re[22] == sector:
+                            movement_type = "moving"
+                            movingfleetcount += 1
+                            if ((re[31] >= re[28] and re[18] < config.rAlliance) or not display_from) and \
+                                ((re[32] >= re[29] and re[26] < config.rAlliance) or not display_to) and re[10] < config.rAlliance:
+                                radar["signature"] = 0
+                        else:
+                            movement_type = "leaving"
+                            leavingfleetcount += 1
+                            if ((re[31] and re[31] >= re[28] and re[18] < config.rAlliance) or not display_from) and \
+                                ((re[32] and re[32] >= re[29] and re[26] < config.rAlliance) or not display_to) and re[10] < config.rAlliance:
+                                radar["signature"] = 0
+                    else:
+                        movement_type = "entering"
+                        enteringfleetcount += 1
+                        if ((re[31] and re[31] >= re[28] and re[18] < config.rAlliance) or not display_from) and \
+                            ((re[32] and re[32] >= re[29] and re[26] < config.rAlliance) or not display_to) and re[10] < config.rAlliance:
+                            radar["signature"] = 0
+                    # Assign From and To planets info
+                    if display_from:
+                        # Assign the name of the owner if is not an ally planet
+        #               if (re[18] < rAlliance) and not IsNull(re[17]):
+        #                   if re[28] > 0 or re[18] = rFriend:
+        #                       content.AssignValue "f_planetname", re[17]
+        #                   else
+        #                       content.AssignValue "f_planetname", ""
+        #                   end if
+        #               else
+        #                   content.AssignValue "f_planetname", re[12]
+        #               end if
+                        radar["f_planetname"] = getPlanetName(request,re[18], re[28], re[17], re[12])
+                        radar["f_planetid"] = re[11]
+                        radar["f_g"] = re[13]
+                        radar["f_s"] = re[14]
+                        radar["f_p"] = re[15]
+                        radar["f_relation"] = re[18]
+                    else:
+                        radar["f_planetname"] = ""
+                        radar["f_planetid"] = ""
+                        radar["f_g"] = ""
+                        radar["f_s"] = ""
+                        radar["f_p"] = ""
+                        radar["f_relation"] = "0"
+                    if display_to:
+                        # Assign the planet name if possible otherwise the name of the owner
+        #               if (re[26] < rAlliance) and not IsNull(re[25]):
+        #                   if re[29] > 0 or re[26] = rFriend:
+        #                       content.AssignValue "t_planetname", re[25]
+        #                   else
+        #                       content.AssignValue "t_planetname", ""
+        #                   end if
+        #               else
+        #                   content.AssignValue "t_planetname", re[20]
+        #               end if
+                        radar["t_planetname"] = getPlanetName(request,re[26], re[29], re[25], re[20])
+                        radar["t_planetid"] = re[19]
+                        radar["t_g"] = re[21]
+                        radar["t_s"] = re[22]
+                        radar["t_p"] = re[23]
+                        radar["t_relation"] = re[26]
+                    else:
+                        radar["t_planetname"] = ""
+                        radar["t_planetid"] = ""
+                        radar["t_g"] = ""
+                        radar["t_s"] = ""
+                        radar["t_p"] = ""
+                        radar["t_relation"] = "0"
+                    # Assign remaining travel time
+                    if loosing_time > -1:
+                        radar["time"] = loosing_time
+                        radar['losing'] = True
+                    else:
+                        radar["time"] = remaining_time
+                        radar['timeleft'] = True
+                    gcontext['radar'][planame][movement_type]['fleet'][i] = radar.copy()
+                i += 1
+            if movingfleetcount == 0:
+                gcontext['radar'][planame]['moving']['nofleets'] = True
+            if enteringfleetcount == 0:
+                gcontext['radar'][planame]['entering']['nofleets'] = True
+            if leavingfleetcount == 0:
+                gcontext['radar'][planame]['leaving']['nofleets'] = True
+    global config
+    gcontext = request.session.get('gcontext',{})
+    gcontext['selectedmenu'] = 'radars'
+    gcontext['menu'] = menu(request)
+    # Main query : retrieve user planets
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT id, name, radar_strength ' +
+            ' FROM nav_planet ' +
+            ' WHERE ownerid=%(UserID)s' +
+            ' ORDER BY planet', {'UserID': gcontext['exile_user'].id,})
+        res = cursor.fetchall()
+        for re in res:
+            # Display fleets movements according to player radar strength
+            if re[2] > 0:
+                displayRadar(re[0], re[1], re[2])
+    context = gcontext
+    t = loader.get_template('exile/radars.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
 def map(request):
     def GetSector(sector, shiftX, shiftY):
         if (sector % 10 == 0) and (shiftX > 0):

@@ -17,6 +17,7 @@ urlpatterns = [
     path('fleets-standby', views.fleetsstandby, name='fleetsstandby'),
     path('fleets-ships-stats', views.fleetsshipsstats, name='fleetsshipsstats'),
     path('fleets', views.fleets, name='fleets'),
+    path('radars', views.radars, name='radars'),
     path('battleview', views.battleview, name='battleview'),
     path('battle', views.battle, name='battle'),
     path('fleetships', views.fleetships, name='fleetships'),
