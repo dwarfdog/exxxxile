@@ -33,33 +33,40 @@ function confirmBreakPact(tag,name) {
 		{% if naps.break %}<td>Pacte</td>{% endif %}
 		</tr>
 		{% for i,nap in naps.nap.items %}
-			<tr><td>{{ nap.place }}. <a href="{% url 'exile:alliance' %}?tag={{ nap.tag }}">[{{ nap.tag }}] {{ nap.name }}</a></td>
-			{% if nap.score %}<td align=right>{{ nap.score }}</td>{% endif %}
-			<td>{{ nap.created|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td>
-			<td align=right><script>
-			{% if nap.countdown %}putcountdown1({{ nap.break_interval }}, "Rompu", "?"){% endif %}
-			{% if nap.time %}document.write(formattime({{ nap.break_interval }})){% endif %}
-			</script></td>
-			<td>
-			{% if nap.toggle_share_locs %}<a href="?cat={{ cat }}&a=sharelocs&tag={{ nap.tag }}">{% endif %}{% if nap.locs_shared %}Oui{% endif %}{% if nap.locs_not_shared %}Non{% endif %}{% if nap.toggle_share_locs %}</a>{% endif %}
-			</td>
-			<td>
-			{% if nap.toggle_share_radars %}<a href="?cat={{ cat }}&a=shareradars&tag={{ nap.tag }}">{% endif %}{% if nap.radars_shared %}Oui{% endif %}{% if nap.radars_not_shared %}Non{% endif %}{% if nap.toggle_share_radars %}</a>{% endif %}
-			</td>
-			{% if nap.break %}<td><a href="?cat={{ nap.cat }}&a=break&tag={{ nap.tag }}" onclick="return confirmBreakPact('{{ nap.tag }}','{{ nap.name }}')">Rompre</a></td>{% endif %}
-			{% if nap.broken %}<td>Rompu</td>{% endif %}
+			<tr>
+				<td>{{ nap.place }}. <a href="{% url 'exile:alliance' %}?tag={{ nap.tag }}">[{{ nap.tag }}] {{ nap.name }}</a></td>
+				<td align=right>{% if nap.score %}{{ nap.score }}{% else %}0{% endif %}</td>
+				<td>{{ nap.created|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td>
+				<td align=right>
+					<script>
+					{% if nap.countdown %}putcountdown1({{ nap.break_interval }}, "Rompu", "?"){% endif %}
+					{% if nap.time %}document.write(formattime({{ nap.break_interval }})){% endif %}
+					</script>
+				</td>
+				<td>
+					{% if nap.toggle_share_locs %}<a href="?cat={{ cat }}&a=sharelocs&tag={{ nap.tag }}">{% endif %}{% if nap.locs_shared %}Oui{% endif %}{% if nap.locs_not_shared %}Non{% endif %}{% if nap.toggle_share_locs %}</a>{% endif %}
+				</td>
+				<td>
+					{% if nap.toggle_share_radars %}<a href="?cat={{ cat }}&a=shareradars&tag={{ nap.tag }}">{% endif %}{% if nap.radars_shared %}Oui{% endif %}{% if nap.radars_not_shared %}Non{% endif %}{% if nap.toggle_share_radars %}</a>{% endif %}
+				</td>
+				{% if nap.break %}<td><a href="?cat={{ nap.cat }}&a=break&tag={{ nap.tag }}" onclick="return confirmBreakPact('{{ nap.tag }}','{{ nap.name }}')">Rompre</a></td>{% endif %}
+				{% if nap.broken %}<td>Rompu</td>{% endif %}
 			</tr>
 		{% endfor %}
 		{% if naps.nonaps %}
-			<tr><td colspan=6 align=center>Aucun</td></tr>
+			<tr>
+				<td colspan=6 align=center>Aucun</td>
+			</tr>
 		{% endif %}
 		{% if naps.message %}
-			<tr><td colspan=5 class="error">
-			{% if naps.message.norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
-			{% if naps.message.unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
-			{% if naps.message.nap_not_found %}Nous n'avons aucun pacte avec cette alliance{% endif %}
-			{% if naps.message.not_enough_credits %}L'alliance ne dispose pas d'assez de crédits pour rompre le pacte{% endif %}
-			</td></tr>
+			<tr>
+				<td colspan=5 class="error">
+				{% if naps.message.norights %}Vous n'êtes pas en droit de faire une telle demande{% endif %}
+				{% if naps.message.unknown %}Aucune alliance avec un tel tag n'a été trouvé{% endif %}
+				{% if naps.message.nap_not_found %}Nous n'avons aucun pacte avec cette alliance{% endif %}
+				{% if naps.message.not_enough_credits %}L'alliance ne dispose pas d'assez de crédits pour rompre le pacte{% endif %}
+				</td>
+			</tr>
 		{% endif %}
 	</table>
 {% endif %}
