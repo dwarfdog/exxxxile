@@ -5823,7 +5823,7 @@ def alliancecreate(request):
 @construct
 @logged
 def radars(request):
-    def displayRadar(planetid, planame, radarstrength):
+    def displayRadar(planetid, planame, radarstrength, galaxy, sector):
         with connection.cursor() as cursor:
             cursor.execute('SELECT v.id, v.name, attackonsight, engaged, size, signature, speed, remaining_time, ' +
                 ' ownerid, owner_name, owner_relation, ' +
@@ -5984,7 +5984,7 @@ def radars(request):
     gcontext['menu'] = menu(request)
     # Main query : retrieve user planets
     with connection.cursor() as cursor:
-        cursor.execute('SELECT id, name, radar_strength ' +
+        cursor.execute('SELECT id, name, radar_strength, galaxy, sector ' +
             ' FROM nav_planet ' +
             ' WHERE ownerid=%(UserID)s' +
             ' ORDER BY planet', {'UserID': gcontext['exile_user'].id,})
@@ -5992,7 +5992,7 @@ def radars(request):
         for re in res:
             # Display fleets movements according to player radar strength
             if re[2] > 0:
-                displayRadar(re[0], re[1], re[2])
+                displayRadar(re[0], re[1], re[2], re[3], re[4])
     context = gcontext
     t = loader.get_template('exile/radars.html')
     context['content'] = t.render(gcontext, request)
