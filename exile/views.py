@@ -6967,7 +6967,7 @@ def production(request):
                         if i == enabled:
                             building['enabled'] = i
                             break
-                manage['buildings'][re[0]] = building.copy()
+                    manage['buildings'][re[0]] = building.copy()
             gcontext['manage'] = manage
     def displayReceiveSendEnergy(action):
         with connection.cursor() as cursor:
