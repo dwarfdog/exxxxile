@@ -124,7 +124,7 @@
 					<img src="{% static 'exile/assets/buildings/' %}{{ bui.id }}.jpg" class="building" title="{{ bui.name }}" width="64" height="64">
 				</td>
 				<td>
-					<a name="{{ bui.id }}"></a><div class="label">{{ bui.name }}</div><div class="description">{{ bui.description }}</div>
+					<a name="{{ bui.id }}"></a><div class="label">{{ bui.name }}</div><div class="description">{{ bui.description|safe }}</div>
 				</td>
 				<td align="right" valign=middle>
 					<table class="clear" width="100%">
@@ -180,7 +180,7 @@
 		{% for i,res in cat.items %}
 			<tr class="item">
 				<td>
-					<a name="{{ res.id }}"></a><div class="label">{{ res.name }}</div><div class="description">{{ res.description }}</div>
+					<a name="{{ res.id }}"></a><div class="label">{{ res.name }}</div><div class="description">{{ res.description|safe }}</div>
 				</td>
 				<td nowrap align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Crédits" width=16 height=16> {{ res.cost_credits }}</td>
 			</tr>
@@ -212,7 +212,7 @@
 				<td>
 					<a name="{{ ship.id }}"></a>
 					<div class="label">{{ ship.name }}</div>
-					<div class="description">{{ ship.description }}</div>
+					<div class="description">{{ ship.description|safe }}</div>
 					{% if ship.buildingsrequired %}
 						<div class="required">Bâtiments requis</div>
 							<ul class="requirements">
