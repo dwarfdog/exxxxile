@@ -56,7 +56,7 @@ def retrieveBuildingsCache():
     if not cache.get('db_buildings'):
         # retrieve general buildings info
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, storage_workers, energy_production, storage_ore, storage_hydrocarbon, workers, storage_scientists, storage_soldiers, label, description, energy_consumption, workers*maintenance_factor/100, upkeep FROM db_buildings')
+            cursor.execute('SELECT id, storage_workers, energy_production, storage_ore, storage_hydrocarbon, workers, storage_scientists, storage_soldiers, label, description, energy_consumption, workers*maintenance_factor/100, upkeep, buildable FROM db_buildings')
             res = cursor.fetchall()
             if res:
                 cache.add('db_buildings', res.copy(), None)
@@ -145,7 +145,7 @@ def retrieveResearchCache():
     if not cache.get('db_research'):
         # retrieve Research info
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, label, description FROM db_research')
+            cursor.execute('SELECT id, label, description, category FROM db_research')
             res = cursor.fetchall()
             if res:
                 cache.add('db_research', res.copy(), None)
@@ -153,6 +153,37 @@ def retrieveResearchCache():
             else:
                 cache.add('db_research', {}, 300)
     return cache.get('db_research')
+
+def retrieveResearchReqCache():
+    cache.add('db_research_req_last_retrieve', time.time(), None)
+    if not cache.get('db_research_req'):
+        # retrieve buildings requirements
+        # planet elements can't restrict the destruction of a building that made their construction possible
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT researchid, required_buildingid, required_buildingcount' +
+                ' FROM db_research_req_building')
+            res = cursor.fetchall()
+            if res:
+                cache.add('db_research_req', res.copy(), None)
+                cache.add('db_research_req_retrieved', time.time(), None)
+            else:
+                cache.add('db_research_req', {}, 300)
+    return cache.get('db_research_req')
+
+def retrieveResearchReqRCache():
+    cache.add('db_research_req_r_last_retrieve', time.time(), None)
+    if not cache.get('db_research_req_r'):
+        # retrieve buildings requirements
+        # planet elements can't restrict the destruction of a building that made their construction possible
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT researchid, required_researchid, required_researchlevel FROM db_research_req_research')
+            res = cursor.fetchall()
+            if res:
+                cache.add('db_research_req_r', res.copy(), None)
+                cache.add('db_research_req_r_retrieved', time.time(), None)
+            else:
+                cache.add('db_research_req_r', {}, 300)
+    return cache.get('db_research_req_r')
 
 def planetimg(id,floor):
     planetimg = 1 + (floor + id) % 21
@@ -9669,6 +9700,28 @@ def help(request):
                     if not ck in gcontext['category']:
                         gcontext['category'][ck] = {}
                     gcontext['category'][ck][re[0]] = building.copy()
+            builbreq = retrieveBuildingsReqCache()
+            builrreq = retrieveBuildingsReqRCache()
+            gcontext['tree'] = {}
+            for bui in retrieveBuildingsCache():
+                if not bui[13]:
+                    continue
+                build = {
+                    'id': bui[0],
+                    'label': bui[8],
+                    'description': bui[8],
+                    'buildings': {},
+                    'research': {}
+                }
+                for i in builbreq:
+                    if i[0] == bui[0]:
+                        build['buildings'][i[1]] = getBuildingLabel(i[1])
+                for i in builrreq:
+                    if i[0] == bui[0]:
+                        if i[1] in [0,1,3,40]: # tech foss, marchand, warlord
+                            continue
+                        build['research'][i[1]] = {'label': getResearchLabel(i[1]),'level': i[2]}
+                gcontext['tree'][bui[0]] = build.copy()
         elif cat == "research": # display help on researches
             with connection.cursor() as cursor:
                 cursor.execute("SELECT researchid, category, total_cost, level, levels" +
@@ -9691,6 +9744,31 @@ def help(request):
                     if not ck in gcontext['category']:
                         gcontext['category'][ck] = {}
                     gcontext['category'][ck][re[0]] = research.copy()
+            searbreq = retrieveResearchReqCache()
+            print(searbreq)
+            searrreq = retrieveResearchReqRCache()
+            print(searrreq)
+            gcontext['tree'] = {}
+            for resear in retrieveResearchCache():
+                if resear[3] < 10:
+                    continue
+                resea = {
+                    'id': resear[0],
+                    'label': resear[1],
+                    'description': resear[2],
+                    'buildings': {},
+                    'research': {}
+                }
+                for i in searbreq:
+                    if i[0] == resear[0]:
+                        resea['buildings'][i[1]] = str(i[2])+' x '+getBuildingLabel(i[1])
+                for i in searrreq:
+                    if i[0] == resear[0]:
+                        if i[1] in [0,1,3,40]: # tech foss, marchand, warlord
+                            continue
+                        resea['research'][i[1]] = {'label': getResearchLabel(i[1]),'level': i[2]}
+                gcontext['tree'][resear[0]] = resea.copy()
+            print(gcontext['tree'])
         elif cat == "ships": # display help on ships
             with connection.cursor() as cursor:
                 cursor.execute("SELECT id, category, cost_ore, cost_hydrocarbon, crew," +
@@ -9760,8 +9838,6 @@ def help(request):
                     'research': {}
                 }
                 for i in shipbreq:
-                    print(i[0])
-                    print(i[1])
                     if i[0] == ship[0]:
                         shipp['buildings'][i[1]] = getBuildingLabel(i[1])
                 for i in shiprreq:
