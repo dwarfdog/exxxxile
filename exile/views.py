@@ -5844,7 +5844,6 @@ def radars(request):
             movingfleetcount = 0 # fleets moving inside the sector
             enteringfleetcount = 0 # fleets entering the sector
             leavingfleetcount = 0 # fleets leaving the sector
-            gcontext['radar'] = {}
             gcontext['radar'][planame] = {
                 'moving': {'fleet': {}},
                 'leaving': {'fleet': {}},
@@ -5982,12 +5981,13 @@ def radars(request):
     gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'radars'
     gcontext['menu'] = menu(request)
+    gcontext['radar'] = {}
     # Main query : retrieve user planets
     with connection.cursor() as cursor:
         cursor.execute('SELECT id, name, radar_strength, galaxy, sector ' +
             ' FROM nav_planet ' +
             ' WHERE ownerid=%(UserID)s' +
-            ' ORDER BY planet', {'UserID': gcontext['exile_user'].id,})
+            ' ORDER BY id', {'UserID': gcontext['exile_user'].id,})
         res = cursor.fetchall()
         for re in res:
             # Display fleets movements according to player radar strength
