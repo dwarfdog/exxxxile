@@ -204,7 +204,7 @@ class Command(BaseCommand):
                     cursor.execute("INSERT INTO battles_ships(battleid, owner_id, owner_name, fleet_id, fleet_name, shipid, before, after, killed, won, damages, attacked)" +
                                 " VALUES(%s, %s, (SELECT login FROM users WHERE id=%s LIMIT 1), %s" +
                                 ", (SELECT name FROM fleets WHERE id=%s LIMIT 1), %s, %s, %s, %s" +
-                                 ", %s, %s, (SELECT attackonsight FROM fleets WHERE id=%s LIMIT 1))", [BattleId, expl[0], expl[0], expl[1], expl[1], expl[2], res['before'], res['after'], sum_killed, won, res['damages'], expl[1]])
+                                 ", %s, %s, (SELECT attackonsight FROM fleets WHERE id=%s LIMIT 1))", [BattleId, expl[0], expl[0], expl[1], expl[1], expl[2], res['before'], res['after'], sum_killed, won, int(res['damages']), expl[1]])
                     # new way of saving battle
                     if expl[1] != lastFleetId:
                         # add a fleet in the battle report
@@ -212,7 +212,7 @@ class Command(BaseCommand):
                         ree = cursor.fetchone()
                         lastFleetId = expl[1]
                         lastBattleFleetId = ree[0]
-                    cursor.execute("INSERT INTO battles_fleets_ships(fleetid, shipid, before, after, killed, damages) VALUES(%s, %s, %s, %s, %s, %s)", [lastBattleFleetId, expl[2], res['before'], res['after'], sum_killed, res['damages']])
+                    cursor.execute("INSERT INTO battles_fleets_ships(fleetid, shipid, before, after, killed, damages) VALUES(%s, %s, %s, %s, %s, %s)", [lastBattleFleetId, expl[2], res['before'], res['after'], sum_killed, int(res['damages'])])
 
                     for DestroyedShipId,quantity in res['killed'].items():
                         cursor.execute("INSERT INTO battles_fleets_ships_kills(fleetid, shipid, destroyed_shipid, count) VALUES(%s, %s, %s, %s)", [lastBattleFleetId, expl[2], DestroyedShipId, quantity])
