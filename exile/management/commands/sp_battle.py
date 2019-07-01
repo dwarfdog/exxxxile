@@ -92,32 +92,32 @@ class Command(BaseCommand):
                 counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])] = {'killed':{}, 'damages':0, 'before':0, 'after':0, 'mod_shield':0, 'mod_handling':0, 'mod_tracking_speed':0, 'mod_damage':0}
                 if not ship[0] in possible_targets.keys():
                     possible_targets[ship[0]] = list(filter(lambda x: x[0] in players[ship[0]]['enemies'], ships))
-                    shot = ship[10]
-                    if shot[0] != 0: # ship can shot
-                        for target in possible_targets[ship[0]]:
-                            ship_key = str(ship[0])+'|'+str(ship[2])
-                            if not ship_key in possible_targets_stats.keys():
-                                possible_targets_stats[ship_key] = {}
-                            target_key = str(target[0])+'|'+str(target[2])
-                            if not target_key in possible_targets_stats[ship_key].keys():
-                                chance_to_hit = max(shot[1]/target[5],1)
-                                tech_diff = ship[15] - target[15]
-                                if tech_diff < 0:
-                                    chance_to_hit *= 0.85**abs(tech_diff);
-                                elif tech_diff > 0:
-                                    chance_to_hit *= 1.10**tech_diff;
-                                if chance_to_hit >= 1:
-                                    chance_to_hit = 1
-                                if chance_to_hit < 0:
-                                    chance_to_hit = 0
-                                degats = shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100
-                                avg_degats = degats * chance_to_hit
-                                possible_targets_stats[ship_key][target_key] = {'degats':degats,'avg_degats':avg_degats,'chance_to_hit':chance_to_hit}
-                        # TODO
-                        # shuffle(possible_targets) then sort them by possible_targets_stats[ship_key][target_key]['avg_degats']
-                        # QUESTION: this is an targeting optimization, how can a ship know others ships mods, from ship type ok but from other mods sources ?
-                        # Maybe degats base should be = shot[2] + shot[3] + shot[4] + shot[5] to simulate this lack of knowledge
-                        # it suppose to compute the real degats too, for algo optimization (like now)
+                shot = ship[10]
+                if shot[0] != 0: # ship can shot
+                    for target in possible_targets[ship[0]]:
+                        ship_key = str(ship[0])+'|'+str(ship[1])+'|'+str(ship[2])
+                        if not ship_key in possible_targets_stats.keys():
+                            possible_targets_stats[ship_key] = {}
+                        target_key = str(target[0])+'|'+str(target[1])+'|'+str(target[2])
+                        if not target_key in possible_targets_stats[ship_key].keys():
+                            chance_to_hit = max(shot[1]/target[5],1)
+                            tech_diff = ship[15] - target[15]
+                            if tech_diff < 0:
+                                chance_to_hit *= 0.85**abs(tech_diff);
+                            elif tech_diff > 0:
+                                chance_to_hit *= 1.10**tech_diff;
+                            if chance_to_hit >= 1:
+                                chance_to_hit = 1
+                            if chance_to_hit < 0:
+                                chance_to_hit = 0
+                            degats = shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100
+                            avg_degats = degats * chance_to_hit
+                            possible_targets_stats[ship_key][target_key] = {'degats':degats,'avg_degats':avg_degats,'chance_to_hit':chance_to_hit}
+                    # TODO
+                    # shuffle(possible_targets) then sort them by possible_targets_stats[ship_key][target_key]['avg_degats']
+                    # QUESTION: this is an targeting optimization, how can a ship know others ships mods, from ship type ok but from other mods sources ?
+                    # Maybe degats base should be = shot[2] + shot[3] + shot[4] + shot[5] to simulate this lack of knowledge
+                    # it suppose to compute the real degats too, for algo optimization (like now)
             for r in range(Rounds):
                 targets = 0
                 for ship in ships:
@@ -136,16 +136,16 @@ class Command(BaseCommand):
                         continue
                     shot = ship[10]
                     if shot[0] != 0: # ship can shot
-                        ship_key = str(ship[0])+'|'+str(ship[2])
+                        ship_key = str(ship[0])+'|'+str(ship[1])+'|'+str(ship[2])
                         len_possible_targets = len(possible_targets[ship[0]])
                         if len_possible_targets == 0:
                             continue
                         target_index = random.randint(0,len_possible_targets-1)
                         target = possible_targets[ship[0]][target_index]
                         targets += 1
-                        target_key = str(target[0])+'|'+str(target[2])
+                        target_key = str(target[0])+'|'+str(target[1])+'|'+str(target[2])
                         chance_to_hit = possible_targets_stats[ship_key][target_key]['chance_to_hit']
-                        if chance_to_hit < 1 and random.random() <= chance_to_hit:
+                        if chance_to_hit < 1 and random.random() > chance_to_hit:
                             continue
                         degats = possible_targets_stats[ship_key][target_key]['degats']
                         if target[4] > 0:
