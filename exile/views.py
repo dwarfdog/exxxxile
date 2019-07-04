@@ -2204,7 +2204,7 @@ def fleet(request):
             # display fleets that are near the same planet as this fleet
             # it allows to switch between the fleets and merge them quickly
             fleetCount = 0
-            gcontext['fleets'] = {'playerfleet':{},'fleet':{'enemy':{},'ally':{}}}
+            gcontext['fleets'] = {'playerfleet':{},'fleet':{'friend':{},'enemy':{},'ally':{}}}
             if res[34] != -1:
                 cursor.execute("SELECT vw_fleets.id, vw_fleets.name, size, signature, speed, cargo_capacity-cargo_free, cargo_capacity, action, ownerid, owner_name, alliances.tag, sp_relation(%s,ownerid)" +
                         " FROM vw_fleets" +
