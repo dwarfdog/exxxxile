@@ -150,10 +150,11 @@ class Command(BaseCommand):
                         degats = possible_targets_stats[ship_key][target_key]['degats']
                         if target[4] > 0:
                             shield = target[4]
+                            deg = degats
                             degats -= shield
-                            target[4] -= degats
+                            target[4] -= deg
                         if target[4] > 0:
-                            counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['damages'] += degats
+                            counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['damages'] += deg
                             continue
                         if target[3] > 0:
                             target[3] -= degats

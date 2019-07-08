@@ -10810,11 +10810,11 @@ CREATE FUNCTION exile_s03.sp_alliance_nap_cancel(_userid integer, _alliance_tag 
 -- Param2: tag of alliance
 -- Param3: hours to break the nap
 DECLARE
-	user record;
+	ruser record;
 	invitedallianceid int4;
 BEGIN
 	-- check that the player $1 can request a NAP
-	SELECT INTO user id, alliance_id
+	SELECT INTO ruser id, alliance_id
 	FROM users
 	WHERE id=$1 AND (SELECT leader OR can_create_nap FROM alliances_ranks WHERE allianceid=alliance_id AND id=alliance_rank);
 	IF NOT FOUND THEN
@@ -10829,7 +10829,7 @@ BEGIN
 		RETURN 2;
 	END IF;
 
-	IF user.alliance_id = invitedallianceid THEN
+	IF ruser.alliance_id = invitedallianceid THEN
 		RETURN 2;
 	END IF;
 
