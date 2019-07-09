@@ -164,9 +164,9 @@ class Command(BaseCommand):
                                     counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]] = 0
                                 counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]] += 1
                                 del possible_targets[ship[0]][target_index]
-                for ship in ships:
-                    if ship[4] > 0:
-                        ship[4] = ship[4] + (counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['shield']-ship[4])/2 # les shields se rechargent de la moitié de leurs pertes si ils n'ont pas été détruits
+                #for ship in ships:
+                #    if ship[4] > 0:
+                #        ship[4] = ship[4] + (counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['shield']-ship[4])/2 # les shields se rechargent de la moitié de leurs pertes si ils n'ont pas été détruits
                 if targets == 0: # battle finished ?!
                     r -= 1
                     break
