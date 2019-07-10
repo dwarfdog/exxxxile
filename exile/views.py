@@ -5865,8 +5865,10 @@ def radars(request):
                 ' from_radarstrength, to_radarstrength, alliances.tag, radar_jamming, destplanet_radar_jamming ' +
                 ' FROM vw_fleets_moving v ' +
                 '   LEFT JOIN alliances ON alliances.id = owner_alliance_id ' +
-                ' WHERE userid=%(userid)s AND ( planetid = %(planetid)s OR destplanetid = %(planetid)s ) ' +
-                ' ORDER BY remaining_time', {'userid': gcontext['exile_user'].id, 'planetid': planetid})
+                ' WHERE userid=%(userid)s AND ( ' +
+                '   (planetid >= sp_first_planet(%(galaxy)s,%(sector)s) AND planetid <= sp_last_planet(%(galaxy)s,%(sector)s)) OR ' +
+                '   (destplanetid >= sp_first_planet(%(galaxy)s,%(sector)s) AND destplanetid <= sp_last_planet(%(galaxy)s,%(sector)s))) ' +
+                ' ORDER BY remaining_time', {'userid': gcontext['exile_user'].id, 'galaxy': galaxy, 'sector': sector})
             res = cursor.fetchall()
             relation = -100 # -100 = do not display the fleet
             loosing_time = 0 # seconds before our radar loses the fleet
