@@ -5750,7 +5750,7 @@ def allianceinvitations(request):
                 if request.session.get(sLeaveCost) < 2000:
                     request.session[sLeaveCost] = 0
                 gcontext["credits"] = request.session.get(sLeaveCost)
-                gcontext['leave'] = {}
+                gcontext['leave'] = {'fake':True}
                 if request.session.get(sLeaveCost) > 0:
                     gcontext["leave"]["charges"] = True
                 if leave_status != "":
@@ -7246,7 +7246,7 @@ def production(request):
             sending_enabled = 0
             sendreceive = {'sent':{},'received':{}}
             for re in res:
-                if re[0] == CurrentPlanet:
+                if re[0] == gcontext['CurrentPlanet']:
                     sending = sending + 1
                     if re[14]:
                         sending_enabled += 1
