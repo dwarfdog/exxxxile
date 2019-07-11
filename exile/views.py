@@ -5780,7 +5780,7 @@ def allianceinvitations(request):
         with connection.cursor() as cursor:
             cursor.execute("SELECT sp_alliance_decline_invitation(%s, %s)", [gcontext['exile_user'].id, alliance_tag])
     elif action == "leave":
-        if request.session.get(sLeaveCost, "") and request.POST.get("leave") == 1:
+        if request.session.get(sLeaveCost, 0) and request.POST.get("leave") == 1:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT sp_alliance_leave(%s, %s)", [gcontext['exile_user'].id, request.session.get(sLeaveCost)])
                 res = cursor.fetchone()
