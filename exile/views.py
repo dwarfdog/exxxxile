@@ -5746,12 +5746,12 @@ def allianceinvitations(request):
             if gcontext['exile_user'].alliance_id and gcontext["can_join_alliance"]:
                 cursor.execute("SELECT sp_alliance_get_leave_cost(%s)", [gcontext['exile_user'].id])
                 res = cursor.fetchone()
-                request.session[sLeaveCost] = res[0]
-                if request.session.get(sLeaveCost) < 2000:
-                    request.session[sLeaveCost] = 0
-                gcontext["credits"] = request.session.get(sLeaveCost)
+                request.session['sLeaveCost'] = res[0]
+                if request.session.get('sLeaveCost') < 2000:
+                    request.session['sLeaveCost'] = 0
+                gcontext["credits"] = request.session.get('sLeaveCost')
                 gcontext['leave'] = {'fake':True}
-                if request.session.get(sLeaveCost) > 0:
+                if request.session.get('sLeaveCost') > 0:
                     gcontext["leave"]["charges"] = True
                 if leave_status != "":
                     gcontext["leave"][leave_status] = True
@@ -5780,9 +5780,9 @@ def allianceinvitations(request):
         with connection.cursor() as cursor:
             cursor.execute("SELECT sp_alliance_decline_invitation(%s, %s)", [gcontext['exile_user'].id, alliance_tag])
     elif action == "leave":
-        if request.session.get(sLeaveCost, 0)>=0 and request.POST.get("leave") == 1:
+        if request.POST.get("leave"):
             with connection.cursor() as cursor:
-                cursor.execute("SELECT sp_alliance_leave(%s, %s)", [gcontext['exile_user'].id, request.session.get(sLeaveCost)])
+                cursor.execute("SELECT sp_alliance_leave(%s, %s)", [gcontext['exile_user'].id, request.session.get('sLeaveCost',0)])
                 res = cursor.fetchone()
                 if res[0] == 0:
                     return HttpResponseRedirect(reverse('exile:alliance'))
