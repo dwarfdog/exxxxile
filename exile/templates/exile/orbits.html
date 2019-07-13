@@ -88,7 +88,7 @@ function cargoDesc(id){
 								</table>
 							</td>
 							<td align="center" width="15%" nowrap>
-								<input type="text" size="5" value="{{ ship.ship_quantity }}" id="s{{ ship.id }}" name="{{ id }}s{{ ship.id }}"> <a href="#" onclick="setval('s{{ ship.id }}', {{ ship.quantity }}); return false;">max</a>
+								<input type="text" size="5" value="{{ ship.ship_quantity }}" id="{{ id }}s{{ ship.id }}" name="{{ id }}s{{ ship.id }}"> <a href="#" onclick="setval('{{ id }}s{{ ship.id }}', {{ ship.quantity }}); return false;">max</a>
 							</td>
 						</tr>
 					{% endfor %}
