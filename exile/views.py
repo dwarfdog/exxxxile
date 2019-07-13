@@ -8295,7 +8295,7 @@ def mails(request):
             nb_pages = int(size/displayed)
             if nb_pages*displayed < size:
                 nb_pages += 1
-            if offset >= nb_pages:
+            if nb_pages and offset >= nb_pages:
                 offset = nb_pages - 1
             gcontext["offset"] = offset
             if nb_pages > 50:
@@ -8394,7 +8394,7 @@ def mails(request):
             offset = 0
         if offset > 50:
             offset=50
-        messages_filter = "datetime > now()-INTERVAL '2 weeks' AND deleted=false AND "
+        messages_filter = "datetime > now()-INTERVAL '2 weeks' AND "
         # if gcontext['exile_user'].privilege >= 100:
         #     messages_filter = ""
         # get total number of mails that could be displayed
