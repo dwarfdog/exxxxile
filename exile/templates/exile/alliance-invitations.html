@@ -26,7 +26,7 @@
         {% csrf_token %}
         <table class="default" width=700>
             <tr class="title"><td>Quitter l'alliance</td></tr>
-            <tr class="smallitem"><td align=center><input type="checkbox" class="checkbox" name="leave" id="leave" value="1"><label for="leave">Je quitte mon alliance actuelle{% if leave.charges %}, les frais s'élevant à {{ credits }}&nbsp;crédits{% endif %}.</label><br/><br/><span class="warning">Attention, vous ne pourrez pas créer ou rejoindre d'alliance pendant {{ hours_before_rejoin }} heures.</span></td></tr>
+            <tr class="smallitem"><td align=center><input type="checkbox" class="checkbox" name="leave" id="leave" value="1"><label for="leave">Je quitte mon alliance actuelle{% if leave.charges %}, les frais s'élevant à {{ credits }}&nbsp;crédits{% endif %}.</label><br/><br/><span class="warning">Attention, vous ne pourrez pas créer ou rejoindre d'alliance pendant {{ hours_before_rejoin }} heures après le temps nécessaire pour quitter votre alliance ({{ hours_before_leave }}h).</span></td></tr>
             <tr class="smallitem"><td align=center><input type="submit" name="submit" value="Valider"></td></tr>
             {% if leave.too_many_leaving %}<tr><td class="error">Trop de membres sont déjà en train de quitter l'alliance, vous devez attendre avant de pouvoir quitter à votre tour</td></tr>{% endif %}
             {% if leave.not_enough_credits %}<tr><td class="error">Fonds insuffisants</td></tr>{% endif %}

@@ -5709,6 +5709,9 @@ def allianceinvitations(request):
             cursor.execute("SELECT date_part('epoch', const_interval_before_join_new_alliance()) / 3600")
             res =cursor.fetchone()
             gcontext["hours_before_rejoin"] = res[0]
+            cursor.execute("SELECT date_part('epoch', const_interval_alliance_leave ()) / 3600")
+            res =cursor.fetchone()
+            gcontext["hours_before_leave"] = res[0]
             cursor.execute("SELECT alliances.tag, alliances.name, alliances_invitations.created, users.login" +
                     " FROM alliances_invitations" +
                     "       INNER JOIN alliances ON alliances.id = alliances_invitations.allianceid" +
@@ -5785,7 +5788,7 @@ def allianceinvitations(request):
                 cursor.execute("SELECT sp_alliance_leave(%s, %s)", [gcontext['exile_user'].id, request.session.get('sLeaveCost',0)])
                 res = cursor.fetchone()
                 if res[0] == 0:
-                    return HttpResponseRedirect(reverse('exile:alliance'))
+                    return HttpResponseRedirect(reverse('exile:alliancemembers'))
                 else:
                     leave_status = "not_enough_credits"
     DisplayInvitations()
@@ -8327,7 +8330,7 @@ def mails(request):
                     "   LEFT JOIN messages_ignore_list ON (userid=%s AND ignored_userid = users.id)" +
                     " WHERE " + search_cond + " ownerid = %s" +
                     " ORDER BY datetime DESC, messages.id DESC" +
-                    " OFFSET " + str(offset*displayed) + " LIMIT " + str(displayed), [gcontext['exile_user'].id, gcontext['exile_user'].id])
+                    " OFFSET " + str(max(offset*displayed,0)) + " LIMIT " + str(displayed), [gcontext['exile_user'].id, gcontext['exile_user'].id])
             res = cursor.fetchall()
             i = 0
             gcontext["mail"] = {}
