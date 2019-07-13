@@ -8657,6 +8657,8 @@ def orbits(request):
     # Create the new fleet
     def NewFleet(CurrentPlanet):
         fleetname = request.POST.get(str(CurrentPlanet) + "name", "").strip()
+        if not fleetname:
+            return
         if not isValidName(fleetname):
             gcontext['planets'][CurrentPlanet]['fleet_creation_error'] = "fleet_name_invalid"
             return
