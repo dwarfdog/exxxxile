@@ -8694,7 +8694,7 @@ def orbits(request):
     global config
     gcontext = request.session.get('gcontext',{})
     gcontext['planets'] = {}
-    gcontext['selectedmenu'] = 'orbit'
+    gcontext['selectedmenu'] = 'orbits'
     gcontext['menu'] = menu(request)
     gcontext['plaurl'] = reverse('exile:orbits')
     for CurrentPlanet in checkVWPlanetListCache(request):
