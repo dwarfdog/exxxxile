@@ -817,6 +817,54 @@ def logged(function):
             if fleet:
                 gcontext['CurrentFleet'] = fleet.id
                 request.session['CurrentFleet'] = fleet.id
+        """
+        if oPlayerInfo("credits") < 0 then
+            dim bankrupt_hours
+            bankrupt_hours = oPlayerInfo("credits_bankruptcy").Value
+'           if bankrupt_hours < 36 then
+                tpl_layout.AssignValue "bankruptcy_hours", bankrupt_hours
+                tpl_layout.Parse "creditswarning.hours"
+'           else
+'               tpl_layout.AssignValue "bankruptcy_days", Round(bankrupt_hours / 24)
+'               tpl_layout.Parse "creditswarning.days"
+'           end if
+            tpl_layout.Parse "creditswarning"
+        end if
+        '
+        ' Fill admin info
+        '
+        if Session(sPrivilege) > 100 then
+            dim oRs
+            if isImpersonating then
+                tpl_layout.AssignValue "login", oPlayerInfo("login")
+                tpl_layout.Parse "impersonating"
+            end if
+            ' Assign the time taken to generate the page
+            tpl_layout.AssignValue "render_time",  Timer() - StartTime
+            ' Assign number of logged players
+            set oRs = oConn.Execute("SELECT int4(count(*)) FROM vw_players WHERE lastactivity >= now()-INTERVAL '20 minutes'")
+            tpl_layout.AssignValue "players", oRs(0)
+            tpl_layout.Parse "menu.dev"
+            if oPlayerInfo("privilege") = -2 then
+                set oRs = oConn.Execute("SELECT start_time, min_end_time, end_time FROM users_holidays WHERE userid="&UserId)
+                if not oRs.EOF then
+                    tpl_layout.AssignValue "start_datetime", oRs(0).Value
+                    tpl_layout.AssignValue "min_end_datetime", oRs(1).Value
+                    tpl_layout.AssignValue "end_datetime", oRs(2).Value
+                    tpl_layout.Parse "onholidays"
+                end if
+            end if
+            if oPlayerInfo("privilege") = -1 then
+                tpl_layout.AssignValue "ban_datetime", oPlayerInfo("ban_datetime").Value
+                tpl_layout.AssignValue "ban_reason", oPlayerInfo("ban_reason").Value
+                tpl_layout.AssignValue "ban_reason_public", oPlayerInfo("ban_reason_public").Value
+                if not IsNull(oPlayerInfo("ban_expire")) then
+                    tpl_layout.AssignValue "ban_expire_datetime", oPlayerInfo("ban_expire").Value
+                    tpl_layout.Parse "banned.expire"
+                end if
+                tpl_layout.Parse "banned"
+            end if
+        """
         if IsPlayerAccount(request):
             # Redirect to locked page
             if gcontext['exile_user'].privilege == -1:
@@ -919,6 +967,45 @@ def connect(request):
 
 @construct
 @logged
+def maintenance(request):
+    """
+    function sqlValue(value)
+    if isNull(value) then
+        sqlValue = "NULL"
+    else
+        sqlValue = "'" & value & "'"
+    end if
+end function
+'
+' display page
+'
+sub DisplayPage()
+    dim content
+    set content = GetTemplate("maintenance")
+    content.AssignValue "skin", "s_transparent"
+'   dim query, oRs
+'   query = "SELECT id, max_commanders, max_planets FROM db_security_levels"
+'   set oRs = oConn.Execute(query)
+'   while not oRs.EOF
+'       content.AssignValue "security" & oRs(0).value & "_max_commanders", oRs(1).value
+'       content.AssignValue "security" & oRs(0).value & "_max_planets", oRs(2).value
+'       oRs.MoveNext
+'   wend
+    
+    content.Parse ""
+    Response.write content.Output
+end sub
+'
+' process page
+'
+DisplayPage
+    """
+    gcontext = request.session.get('gcontext',{})
+    context = gcontext
+    return render(request, 'exile/maintenance.html', context)
+
+@construct
+@logged
 def wait(request):
     gcontext = request.session.get('gcontext',{})
     context = gcontext
@@ -1003,8 +1090,33 @@ def start(request):
 @logged
 def holidays(request):
     gcontext = request.session.get('gcontext',{})
-    context = gcontext
-    return render(request, 'exile/holidays.html', context)
+    # retrieve remaining time
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT login," +
+            " (SELECT int4(date_part('epoch', min_end_time-now())) FROM users_holidays WHERE userid=id)," +
+            " (SELECT int4(date_part('epoch', end_time-now())) FROM users_holidays WHERE userid=id)" +
+            " FROM users WHERE privilege=-2 AND id=%s", [gcontext['exile_user'].id])
+        row = cursor.fetchone()
+        if not row:
+            return HttpResponseRedirect(reverse('logout'))
+        # check to unlock holidays mode
+        action = request.POST.get("unlock")
+        if action and row[1] < 0:
+            cursor.execute("SELECT sp_stop_holidays(%s)", [gcontext['exile_user'].id])
+            return HttpResponseRedirect(reverse('overview'))
+        # if remaining time is negative, return to overview page
+        if row[2] <= 0:
+            return HttpResponseRedirect(reverse('overview'))
+        gcontext["login"] = row[0]
+        gcontext["remaining_time"] = row[2]
+        # only allow to unlock the account after 2 days of holidays
+        if row[1] < 0:
+            gcontext["unlock"] = True
+        else:
+            gcontext["remaining_time_before_unlock"] = row[1]
+            gcontext["cant_unlock"] = True
+        context = gcontext
+        return render(request, 'exile/holidays.html', context)
 
 @construct
 @logged
@@ -1016,6 +1128,50 @@ def banned(request):
 @construct
 @logged
 def locked(request):
+    """
+    UserId = ToInt(Session("user"), "")
+if UserId = "" then
+    response.redirect "/"
+    response.end
+end if
+dim query, oRs, action, content
+' retrieve remaining time
+query = "SELECT login, int4(date_part('epoch', ban_expire-now())), ban_reason_public, (SELECT email FROM users WHERE id=u.ban_adminuserid)" &_
+        " FROM users AS u" &_
+        " WHERE privilege=-1 AND id=" & UserId
+set oRs = oConn.Execute(query)
+if oRs.EOF then
+    response.redirect "/"
+    response.end
+end if
+set content = GetTemplate("locked")
+' check to unlock holidays mode
+action = Request.Form("unlock")
+if action <> "" and oRs(1) <= 0 then
+    oConn.Execute "UPDATE users SET privilege=0, ban_expire=NULL WHERE ban_expire <= now() AND privilege=-1 AND id="&UserId, , 128
+    Response.Redirect "/game/overview.asp"
+    Response.End
+end if
+content.AssignValue "login", oRs(0)
+content.AssignValue "remaining_time_before_unlock", oRs(1)
+'content.AssignValue "admin_email", oRs(3)
+content.AssignValue "admin_email", supportMail
+content.AssignValue "universe", Universe
+if not IsNull(oRs(2)) and oRs(2) <> "" then
+    content.AssignValue "reason", oRs(2)
+    content.Parse "reason"
+end if
+if not IsNull(oRs(1)) then
+    if oRs(1) < 0 then
+        content.Parse "unlock"
+    else
+        content.AssignValue "remaining_time_before_unlock", oRs(1)
+        content.Parse "cant_unlock"
+    end if
+end if
+content.Parse ""
+Response.write content.Output
+    """
     gcontext = request.session.get('gcontext',{})
     context = gcontext
     return render(request, 'exile/locked.html', context)
@@ -1023,6 +1179,123 @@ def locked(request):
 @construct
 @logged
 def gameover(request):
+    """
+dim query, oRs, content, UserId
+dim reset_error
+reset_error = 0
+UserId = ToInt(Session("user"), "")
+if UserId = "" then
+    response.redirect "/"
+    response.end
+end if
+dim planets
+' check that the player has no more planets
+set oRs = oConn.Execute("SELECT int4(count(1)) FROM nav_planet WHERE ownerid=" & UserId)
+if oRs.EOF then
+    response.redirect "/"
+    response.end
+end if
+planets = oRs(0)
+' retreive player username and number of resets
+dim username, resets, bankruptcy, research_done
+query = "SELECT login, resets, credits_bankruptcy, int4(score_research) FROM users WHERE id=" & UserId
+set oRs = oConn.Execute(query)
+username = oRs(0)
+resets = oRs(1)
+bankruptcy = oRs(2)
+research_done = oRs(3)
+' still have planets
+if planets > 0 and bankruptcy > 0 then
+    response.redirect "/"
+    response.end
+end if
+if resets = 0 then
+    response.redirect "start.asp"
+    response.end
+end if
+dim changeNameError: changeNameError = ""
+if allowedRetry then
+    dim action
+    action = Request.Form("action")
+    if action = "retry" then
+        ' check if user wants to change name
+        if Request.Form("login") <> username then
+'           connectNexusDB()
+            ' check that the login is not banned
+            set oRs = oConn.Execute("SELECT 1 FROM banned_logins WHERE " & dosql(username) & " ~* login LIMIT 1;")
+            if oRs.EOF then
+                ' check that the username is correct
+                if not isValidName(Request.Form("login")) then
+                    changeNameError = "check_username"
+                else
+                    ' try to rename user and catch any error
+                    on error resume next
+                    oConn.Execute "UPDATE users SET alliance_id=null WHERE id=" & UserId
+                    oConn.Execute "UPDATE users SET login=" & dosql(Request.Form("login")) & " WHERE id=" & UserId
+                    if err.Number <> 0 then
+                        changeNameError = "username_exists"
+                    else
+                        ' update the commander name
+                        oConn.Execute "UPDATE commanders SET name=" & dosql(Request.Form("login")) & " WHERE name=" & dosql(username) & " AND ownerid=" & UserId
+                    end if
+                    on error goto 0
+                end if
+            end if
+        end if
+        if changeNameError = "" then
+            set oRs = oConn.Execute("SELECT sp_reset_account(" & UserId & "," & ToInt(Request.Form("galaxy"), 1) & ")")
+            if oRs(0) = 0 then
+                Response.Redirect "/game/overview.asp"
+                Response.End
+            else
+                reset_error = oRs(0)
+            end if
+        end if
+    elseif action = "abandon" then
+        oConn.Execute "UPDATE users SET deletion_date=now()/*+INTERVAL '2 days'*/ WHERE id=" & UserId, , 128
+        Response.Redirect "/"
+        Response.End
+    end if
+end if
+' display Game Over page
+set content = GetTemplate("game-over")
+content.AssignValue "login", username
+if changeNameError <> "" then action = "continue"
+if action = "continue" then
+    set oRs = oConn.Execute("SELECT id, recommended FROM sp_get_galaxy_info(" & UserId & ")")
+    while not oRs.EOF
+        content.AssignValue "id", oRs(0)
+        content.AssignValue "recommendation", oRs(1)
+        content.Parse "changename.galaxies.galaxy"
+        oRs.MoveNext
+    wend
+    content.Parse "changename.galaxies"
+    if changeNameError <> "" then
+        content.Parse "changename.error." & changeNameError
+        content.Parse "changename.error"
+    end if
+    content.Parse "changename"
+else
+    if allowedRetry then content.Parse "choice.retry"
+    content.Parse "choice"
+    if bankruptcy > 0 then
+        content.Parse "gameover"
+    else
+        content.Parse "bankrupt"
+    end if
+end if
+if reset_error <> 0 then
+    if reset_error = 4 then
+        content.Parse "no_free_planet"
+    else
+        content.AssignValue "userid", UserId
+        content.AssignValue "reset_error", reset_error
+        content.Parse "reset_error"
+    end if
+end if
+content.Parse ""
+Response.write content.Output
+    """
     gcontext = request.session.get('gcontext',{})
     context = gcontext
     return render(request, 'exile/game-over.html', context)
@@ -8259,6 +8532,179 @@ def orbit(request):
     gcontext['contextinfo'] = header(request)
     context = gcontext
     t = loader.get_template('exile/orbit.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
+def orbits(request):
+    e_no_error = 0
+    e_bad_name = 1
+    e_already_exists = 2
+    def DisplayFleets(CurrentPlanet):
+        # list the fleets near the planet
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," +
+                " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," +
+                " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation," +
+                " action, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" +
+                " FROM vw_fleets " +
+                " WHERE planetid=%s AND action != 1 AND action != -1" +
+                " ORDER BY upper(name)", [CurrentPlanet])
+            res = cursor.fetchall()
+            if not res:
+                gcontext['planets'][CurrentPlanet]["nofleets"] = True
+            gcontext['planets'][CurrentPlanet]['fleets'] = {}
+            for re in res:
+                manage = False
+                trade = False
+                fleet = {
+                    "id": re[0],
+                    "name": re[1],
+                    "size": re[4],
+                    "signature": re[5],
+                    "ownerid": re[20],
+                    "ownername": re[21],
+                    "cargo": re[27]+re[28]+re[29]+re[30]+re[31],
+                    "cargo_ore": re[27],
+                    "cargo_hydrocarbon": re[28],
+                    "cargo_scientists": re[29],
+                    "cargo_soldiers": re[30],
+                    "cargo_workers": re[31],
+                }
+                if re[8]:
+                    fleet["commanderid"] = re[8]
+                    fleet["commandername"] = re[9]
+                    fleet["commander"] = True
+                else:
+                    fleet["nocommander"] = True
+                if re[26] == 2:
+                    fleet["recycling"] = True
+                elif re[3]:
+                    fleet["fighting"] = True
+                else:
+                    fleet["patrolling"] = True
+                if re[17] == config.rHostile or re[17] == config.rWar:
+                        fleet["enemy"] = True
+                elif re[17] == config.rAlliance:
+                        fleet["ally"] = True
+                elif re[17] == config.rFriend:
+                        fleet["friend"] = True
+                elif re[17] == config.rSelf:
+                        if re[26] == 0:
+                            fake = True
+                            #   manage = True
+                            #   trade = True
+                        fleet["owner"] = True
+                if manage:
+                    fleet["manage"] = True
+                else:
+                    fleet["cant_manage"] = True
+                if trade:
+                    fleet["trade"] = True
+                else:
+                    fleet["cant_trade"] = True
+                gcontext['planets'][CurrentPlanet]['fleets'][re[0]] = fleet.copy()
+            # list the ships on the planet to create a new fleet
+            cursor.execute("SELECT shipid, quantity," +
+                    " signature, capacity, handling, speed, (weapon_dmg_em + weapon_dmg_explosive + weapon_dmg_kinetic + weapon_dmg_thermal) AS weapon_power," +
+                    " weapon_turrets, weapon_tracking_speed, hull, shield, recycler_output, long_distance_capacity, droppods" +
+                    " FROM planet_ships LEFT JOIN db_ships ON (planet_ships.shipid = db_ships.id)" +
+                    " WHERE planetid=%s" +
+                    " ORDER BY category, label", [CurrentPlanet])
+            res = cursor.fetchall()
+            if not res:
+                gcontext['planets'][CurrentPlanet]["noships"] = True
+            gcontext['planets'][CurrentPlanet]['new'] = {}
+            for re in res:
+                ship = {
+                    "id": re[0],
+                    "quantity": re[1],
+                    "name": getShipLabel(re[0]),
+                    "description": getShipDescription(re[0]),
+                    "ship_signature": re[2],
+                    "ship_cargo": re[3],
+                    "ship_handling": re[4],
+                    "ship_speed": re[5],
+                    "ship_hull": re[9],
+                }
+                if gcontext['planets'][CurrentPlanet]['fleet_creation_error'] != "":
+                    ship["ship_quantity"] = request.POST.get("s" + str(re[0]), "0")
+                    if not ship["ship_quantity"].isdigit():
+                        ship["ship_quantity"] = "0"
+                if re[6] > 0:
+                    ship["ship_turrets"] = re[7]
+                    ship["ship_power"] = re[6]
+                    ship["ship_tracking_speed"] = re[8]
+                    ship["attack"] = True
+                if re[10] > 0:
+                    ship["ship_shield"] = re[10]
+                    ship["shield"] = True
+                if re[11] > 0:
+                    ship["ship_recycler_output"] = re[11]
+                    ship["recycler_output"] = True
+                if re[12] > 0:
+                    ship["ship_long_distance_capacity"] = re[12]
+                    ship["long_distance_capacity"] = True
+                if re[13] > 0:
+                    ship["ship_droppods"] = re[13]
+                    ship["droppods"] = True
+                gcontext['planets'][CurrentPlanet]['new'][re[0]] = ship.copy()
+            # Assign the fleet name passed in form body
+            if gcontext['planets'][CurrentPlanet]['fleet_creation_error'] != "":
+                gcontext['planets'][CurrentPlanet]["fleetname"] = request.POST.get(str(CurrentPlanet) + "name", "")
+                gcontext['planets'][CurrentPlanet]["error"] = gcontext['planets'][CurrentPlanet]['fleet_creation_error']
+    # Create the new fleet
+    def NewFleet(CurrentPlanet):
+        fleetname = request.POST.get(str(CurrentPlanet) + "name", "").strip()
+        if not isValidName(fleetname):
+            gcontext['planets'][CurrentPlanet]['fleet_creation_error'] = "fleet_name_invalid"
+            return
+        # create a new fleet at the current planet with the given name
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT sp_create_fleet(%s, %s, %s)", [gcontext['exile_user'].id, CurrentPlanet, fleetname])
+            res = cursor.fetchone()
+            if not res:
+                return
+            fleetid = res[0]
+            if fleetid < 0:
+                if fleetid == -3:
+                    gcontext['planets'][CurrentPlanet]['fleet_creation_error'] = "fleet_too_many"
+                else:
+                    gcontext['planets'][CurrentPlanet]['fleet_creation_error'] = "fleet_name_already_used"
+                return
+            cant_use_ship = False
+            for i in retrieveShipsCache():
+                shipid = i[0]
+                try:
+                    quantity = int(request.POST.get(str(CurrentPlanet) + "s" + str(shipid)), 0)
+                except (KeyError, Exception):
+                    quantity = 0
+                # add the ships type by type
+                if quantity > 0:
+                    cursor.execute("SELECT * FROM sp_transfer_ships_to_fleet(%s, %s, %s, %s)", [gcontext['exile_user'].id, fleetid, shipid, quantity])
+                    cant_use_ship = cant_use_ship or res[0] == 3
+            #oConn.Execute "UPDATE fleets SET attackonsight=firepower>0 WHERE id=" & fleetid & " AND ownerid=" & UserID, , adExecuteNoRecords
+            # delete the fleet if there is no ships in it
+            cursor.execute("DELETE FROM fleets WHERE size=0 AND id=%s AND ownerid=%s", [fleetid, gcontext['exile_user'].id])
+            if cant_use_ship and gcontext['planets'][CurrentPlanet]['fleet_creation_error'] == "":
+                gcontext['planets'][CurrentPlanet]['fleet_creation_error'] = "ship_cant_be_used"
+    global config
+    gcontext = request.session.get('gcontext',{})
+    gcontext['planets'] = {}
+    gcontext['selectedmenu'] = 'orbit'
+    gcontext['menu'] = menu(request)
+    gcontext['plaurl'] = reverse('exile:orbits')
+    for CurrentPlanet in checkVWPlanetListCache(request):
+        gcontext['planets'][CurrentPlanet[0]] = {'fleet_creation_error':'','name':CurrentPlanet[1]}
+    if request.GET.get("a", "") == "new":
+        for CurrentPlanet in checkVWPlanetListCache(request):
+            NewFleet(CurrentPlanet[0])
+    for CurrentPlanet in checkVWPlanetListCache(request):
+        DisplayFleets(CurrentPlanet[0])
+    gcontext['contextinfo'] = header(request)
+    context = gcontext
+    t = loader.get_template('exile/orbits.html')
     context['content'] = t.render(gcontext, request)
     return render(request, 'exile/layout.html', context)
 
