@@ -817,54 +817,42 @@ def logged(function):
             if fleet:
                 gcontext['CurrentFleet'] = fleet.id
                 request.session['CurrentFleet'] = fleet.id
-        """
-        if oPlayerInfo("credits") < 0 then
-            dim bankrupt_hours
-            bankrupt_hours = oPlayerInfo("credits_bankruptcy").Value
-'           if bankrupt_hours < 36 then
-                tpl_layout.AssignValue "bankruptcy_hours", bankrupt_hours
-                tpl_layout.Parse "creditswarning.hours"
-'           else
-'               tpl_layout.AssignValue "bankruptcy_days", Round(bankrupt_hours / 24)
-'               tpl_layout.Parse "creditswarning.days"
-'           end if
-            tpl_layout.Parse "creditswarning"
-        end if
-        '
-        ' Fill admin info
-        '
-        if Session(sPrivilege) > 100 then
-            dim oRs
-            if isImpersonating then
-                tpl_layout.AssignValue "login", oPlayerInfo("login")
-                tpl_layout.Parse "impersonating"
-            end if
-            ' Assign the time taken to generate the page
-            tpl_layout.AssignValue "render_time",  Timer() - StartTime
-            ' Assign number of logged players
-            set oRs = oConn.Execute("SELECT int4(count(*)) FROM vw_players WHERE lastactivity >= now()-INTERVAL '20 minutes'")
-            tpl_layout.AssignValue "players", oRs(0)
-            tpl_layout.Parse "menu.dev"
-            if oPlayerInfo("privilege") = -2 then
-                set oRs = oConn.Execute("SELECT start_time, min_end_time, end_time FROM users_holidays WHERE userid="&UserId)
-                if not oRs.EOF then
-                    tpl_layout.AssignValue "start_datetime", oRs(0).Value
-                    tpl_layout.AssignValue "min_end_datetime", oRs(1).Value
-                    tpl_layout.AssignValue "end_datetime", oRs(2).Value
-                    tpl_layout.Parse "onholidays"
-                end if
-            end if
-            if oPlayerInfo("privilege") = -1 then
-                tpl_layout.AssignValue "ban_datetime", oPlayerInfo("ban_datetime").Value
-                tpl_layout.AssignValue "ban_reason", oPlayerInfo("ban_reason").Value
-                tpl_layout.AssignValue "ban_reason_public", oPlayerInfo("ban_reason_public").Value
-                if not IsNull(oPlayerInfo("ban_expire")) then
-                    tpl_layout.AssignValue "ban_expire_datetime", oPlayerInfo("ban_expire").Value
-                    tpl_layout.Parse "banned.expire"
-                end if
-                tpl_layout.Parse "banned"
-            end if
-        """
+        if gcontext['exile_user'].credits < 0:
+            bankrupt_hours = ogcontext['exile_user'].credits_bankruptcy
+            gcontext["creditswarning"] = {}
+#           if bankrupt_hours < 36:
+            gcontext["bankruptcy_hours"] = bankrupt_hours
+            gcontext["creditswarning"]["hours"] = True
+#           else:
+#               gcontext["bankruptcy_days"] = round(bankrupt_hours / 24)
+#               gcontext["creditswarning"]["days"] = True
+        isImpersonating = False
+        if isImpersonating:
+            gcontext["impersonating"] = True
+            gcontext["impersonating"]["login"] = gcontext['exile_user'].login
+        # Assign number of logged players
+        with connection.cursor() as cursor:
+            if gcontext['exile_user'].privilege > 100:
+                cursor.execute("SELECT int4(count(*)) FROM vw_players WHERE lastactivity >= now()-INTERVAL '20 minutes'")
+                row = cursor.fetchone()
+                gcontext["players"] = row[0]
+                gcontext["dev"] = True
+            if gcontext['exile_user'].privilege == -2:
+                cursor.execute("SELECT start_time, min_end_time, end_time FROM users_holidays WHERE userid=%s", [gcontext['exile_user'].id])
+                row = cursor.fetchone()
+                if row:
+                    gcontext["onholidays"] = True
+                    gcontext["onholidays"]["start_datetime"] = row[0]
+                    gcontext["onholidays"]["min_end_datetime"] = row[1]
+                    gcontext["onholidays"]["end_datetime"] = row[2]
+            if gcontext['exile_user'].privilege == -1:
+                gcontext["banned"] = True
+                gcontext["banned"]["ban_datetime"] = gcontext['exile_user'].ban_datetime
+                gcontext["banned"]["ban_reason"] = gcontext['exile_user'].ban_reason
+                gcontext["banned"]["ban_reason_public"] = gcontext['exile_user'].ban_reason_public
+                if gcontext['exile_user'].ban_expire:
+                    gcontext["banned"]["expire"] = True
+                    gcontext["banned"]["ban_expire_datetime"] = gcontext['exile_user'].ban_expire
         if IsPlayerAccount(request):
             # Redirect to locked page
             if gcontext['exile_user'].privilege == -1:
@@ -968,38 +956,6 @@ def connect(request):
 @construct
 @logged
 def maintenance(request):
-    """
-    function sqlValue(value)
-    if isNull(value) then
-        sqlValue = "NULL"
-    else
-        sqlValue = "'" & value & "'"
-    end if
-end function
-'
-' display page
-'
-sub DisplayPage()
-    dim content
-    set content = GetTemplate("maintenance")
-    content.AssignValue "skin", "s_transparent"
-'   dim query, oRs
-'   query = "SELECT id, max_commanders, max_planets FROM db_security_levels"
-'   set oRs = oConn.Execute(query)
-'   while not oRs.EOF
-'       content.AssignValue "security" & oRs(0).value & "_max_commanders", oRs(1).value
-'       content.AssignValue "security" & oRs(0).value & "_max_planets", oRs(2).value
-'       oRs.MoveNext
-'   wend
-    
-    content.Parse ""
-    Response.write content.Output
-end sub
-'
-' process page
-'
-DisplayPage
-    """
     gcontext = request.session.get('gcontext',{})
     context = gcontext
     return render(request, 'exile/maintenance.html', context)
@@ -1016,7 +972,22 @@ def start(request):
     def sp_get_galaxy_info(userId):
         with connection.cursor() as cursor:
             cursor.execute('SELECT id, recommended FROM sp_get_galaxy_info(%s)', [userId])
-            return cursor.fetchall()
+            rows = cursor.fetchall()
+            context['galaxies'] = {}
+            for row in rows:
+                context['galaxies'][row[0]] = {'id':row[0],'recommended':row[1]}
+        sp_get_galaxy_infos()
+    def sp_get_galaxy_infos():
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT id FROM nav_galaxies WHERE allow_new_players=true ORDER BY id')
+            rows = cursor.fetchall()
+            for row in rows:
+                cursor.execute('SELECT COUNT(DISTINCT ownerid) FROM nav_planet WHERE galaxy=%s AND ownerid IS NOT NULL AND ownerid > 10', [row[0]]);
+                row2 = cursor.fetchone()
+                context['galaxies'][row[0]]['players'] = row2[0]
+                cursor.execute('SELECT COUNT(id) FROM nav_planet WHERE galaxy=%s AND ownerid IS NOT NULL AND ownerid > 10', [row[0]]);
+                row2 = cursor.fetchone()
+                context['galaxies'][row[0]]['colonies'] = row2[0]
     def is_first_login(userId):
         with connection.cursor() as cursor:
             cursor.execute('SELECT login FROM users WHERE resets=0 AND id=%s', [userId])
@@ -1080,7 +1051,7 @@ def start(request):
             return init_player(userid, galaxy, orientation)
             #except (KeyError, Exception):
             #    result = 2
-    context['galaxies'] = sp_get_galaxy_info(request.session.get('sUser'))
+    sp_get_galaxy_info(request.session.get('sUser'))
     context['result'] = result
     context['selected'] = galaxy
     context['login'] = userName
@@ -1098,15 +1069,15 @@ def holidays(request):
             " FROM users WHERE privilege=-2 AND id=%s", [gcontext['exile_user'].id])
         row = cursor.fetchone()
         if not row:
-            return HttpResponseRedirect(reverse('logout'))
+            return HttpResponseRedirect(reverse('exile:index'))
         # check to unlock holidays mode
         action = request.POST.get("unlock")
         if action and row[1] < 0:
             cursor.execute("SELECT sp_stop_holidays(%s)", [gcontext['exile_user'].id])
-            return HttpResponseRedirect(reverse('overview'))
+            return HttpResponseRedirect(reverse('exile:index'))
         # if remaining time is negative, return to overview page
         if row[2] <= 0:
-            return HttpResponseRedirect(reverse('overview'))
+            return HttpResponseRedirect(reverse('exile:index'))
         gcontext["login"] = row[0]
         gcontext["remaining_time"] = row[2]
         # only allow to unlock the account after 2 days of holidays
@@ -1129,48 +1100,33 @@ def banned(request):
 @logged
 def locked(request):
     """
-    UserId = ToInt(Session("user"), "")
-if UserId = "" then
-    response.redirect "/"
-    response.end
-end if
-dim query, oRs, action, content
-' retrieve remaining time
-query = "SELECT login, int4(date_part('epoch', ban_expire-now())), ban_reason_public, (SELECT email FROM users WHERE id=u.ban_adminuserid)" &_
-        " FROM users AS u" &_
-        " WHERE privilege=-1 AND id=" & UserId
-set oRs = oConn.Execute(query)
-if oRs.EOF then
-    response.redirect "/"
-    response.end
-end if
-set content = GetTemplate("locked")
-' check to unlock holidays mode
-action = Request.Form("unlock")
-if action <> "" and oRs(1) <= 0 then
-    oConn.Execute "UPDATE users SET privilege=0, ban_expire=NULL WHERE ban_expire <= now() AND privilege=-1 AND id="&UserId, , 128
-    Response.Redirect "/game/overview.asp"
-    Response.End
-end if
-content.AssignValue "login", oRs(0)
-content.AssignValue "remaining_time_before_unlock", oRs(1)
-'content.AssignValue "admin_email", oRs(3)
-content.AssignValue "admin_email", supportMail
-content.AssignValue "universe", Universe
-if not IsNull(oRs(2)) and oRs(2) <> "" then
-    content.AssignValue "reason", oRs(2)
-    content.Parse "reason"
-end if
-if not IsNull(oRs(1)) then
-    if oRs(1) < 0 then
-        content.Parse "unlock"
-    else
-        content.AssignValue "remaining_time_before_unlock", oRs(1)
-        content.Parse "cant_unlock"
-    end if
-end if
-content.Parse ""
-Response.write content.Output
+    # retrieve remaining time
+    query = "SELECT login, int4(date_part('epoch', ban_expire-now())), ban_reason_public, (SELECT email FROM users WHERE id=u.ban_adminuserid)" &_
+            " FROM users AS u" &_
+            " WHERE privilege=-1 AND id=" & UserId
+    set oRs = oConn.Execute(query)
+    if oRs.EOF then
+        response.redirect "/"
+    set content = GetTemplate("locked")
+    # check to unlock holidays mode
+    action = Request.Form("unlock")
+    if action <> "" and oRs(1) <= 0 then
+        oConn.Execute "UPDATE users SET privilege=0, ban_expire=NULL WHERE ban_expire <= now() AND privilege=-1 AND id="&UserId, , 128
+        Response.Redirect "/game/overview.asp"
+    content.AssignValue "login", oRs(0)
+    content.AssignValue "remaining_time_before_unlock", oRs(1)
+    #content.AssignValue "admin_email", oRs(3)
+    content.AssignValue "admin_email", supportMail
+    content.AssignValue "universe", Universe
+    if not IsNull(oRs(2)) and oRs(2) <> "" then
+        content.AssignValue "reason", oRs(2)
+        content.Parse "reason"
+    if not IsNull(oRs(1)) then
+        if oRs(1) < 0 then
+            content.Parse "unlock"
+        else
+            content.AssignValue "remaining_time_before_unlock", oRs(1)
+            content.Parse "cant_unlock"
     """
     gcontext = request.session.get('gcontext',{})
     context = gcontext
@@ -1179,124 +1135,94 @@ Response.write content.Output
 @construct
 @logged
 def gameover(request):
-    """
-dim query, oRs, content, UserId
-dim reset_error
-reset_error = 0
-UserId = ToInt(Session("user"), "")
-if UserId = "" then
-    response.redirect "/"
-    response.end
-end if
-dim planets
-' check that the player has no more planets
-set oRs = oConn.Execute("SELECT int4(count(1)) FROM nav_planet WHERE ownerid=" & UserId)
-if oRs.EOF then
-    response.redirect "/"
-    response.end
-end if
-planets = oRs(0)
-' retreive player username and number of resets
-dim username, resets, bankruptcy, research_done
-query = "SELECT login, resets, credits_bankruptcy, int4(score_research) FROM users WHERE id=" & UserId
-set oRs = oConn.Execute(query)
-username = oRs(0)
-resets = oRs(1)
-bankruptcy = oRs(2)
-research_done = oRs(3)
-' still have planets
-if planets > 0 and bankruptcy > 0 then
-    response.redirect "/"
-    response.end
-end if
-if resets = 0 then
-    response.redirect "start.asp"
-    response.end
-end if
-dim changeNameError: changeNameError = ""
-if allowedRetry then
-    dim action
-    action = Request.Form("action")
-    if action = "retry" then
-        ' check if user wants to change name
-        if Request.Form("login") <> username then
-'           connectNexusDB()
-            ' check that the login is not banned
-            set oRs = oConn.Execute("SELECT 1 FROM banned_logins WHERE " & dosql(username) & " ~* login LIMIT 1;")
-            if oRs.EOF then
-                ' check that the username is correct
-                if not isValidName(Request.Form("login")) then
-                    changeNameError = "check_username"
-                else
-                    ' try to rename user and catch any error
-                    on error resume next
-                    oConn.Execute "UPDATE users SET alliance_id=null WHERE id=" & UserId
-                    oConn.Execute "UPDATE users SET login=" & dosql(Request.Form("login")) & " WHERE id=" & UserId
-                    if err.Number <> 0 then
-                        changeNameError = "username_exists"
-                    else
-                        ' update the commander name
-                        oConn.Execute "UPDATE commanders SET name=" & dosql(Request.Form("login")) & " WHERE name=" & dosql(username) & " AND ownerid=" & UserId
-                    end if
-                    on error goto 0
-                end if
-            end if
-        end if
-        if changeNameError = "" then
-            set oRs = oConn.Execute("SELECT sp_reset_account(" & UserId & "," & ToInt(Request.Form("galaxy"), 1) & ")")
-            if oRs(0) = 0 then
-                Response.Redirect "/game/overview.asp"
-                Response.End
-            else
-                reset_error = oRs(0)
-            end if
-        end if
-    elseif action = "abandon" then
-        oConn.Execute "UPDATE users SET deletion_date=now()/*+INTERVAL '2 days'*/ WHERE id=" & UserId, , 128
-        Response.Redirect "/"
-        Response.End
-    end if
-end if
-' display Game Over page
-set content = GetTemplate("game-over")
-content.AssignValue "login", username
-if changeNameError <> "" then action = "continue"
-if action = "continue" then
-    set oRs = oConn.Execute("SELECT id, recommended FROM sp_get_galaxy_info(" & UserId & ")")
-    while not oRs.EOF
-        content.AssignValue "id", oRs(0)
-        content.AssignValue "recommendation", oRs(1)
-        content.Parse "changename.galaxies.galaxy"
-        oRs.MoveNext
-    wend
-    content.Parse "changename.galaxies"
-    if changeNameError <> "" then
-        content.Parse "changename.error." & changeNameError
-        content.Parse "changename.error"
-    end if
-    content.Parse "changename"
-else
-    if allowedRetry then content.Parse "choice.retry"
-    content.Parse "choice"
-    if bankruptcy > 0 then
-        content.Parse "gameover"
-    else
-        content.Parse "bankrupt"
-    end if
-end if
-if reset_error <> 0 then
-    if reset_error = 4 then
-        content.Parse "no_free_planet"
-    else
-        content.AssignValue "userid", UserId
-        content.AssignValue "reset_error", reset_error
-        content.Parse "reset_error"
-    end if
-end if
-content.Parse ""
-Response.write content.Output
-    """
+    global config
     gcontext = request.session.get('gcontext',{})
+    reset_error = 0
+    # check that the player has no more planets
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT int4(count(1)) FROM nav_planet WHERE ownerid=%s", [gcontext['exile_user'].id])
+        row = cursor.fetchone()
+        if row:
+            return HttpResponseRedirect(reverse('exile:index'))
+        planets = row[0]
+        # retreive player username and number of resets
+        cursor.execute("SELECT login, resets, credits_bankruptcy, int4(score_research) FROM users WHERE id=%s", [gcontext['exile_user'].id])
+        row = cursor.fetchone()
+        username = row[0]
+        resets = row[1]
+        bankruptcy = row[2]
+        research_done = row[3]
+        # still have planets
+        if planets > 0 and bankruptcy > 0:
+            return HttpResponseRedirect(reverse('exile:index'))
+        if resets == 0:
+            return HttpResponseRedirect(reverse('exile:start'))
+        changeNameError = ""
+        if config.allowedRetry:
+            action = request.POST.get("action","")
+            if action == "retry":
+                # check if user wants to change name
+                if request.POST.get("login","") and request.POST.get("login","") != username:
+        #           connectNexusDB()
+                    # check that the login is not banned
+                    cursor.execute("SELECT 1 FROM banned_logins WHERE %s ~* login LIMIT 1;", [username])
+                    row = cursor.fetchone()
+                    if not row:
+                        # check that the username is correct
+                        if not isValidName(request.POST.get("login")):
+                            changeNameError = "check_username"
+                        else:
+                            # try to rename user and catch any error
+                            try:
+                                cursor.execute("UPDATE users SET alliance_id=null WHERE id=%s", [gcontext['exile_user'].id])
+                                cursor.execute("UPDATE users SET login=%s WHERE id=%s", [request.POST.get("login"),gcontext['exile_user'].id])
+                                # update the commander name
+                                cursor.execute("UPDATE commanders SET name=%s WHERE name=%s AND ownerid=%s", [request.POST.get("login"),username,gcontext['exile_user'].id])
+                            except (KeyError,Exception):
+                                changeNameError = "username_exists"
+                if not changeNameError:
+                    try:
+                        galaxy = int(request.POST.get('galaxy','1'))
+                    except (KeyError,Exception):
+                        galaxy = 1
+                    cursor.execute("SELECT sp_reset_account(%s,%s)", [gcontext['exile_user'].id,galaxy])
+                    row = cursor.fetchone()
+                    if row[0] == 0:
+                        return HttpResponseRedirect(reverse('exile:overview'))
+                    else:
+                        reset_error = row[0]
+            elif action == "abandon":
+                cursor.execute("UPDATE users SET deletion_date=now() WHERE id=%s", [gcontext['exile_user'].id])
+            return HttpResponseRedirect(reverse('exile:index'))
+        # display Game Over page
+        gcontext["login"] = username
+        if changeNameError:
+            action = "continue"
+        if action == "continue":
+            cursor.execute("SELECT id, recommended FROM sp_get_galaxy_info(%s)", [gcontext['exile_user'].id])
+            rows = cursor.fetchall()
+            gcontext['changename'] = {'galaxies':{}}
+            for row in rows:
+                gcontext['changename']['galaxies'][row[0]] = {
+                    'id': row[0],
+                    'recommendation': row[1],
+                }
+            if changeNameError:
+                gcontext['changename']["error"] = {changeNameError:True}
+        else:
+            gcontext['choice'] = {}
+            if config.allowedRetry:
+                gcontext['choice']["retry"] = True
+            if bankruptcy > 0:
+                gcontext["gameover"] = True
+            else:
+                gcontext["bankrupt"] = True
+        if reset_error:
+            if reset_error == 4:
+                gcontext["no_free_planet"] = True
+            else:
+                gcontext["userid"] = gcontext['exile_user'].id
+                gcontext["reset_error"] = reset_error
     context = gcontext
     return render(request, 'exile/game-over.html', context)
 
