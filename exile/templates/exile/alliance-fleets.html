@@ -216,6 +216,8 @@ function column(id, name) {
 	return '<td nowrap><a href="#" onclick="return sortBy(' + id + ')">' + name +'</a>&nbsp;<img src="/static/exile/assets/interface/arrow' + arrow + '.gif" /></td>';
 }
 
+function counterFinished(c){ lastUpdate = null; }
+
 function displayFleetList(list) {
 	var ships = 0;
 	var signature = 0;
