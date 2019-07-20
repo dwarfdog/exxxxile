@@ -87,7 +87,7 @@ class Command(BaseCommand):
             for d, player in players.items():
                 enemies = [k for k, v in players.items() if k != d and not d in v['friends']]
                 players[d]['enemies'] = enemies.copy()
-            ships_b = ships.copy()
+            random.shuffle(ships)
             counter = {}
             possible_targets = {}
             selected_targets = {}
