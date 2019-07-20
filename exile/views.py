@@ -818,7 +818,7 @@ def logged(function):
                 gcontext['CurrentFleet'] = fleet.id
                 request.session['CurrentFleet'] = fleet.id
         if gcontext['exile_user'].credits < 0:
-            bankrupt_hours = ogcontext['exile_user'].credits_bankruptcy
+            bankrupt_hours = gcontext['exile_user'].credits_bankruptcy
             gcontext["creditswarning"] = {}
 #           if bankrupt_hours < 36:
             gcontext["bankruptcy_hours"] = bankrupt_hours
