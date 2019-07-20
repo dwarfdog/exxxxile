@@ -23,7 +23,7 @@ class Command(BaseCommand):
                         cursor.execute('select * from users_chats where userid=2 and chatid=3')
                         row = cursor.fetchone()
                         if not row:
-                            cursor.execute('insert into users_chats (userid,chatid,password) values (2,3,'')')
+                            cursor.execute('insert into users_chats (userid,chatid,password) values (2,3,\'\')')
                         cursor.execute('insert into chat_lines (chatid,message,login,allianceid,userid) values (3,\'ALERT : sp_execute_events is down ! Les events sont stoppés.\',\'Watchdog\',null,2)');
                         exit()
                     end = datetime.datetime.now()
