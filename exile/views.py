@@ -2540,7 +2540,7 @@ def fleet(request):
                         if res[39] == 0:
                             gcontext['overview']["cant_invade"] = True
                         else:
-                            if res["can_take_planet"]:
+                            if res[58]:
                                 gcontext['overview']["prestige"] = res[59]
                                 gcontext['overview']["invade"] = {"can_take":True}
                     else:
