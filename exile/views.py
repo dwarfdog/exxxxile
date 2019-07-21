@@ -5323,8 +5323,8 @@ def alliancewars(request):
                 gcontext['wars']['message'] = {gcontext['cease_success']:True}
     def displayDeclaration():
         gcontext["newwar"] = {'fake':True}
+        tag = request.POST.get("tag").strip()
         if request.GET.get("a","") == "new":
-            tag = request.POST.get("tag").strip()
             with connection.cursor() as cursor:
                 cursor.execute("SELECT id, tag, name, sp_alliance_war_cost(id) + (const_coef_score_to_war()*sp_alliance_value(%s))::integer FROM alliances WHERE lower(tag)=lower(%s)", [gcontext['exile_user'].alliance_id, tag])
                 re = cursor.fetchone()
