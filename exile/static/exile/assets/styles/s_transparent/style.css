@@ -159,6 +159,10 @@ div.clear { clear:both; }
 	width:155px;
 }
 
+#rightnav.doublew {
+	width:320px;
+}
+
 #content {
 	position:absolute;
 	left:166px;

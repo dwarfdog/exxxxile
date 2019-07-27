@@ -10,8 +10,8 @@
 		<meta http-equiv="pragma" content="no-cache"/>
 
 		<link href="{% static 'exile/assets/styles/reset.css' %}?v=2" type="text/css" rel="stylesheet" media="all" />
-		<link href="{% static 'exile/assets/styles/' %}{{ skin }}/style.css?v=4" type="text/css" rel="stylesheet" media="all"/>
-		<link href="{% static 'exile/assets/styles/card.css' %}?v=2" type="text/css" rel="stylesheet" media="all"/>
+		<link href="{% static 'exile/assets/styles/' %}{{ skin }}/style.css?v=5" type="text/css" rel="stylesheet" media="all"/>
+		<link href="{% static 'exile/assets/styles/card.css' %}?v=3" type="text/css" rel="stylesheet" media="all"/>
 		<link rel="icon" href="{% static 'exile/assets/favicon.ico' %}" />
 
 		<script type="text/javascript" src="{% static 'exile/scripts/lang.js' %}?v=1"></script>
@@ -175,7 +175,7 @@
 
 			<div id="main">
 
-				<div id="rightnav">
+				<div id="rightnav" class="{% if planet_list|length > 10 %}doublew{% endif %}">
 					{% for planet in planet_list %}
 					    {% include "exile/card_planet.html" with planet=planet plaurl=plaurl CurrentPlanet=CurrentPlanet only %}    
 					{% endfor %}
@@ -203,7 +203,7 @@
 		<!--[[t]]-->
 		<script>
 			window.onresize = function() {
-				$('content').style.width = ((document.documentElement || document.body).clientWidth-340) + 'px';
+				$('content').style.width = ((document.documentElement || document.body).clientWidth-{% if planet_list|length > 10 %}505{% else %}340{% endif %}) + 'px';
 			}
 			window.onresize();
 		</script>

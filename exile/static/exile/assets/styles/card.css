@@ -7,7 +7,10 @@
     padding: 2px;
     /*background: #1f1f1f;*/
     background: url('../interface/header-bg.png');
-    margin-bottom: 6px;
+    /*margin-bottom: 6px;*/
+    width: 46%;
+    margin: 2%;
+    float: left; 
 }
 
 .card.current {
