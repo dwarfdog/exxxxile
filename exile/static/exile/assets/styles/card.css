@@ -13,6 +13,7 @@
 .doublew .card {
   width: 46%;
   margin: 1%;
+  float: left;
 }
 
 .card.current {
