@@ -19,8 +19,8 @@ from exile.models import *
 
 config = apps.get_app_config('exile')
 
-def retrieveAllianceChat(id):
-    if not cache.get('alliances_chat') or not id in cache.get('alliances_chat').keys():
+def retrieveAllianceChat(id,force=False):
+    if force or not cache.get('alliances_chat') or not id in cache.get('alliances_chat').keys():
         with connection.cursor() as cursor:
             cursor.execute('SELECT id,chatid FROM alliances ORDER BY id')
             res = cursor.fetchall()
@@ -632,7 +632,7 @@ def header(request):
             tpl_header["url"] = "?planet="
         # cache the list of planets as they are not supposed to change unless a colonization occurs
         # in case of colonization, let the colonize script reset the session value
-        planetListArray = checkPlanetListCache(request) #request.session.get('sPlanetList', {})
+        planetListArray = checkPlanetListCache(request,True) #request.session.get('sPlanetList', {})
         planetListCount = len(planetListArray)
         #if planetListCount == 0:
         #    # retrieve planet list
@@ -6045,6 +6045,7 @@ def alliancecreate(request):
                 res = cursor.fetchone()
                 create_result = res[0]
                 if create_result >= -1:
+                    retrieveAllianceChat(create_result,True)
                     return HttpResponseRedirect(reverse('exile:alliance'))
     DisplayAllianceCreate()
     context = gcontext
