@@ -51,7 +51,7 @@
 	function computetotal() {
 		var total={{ total }};
 
-		for(var i=1; i<planets.length; i++) {
+		for(var i=0; i<planets.length; i++) {
 			var p = planets[i];
 			var obj = $("totalprice" + p.id);
 			total += parseInt(obj.innerHTML.replace(" ",""));
