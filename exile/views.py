@@ -754,9 +754,8 @@ def logged(function):
             gcontext['skin'] = user.skin
         if not user.timers_enabled:
             gcontext['timers_enabled'] = 'false'
-        if not user.lastactivity:
-            with connection.cursor() as cursor:
-                cursor.execute('UPDATE users SET lastactivity=now() WHERE id=%s', [user.id])
+        with connection.cursor() as cursor:
+            cursor.execute('UPDATE users SET lastlogin=now(),lastactivity=now() WHERE id=%s', [user.id])
         gcontext['planet_list'] = checkVWPlanetListCache(request, True)
         gcontext['plaurl'] = reverse('exile:planet')
         gcontext['can_join_alliance'] = not gcontext['exile_user'].leave_alliance_datetime and (not gcontext['exile_user'].alliance_left or gcontext['exile_user'].alliance_left < datetime.datetime.now())
