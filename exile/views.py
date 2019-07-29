@@ -5169,7 +5169,7 @@ def alliancetributes(request):
             if i == 0:
                 gcontext["tributes_sent"]["none"] = True
             if gcontext["cease_success"]:
-                cgcontext["tributes_sent"]["message"] = {cease_success:True}
+                gcontext["tributes_sent"]["message"] = {gcontext["cease_success"]:True}
     def displayNew():
         gcontext['new'] = {'fake':True}
         if gcontext['invitation_success']:
