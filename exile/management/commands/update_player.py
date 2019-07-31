@@ -21,7 +21,7 @@ class Command(BaseCommand):
                 print('start')
                 print(start.microsecond)
                 continu = False
-                while(!continu){
+                while not continu:
                     try:
                         cursor.execute('SELECT sp_update_player(%s,%s)', [re[0], h])
                         continu = True
@@ -35,7 +35,6 @@ class Command(BaseCommand):
                         cursor.execute('insert into chat_lines (chatid,message,login,allianceid,userid) values (3,\'ALERT : sp_update_player rencontre une erreur !\',\'Watchdog\',null,2)');
                         cursor.execute('insert into chat_lines (chatid,message,login,allianceid,userid) values (3,\''+str(Exception)+'\',\'Watchdog\',null,2)');
                         #exit()
-                }
                 end = datetime.datetime.now()
                 print('end')
                 print(end.microsecond)
