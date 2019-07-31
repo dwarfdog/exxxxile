@@ -30,7 +30,8 @@ class Command(BaseCommand):
                     if not row:
                         cursor.execute('insert into users_chats (userid,chatid,password) values (2,3,\'\')')
                     cursor.execute('insert into chat_lines (chatid,message,login,allianceid,userid) values (3,\'ALERT : sp_update_player is down ! Les mise à jour Joueur (crédits, entretiens) sont stoppés.\',\'Watchdog\',null,2)');
-                    exit()
+                    cursor.execute('insert into chat_lines (chatid,message,login,allianceid,userid) values (3,\''+str(Exception)+'\',\'Watchdog\',null,2)');
+                    #exit()
                 end = datetime.datetime.now()
                 print('end')
                 print(end.microsecond)
