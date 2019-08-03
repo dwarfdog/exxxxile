@@ -164,6 +164,13 @@ div.clear { clear:both; }
 	background:#4D4D57;
 }
 
+#rightnav.doublew {
+	width:270px;
+}
+.doublew .card {
+	margin: 2px !important;
+}
+
 #content {
 	position:absolute;
 	left:133px;
