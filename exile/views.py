@@ -10428,7 +10428,7 @@ def devmulti(request):
                 " browserid, disconnected, browserid2, disconnected2, browserid = browserid2," +
                 " privilege, privilege2, tag, tag2, fingerprint1, fingerprint2" +
                 " FROM admin_view_multi_accounts" +
-                " WHERE datetime > now()-INTERVAL '7 days' LIMIT 2000")
+                " WHERE datetime > now()-INTERVAL '30 days' LIMIT 2000")
             res = cursor.fetchall()
             gcontext['item'] = {}
             i = 0
