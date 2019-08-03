@@ -1,4 +1,4 @@
-{% load static %}{% load exile_extras %}{% load tz %}
+{% load static %}{% load exile_extras %}{% load tz %}{% load bbcode_tags %}
 <script type="text/javascript" src="{% static 'exile/scripts/cookies.js' %}"></script>
 
 <script type="text/javascript">
@@ -50,7 +50,7 @@ function sig(signature){
 {% endif %}</td></tr>
 <tr id="motd_content" class="item">
 <td>
-	{{ exile_user.alliance.announce|rnreplace|safe }}
+	{{ exile_user.alliance.announce|bbcode|safe }}
 </td>
 </tr>
 </table>
