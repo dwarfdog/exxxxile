@@ -15,6 +15,7 @@ from django.db import connection
 from .apps import ExileConfig
 from django.apps import apps
 from django.db import transaction
+import bfa
 
 from exile.models import *
 
@@ -930,6 +931,12 @@ def connect(request):
         address = get_client_ip(request)
         addressForwarded = request.get_host()
         userAgent = request.headers.get('User-Agent','')
+        if not context['user'].fingerprint:
+            try:
+                fingerprint = bfa.fingerprint.get(request)
+            except (ConnectionError, ValueError):
+                fingerprint = ''
+            context['user'].fingerprint = fingerprint
         with connection.cursor() as cursor:
             cursor.execute('SELECT id, lastplanetid, privilege, resets FROM sp_account_connect2(%s, %s, %s, %s, %s, %s, %s)', [context['user'].id, context['user'].lcid, address, addressForwarded, userAgent, browserid, context['user'].fingerprint])
             return cursor.fetchone()
