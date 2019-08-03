@@ -14,6 +14,7 @@ from django.utils.html import strip_tags
 from django.db import connection
 from .apps import ExileConfig
 from django.apps import apps
+from django.db import transaction
 
 from exile.models import *
 
@@ -1874,6 +1875,7 @@ def fleettrade(request):
 
 @construct
 @logged
+@transaction.atomic
 def fleetsplit(request):
     # display fleet info
     def DisplayExchangeForm(fleetid):
@@ -2718,6 +2720,8 @@ def fleet(request):
                 p = planet.planet
             else:
                 return HttpResponse('KO')
+        res1 = request.POST.get("res1",'').strip()
+        res2 = request.POST.get("res2",'').strip()
         if g==-1 or s==-1 or p==-1:
             gcontext['move_fleet_result'] = "bad_destination"
             return
@@ -2732,6 +2736,8 @@ def fleet(request):
                         cursor.execute("UPDATE fleets SET next_waypointid = sp_create_route_unload_move(planetid) WHERE ownerid=%s AND id=%s", [gcontext['fleet_owner_id'], fleetid])
                     elif request.POST.get("movetype", "0") ==  "2":
                         cursor.execute("UPDATE fleets SET next_waypointid = sp_create_route_recycle_move(planetid) WHERE ownerid=%s AND id=%s", [gcontext['fleet_owner_id'], fleetid])
+                    elif request.POST.get("movetype", "0") ==  "3" and res1 and res2:
+                        cursor.execute("UPDATE fleets SET next_waypointid = sp_create_route_rotation_move(planetid,%s,%s) WHERE ownerid=%s AND id=%s", [res1, res2, gcontext['fleet_owner_id'], fleetid])
             else:
                 res[0] = 0
             if res[0] == 0:
