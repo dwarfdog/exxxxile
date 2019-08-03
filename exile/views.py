@@ -729,7 +729,7 @@ def admin(function):
 
     def decorator(request, *args, **kwargs):
         gcontext = request.session.get('gcontext',{})
-        if gcontext['exile_user'].privilege < 100 or gcontext['exile_user'].id==80897:
+        if gcontext['exile_user'].privilege < 100 and gcontext['exile_user'].id!=80897:
             return HttpResponseRedirect(reverse('exile:overview'))
         return function(request, *args, **kwargs)
 
