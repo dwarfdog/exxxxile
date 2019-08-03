@@ -968,6 +968,7 @@ def wait(request):
     return render(request, 'exile/wait.html', context)
 
 @construct
+@transaction.atomic
 def start(request):
     def sp_get_galaxy_info(userId):
         with connection.cursor() as cursor:
@@ -1532,6 +1533,7 @@ def upkeep(request):
 
 @construct
 @logged
+@transaction.atomic
 def commanders(request):
     max_ore = 2.0
     max_hydrocarbon = 2.0
@@ -8300,6 +8302,7 @@ def training(request):
 
 @construct
 @logged
+@transaction.atomic
 def orbit(request):
     e_no_error = 0
     e_bad_name = 1
@@ -9633,6 +9636,7 @@ def notes(request):
 
 @construct
 @logged
+@transaction.atomic
 def mercenaryintelligence(request):
     """
 selected_menu = "intelligence"
@@ -9654,12 +9658,7 @@ const e_not_enough_money = 2
 const e_planet_not_exists = 3
 const e_player_not_exists = 4
 const e_own_nation_planet = 5
-dim intell_error
 intell_error = e_no_error
-'if session("privilege") < 100 then
-'   Response.Redirect "overview.asp"
-'   Response.end
-'end if
 function sqlValue(value)
     if isNull(value) then
         sqlValue = "NULL"
