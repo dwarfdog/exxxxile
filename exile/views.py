@@ -2469,6 +2469,7 @@ def fleet(request):
         #   else
         #       content.AssignValue "planetname", res[11]
         #   end if
+            can_install_building = False
             if res[34] == -1 or res[34] == 1: # fleet is moving when dest_planetid is not null
                 # Assign destination planet
                 gcontext['overview']["t_planetid"] = res[18]
@@ -2497,7 +2498,6 @@ def fleet(request):
                     gcontext['overview']["cancel_moving"] = True
                 if res[10]:
                     gcontext['overview']['moving'] = {"from": True}
-                can_install_building = False
             else:
                 if res[3]: #if is engaged
                     gcontext['overview']["fighting"] = True
