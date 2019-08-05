@@ -411,4 +411,4 @@ class Command(BaseCommand):
                     print('end ' + str(end.microsecond))
                     print()
                     time.sleep(5)
-                    exit()
+                    #exit()
