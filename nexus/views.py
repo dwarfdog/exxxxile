@@ -10,6 +10,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.db import connection, connections
 import bfa
+from xml.dom import minidom
 
 from nexus.models import *
 
@@ -30,8 +31,34 @@ def index(request):
     except (KeyError, NexusUsers.DoesNotExist):
         user = None
     context = {
+        'news1': {},
+        'news2': {}
+    }
+    cpt=0
+    bcpt=0
+    for new in News.objects.all():
+        xmldoc = minidom.parseString(new.xml)
+        readbitlist = xmldoc.getElementsByTagName('item')
+        for s in readbitlist:
+            print(s.getElementsByTagName('title')[0].childNodes[0].data)
+            print(s.getElementsByTagName('description')[0].childNodes[0].data)
+            print(s.getElementsByTagName('author')[0].childNodes[0].data)
+            print(s.getElementsByTagName('pubDate')[0].childNodes[0].data)
+            values = {
+                'title': s.getElementsByTagName('title')[0].childNodes[0].data,
+                'description': s.getElementsByTagName('description')[0].childNodes[0].data,
+                'author': s.getElementsByTagName('author')[0].childNodes[0].data,
+                'pubDate': s.getElementsByTagName('pubDate')[0].childNodes[0].data,
+            }
+            if bcpt==0:
+                context['news1'][cpt] = values.copy()
+            else:
+                context['news2'][cpt] = values.copy()
+            cpt+=1
+        bcpt+=1
+    context = {
         'universes': Universes.objects.all(),
-        'content': t.render({}, request),
+        'content': t.render(context, request),
         'logged': request.session.get('logged', False),
         'user': user,
         'lastloginerror': request.session.get('lastloginerror', '')
