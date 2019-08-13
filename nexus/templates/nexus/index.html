@@ -1,7 +1,7 @@
 <div class="header first">
-	<div class="news left">Actualités</div>
+    <div class="news left">Actualités</div>
 	<div class="news right">Membres sur discord</div>
-    <div class="clearer"><!-- --></div>
+    <div class="clearer"></div>
     <br/>
 </div>
 <div>
@@ -9,5 +9,28 @@
 	<div class="news right">
         <iframe src="https://discordapp.com/widget?id=586952357162778626&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>
     </div>
-	<div class="clearer"><!-- --></div>
+	<div class="clearer"></div>
+</div>
+<div class="header first">
+    <div class="news">Historique</div>
+    <div class="clearer"></div>
+</div>
+<div>
+    <div class="news left">
+        {% for k,new in news1.items %}
+            <h2>{{ new.title }}</h2>
+            <b>{{ new.pubDate }}</b><br/>
+            <em>{{ new.author }}</em>
+            {{ new.description|safe }}
+        {% endfor %}
+    </div>
+    <div class="news right">
+        {% for k,new in news2.items %}
+            <h2>{{ new.title }}</h2>
+            <b>{{ new.pubDate }}</b><br/>
+            <em>{{ new.author }}</em>
+            {{ new.description|safe }}
+        {% endfor %}
+    </div>
+    <div class="clearer"></div>
 </div>

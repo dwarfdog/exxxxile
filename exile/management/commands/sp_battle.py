@@ -129,7 +129,9 @@ class Command(BaseCommand):
                                 chance_to_hit = 1
                             if chance_to_hit < 0:
                                 chance_to_hit = 0
-                            degats = shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100
+                            degats = shot[0]*(shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100)
+                            if degats > target[3] + target[4]:
+                                degats = target[3] + target[4]
                             avg_degats = degats * chance_to_hit
                             possible_targets_stats[ship_key][target_key] = {
                                 'degats':degats,
@@ -174,9 +176,9 @@ class Command(BaseCommand):
                     shot = ship[10]
                     if shot[0]: # ship can shot
                         ship_key = str(ship[0])+'|'+str(ship[1])+'|'+str(ship[2])
-                        if not len(possible_targets[ship[0]]):
-                            continue
                         for singleshot in range(shot[0]):
+                            if not len(possible_targets[ship[0]]):
+                                continue
                             #pship_key = ship_key+'|'+str(ship[16])
                             #target = False
                             #if pship_key in selected_targets.keys():
