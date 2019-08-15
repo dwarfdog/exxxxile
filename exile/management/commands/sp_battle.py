@@ -134,6 +134,8 @@ class Command(BaseCommand):
                             if degats > target[3] + target[4]:
                                 degats = target[3] + target[4]
                             avg_degats = degats * chance_to_hit
+                            if not target[10][0]:
+                                avg_degats /= 10000
                             possible_targets_stats[ship_key][target_key] = {
                                 'degats':degats,
                                 'avg_degats':avg_degats,
