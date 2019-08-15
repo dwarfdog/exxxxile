@@ -41,7 +41,7 @@ function hideAll() {
 }
 {% endif %}
 
-{% if universe %}
+{% if universes %}
 {% if comment %}universe{% endif %}
 
 function displayUniverse(u) {
@@ -684,14 +684,14 @@ function displayRadar() {
 	</table>
 </td>
 <td align="center">
-	{% if universe %}
+	{% if universes %}
 	<div id="mapuniverse">
 		<div id="mapuniverseview"></div>
 	</div>
 	<script>
 	displayUniverse(
 		new Array(0
-		{% for k,galaxy in universe.galaxy.items %}
+		{% for k,galaxy in universes.galaxy.items %}
 			{% if galaxy.visible %}
 				, new Array({{ galaxy.galaxyid }}, 0{% if galaxy.hasplanet %}1{% endif %}, 0{% if galaxy.hasally %}1{% endif %}, 0{% if galaxy.hasfriend %}1{% endif %}, 0{% if galaxy.hasenemy %}1{% endif %})
 			{% endif %}

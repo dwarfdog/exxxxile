@@ -6438,7 +6438,7 @@ def map(request):
                     ' FROM nav_galaxies AS n ' +
                     ' ORDER BY n.id', {'UserID': gcontext['exile_user'].id})
                 res = cursor.fetchall()
-                gcontext['universe'] = {
+                gcontext['universes'] = {
                     'galaxy': {}
                 }
                 for re in res:
@@ -6455,7 +6455,7 @@ def map(request):
                         galaxy['hasfriend'] = True
                     elif re[1]:
                         galaxy['hasnothing'] = True
-                    gcontext['universe']['galaxy'][re[0]] = galaxy.copy()
+                    gcontext['universes']['galaxy'][re[0]] = galaxy.copy()
             return
         if sector == "":
             # Display map of sectors for the given galaxy
