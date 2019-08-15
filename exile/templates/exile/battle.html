@@ -73,6 +73,7 @@
                             {% for l,sh in ships.items %}
                                 {% for m,ki in sh.killed.items %}{{ ki.killed_name }} x{{ ki.killed_count }}<br/>{% endfor %}
                                 {% if sh.killed_total %}Total: {{ sh.killed_total }}<br/>{% endif %}{% if sh.killed_zero %}0<br/>{% endif %}
+                                <hr/>
                             {% endfor %}
                             <br/>
                         </td>

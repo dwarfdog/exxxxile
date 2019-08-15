@@ -11361,7 +11361,7 @@ def FormatBattle(request,battleid, creator, pointofview, ispubliclink):
                     killed += 1 # count how many different ships were destroyed:
             if killed == 0:
                 gcontext['opponent'][re[10]]['fleet'][re[12]]['category'][re[3]][cpt]["killed_zero"] = True
-            if killed > 1:
+            else:
                 gcontext['opponent'][re[10]]['fleet'][re[12]]['category'][re[3]][cpt]["killed_total"] = total
             if re[11] == config.rSelf:
                 gcontext['opponent'][re[10]]["self"] = True
