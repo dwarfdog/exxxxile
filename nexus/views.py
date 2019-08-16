@@ -351,7 +351,7 @@ def login(request):
         addressForwarded = request.get_host()
         userAgent = request.headers.get('User-Agent','')
         #try:
-            fingerprint = bfa.fingerprint.get(request)
+        fingerprint = bfa.fingerprint.get(request)
         #except (KeyError, Exception):
         #    fingerprint = ''
         #    request.session['lastloginerror'] = 'credentials_invalid'
