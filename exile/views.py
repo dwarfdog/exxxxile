@@ -934,8 +934,9 @@ def connect(request):
         if not context['user'].fingerprint:
             try:
                 fingerprint = bfa.fingerprint.get(request)
-            except (ConnectionError, ValueError):
+            except (KeyError, Exception):
                 fingerprint = ''
+                return -100
             context['user'].fingerprint = fingerprint
         with connection.cursor() as cursor:
             cursor.execute('SELECT id, lastplanetid, privilege, resets FROM sp_account_connect2(%s, %s, %s, %s, %s, %s, %s)', [context['user'].id, context['user'].lcid, address, addressForwarded, userAgent, browserid, context['user'].fingerprint])
@@ -953,6 +954,8 @@ def connect(request):
         response = HttpResponseRedirect(reverse('exile:start'))
     elif res[2] == -3:
         response = HttpResponseRedirect(reverse('exile:wait'))
+    elif res[2] == -100:
+        response = HttpResponseRedirect(reverse('exile:logout'))
     elif res[2] == -2:
         response = HttpResponseRedirect(reverse('exile:holidays'))
     else:

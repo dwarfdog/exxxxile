@@ -350,10 +350,12 @@ def login(request):
         address = request.META['REMOTE_ADDR']
         addressForwarded = request.get_host()
         userAgent = request.headers.get('User-Agent','')
-        try:
+        #try:
             fingerprint = bfa.fingerprint.get(request)
-        except (ConnectionError, ValueError):
-            fingerprint = ''
+        #except (KeyError, Exception):
+        #    fingerprint = ''
+        #    request.session['lastloginerror'] = 'credentials_invalid'
+        #    return HttpResponseRedirect(reverse('nexus:index'))
         request.session['fingerprint'] = fingerprint
         print(fingerprint)
         # try to log on
