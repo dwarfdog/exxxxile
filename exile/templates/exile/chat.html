@@ -219,7 +219,7 @@ Chat.prototype = {
 						if(s != 200) throw null;
 					}
 					catch(e) {
-						c.addLine('', '', null, s+':Erreur lors de l\'envoi de "' + line + '"');
+						c.addLine('', '', '', null, s+':Erreur lors de l\'envoi de "' + line + '"');
 					}
 					c.display();
 					c.textSent(); 
@@ -289,7 +289,7 @@ Chat.prototype = {
 		this.lastTo = to;
 	},
 
-	addLine: function(tag, author, datetime, line) {
+	addLine: function(tag, author, authorimg, datetime, line) {
 		this.refreshTime -= 100;
 		if(this.refreshTime > max_refreshtime) this.refreshTime = max_refreshtime;
 		if(this.refreshTime < min_refreshtime) this.refreshTime = min_refreshtime;
@@ -304,7 +304,7 @@ Chat.prototype = {
 
 		if(!this.showTag) tag = '';
 
-		this.lines.push((datetime==null?'<b>':'')+'<img src="{% static 'exile/assets/interface/spacer.gif' %}" width="0" height="15" border="0">' + formatTime(datetime) + (tag!=''?' <a href="{% url 'exile:alliance' %}?tag='+tag+'" target="_blank">['+tag+']</a>':'') + ' <a href="#" onclick="chatlist['+this.id+'].tell(\''+author+'\'); return false;" class="author">' + author + '</a> : ' + line + (datetime==null?'</b>':''));
+		this.lines.push((datetime==null?'<b>':'')+'<img src="{% static 'exile/assets/interface/spacer.gif' %}" width="0" height="15" border="0">' + formatTime(datetime) + '&nbsp;<img src="' + authorimg + '" width="24" height="24" style="cursor:pointer;vertical-align:middle;border:1px solid #555;margin:1px;" onclick="window.location.href=\'/exile/nation?name=' + author + '\'">' + (tag!=''?' <a href="{% url 'exile:alliance' %}?tag='+tag+'" target="_blank">['+tag+']</a>':'') + ' <a href="#" onclick="chatlist['+this.id+'].tell(\''+author+'\'); return false;" class="author">' + author + '</a> : ' + line + (datetime==null?'</b>':''));
 
 		// limit chatbox to 250 messages
 		while(this.lines.length > 250) this.lines.shift();
@@ -379,7 +379,7 @@ Chat.prototype = {
 					} catch(e) {
 						//window.location.reload(true);
 						try {
-							c.addLine('', '', null, ':Erreur lors de la réception des données: "' + e.message + '"');
+							c.addLine('', '', '', null, ':Erreur lors de la réception des données: "' + e.message + '"');
 						} catch(e) {
 						}
 					}
@@ -621,7 +621,7 @@ oChatLine = $('chatline');
 	var chat = chatlist[{{ chatid }}];
 	if(chat) {
 		{% for i,l in refresh.line.items %}
-			chat.addLine('{{ l.alliancetag|escapejs }}', '{{ l.author|escapejs }}', new Date({{ l.datetime|timezone:"Europe/Paris"|date:"Y" }},{{ l.datetime|timezone:"Europe/Paris"|date:"m" }}-1,{{ l.datetime|timezone:"Europe/Paris"|date:"d" }},{{ l.datetime|timezone:"Europe/Paris"|date:"H" }},{{ l.datetime|timezone:"Europe/Paris"|date:"i" }},{{ l.datetime|timezone:"Europe/Paris"|date:"s" }},{{ l.datetime|timezone:"Europe/Paris"|date:"z" }}), '{{ l.line|bbcode|escapejs }}');
+			chat.addLine('{{ l.alliancetag|escapejs }}', '{{ l.author|escapejs }}', '{{ l.authorimg }}', new Date({{ l.datetime|timezone:"Europe/Paris"|date:"Y" }},{{ l.datetime|timezone:"Europe/Paris"|date:"m" }}-1,{{ l.datetime|timezone:"Europe/Paris"|date:"d" }},{{ l.datetime|timezone:"Europe/Paris"|date:"H" }},{{ l.datetime|timezone:"Europe/Paris"|date:"i" }},{{ l.datetime|timezone:"Europe/Paris"|date:"s" }},{{ l.datetime|timezone:"Europe/Paris"|date:"z" }}), '{{ l.line|bbcode|escapejs }}');
 		{% endfor %}
 		chat.display();
 

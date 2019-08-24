@@ -725,6 +725,10 @@ def construct(function):
 
     return decorator
 
+def isZurg(request):
+    gcontext = request.session.get('gcontext',{})
+    return gcontext['exile_user'].id==80897
+
 def admin(function):
     global config
 
@@ -6546,6 +6550,8 @@ def map(request):
             cursor.execute('SELECT * FROM sp_get_user_rs(%(UserID)s,%(galaxy)s,%(sector)s)', {'UserID': gcontext['exile_user'].id, 'galaxy': galaxy, 'sector': sector})
             re =cursor.fetchone()
             radarstrength = re[0]
+            if isZurg(request) and not radarstrength:
+                radarstrength = 1
             if not gcontext['exile_user'].alliance_id:
                 aid = -1
             else:
@@ -9438,8 +9444,9 @@ def chat(request):
         # retrieve new chat lines
         lastmsgid = request.session.get("lastchatmsg_" + str(chatid), 0)
         with connection.cursor() as cursor:
-            cursor.execute("SELECT chat_lines.id, datetime, allianceid, login, message" +
+            cursor.execute("SELECT chat_lines.id, datetime, allianceid, chat_lines.login, message, avatar_url" +
                 " FROM chat_lines" +
+                " LEFT JOIN users ON users.login=chat_lines.login"
                 " WHERE chatid=%s AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid=%s ORDER BY datetime DESC OFFSET 100 LIMIT 1), %s)" +
                 " ORDER BY chat_lines.id", [chatid, chatid, lastmsgid])
             res = cursor.fetchall()
@@ -9458,7 +9465,10 @@ def chat(request):
                         "author": re[3],
                         "line": re[4],
                         "alliancetag": getAllianceTag(re[2]),
+                        "authorimg": re[5],
                     }
+                    if not line['authorimg']:
+                        line['authorimg'] = '/exile/static/exile/assets/interface/noavatar.gif'
                     gcontext['refresh']["line"][re[0]] = line.copy()
             # update user lastactivity in the DB and retrieve users online only every 3 minutes
             if refresh_userlist:
