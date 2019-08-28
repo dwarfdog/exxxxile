@@ -46,7 +46,7 @@
 {% endif %}
 </script>
 
-<form method="post" action="?a=buy{% if planetid %}&planet={{ planetid }}{% endif %}">
+<form method="post" action="?a=buy{% if selectedmenu == 'market_buy' %}&planet={{ planetid }}{% endif %}">
 	{% csrf_token %}
 	<input type="hidden" name="rel" value="1">
 

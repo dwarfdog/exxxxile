@@ -239,7 +239,7 @@ function displayFleetList(list) {
 		else
 			z+= '<img src="{% static 'exile/assets/interface/stance_defend.gif' %}" class="stance" alt="Riposte" width="10" height="10">';
 
-		z+= '<a href="{% url 'exile:fleet' %}?planet=' + fleet.position.id + '&id=' + fleet.id + '" id="fleet' + fleet.id + '" onmouseover="ddrivetip(dShipList(' + fleet.id + '))" onmouseout="hideddrivetip()" nowrap><b>' + fleet.name + '</b></td>';
+		z+= '<a href="{% url 'exile:fleet' %}?planet=' + fleet.position.id + '&id=' + fleet.id + '&view=ally" id="fleet' + fleet.id + '" onmouseover="ddrivetip(dShipList(' + fleet.id + '))" onmouseout="hideddrivetip()" nowrap><b>' + fleet.name + '</b></td>';
 
 		z+= '<td align="right" nowrap>' + fleet.size.n() + '</td><td align="right" nowrap>' + fleet.signature.n() + '</td><td align="right"' + (fleet.cargoload > 0?'onmouseover="ddrivetip(dCargo(' + fleet.id + '))"':'')+ 'onmouseout="hideddrivetip()" nowrap>' + fleet.cargoload.n() + ' / ' + fleet.cargocapacity.n() + '</td><td>' + fleet.position + '</td>';
 

@@ -2886,7 +2886,11 @@ def fleet(request):
     if gcontext['exile_user'].alliance_id and hasRight(request,"can_order_other_fleets"):
         gcontext['can_command_alliance_fleets'] = gcontext['exile_user'].alliance_id
     gcontext['fleet_owner_id'] = gcontext['exile_user'].id
-    gcontext['selectedmenu'] = 'fleets_fleets'
+    gcontext['viewback'] = request.GET.get("view", 'fleets')
+    if gcontext['viewback'] == 'fleets':
+        gcontext['selectedmenu'] = 'fleets_fleets'
+    else:
+        gcontext['selectedmenu'] = 'alliance_fleets'
     gcontext['menu'] = menu(request)
     try:
         fleetid = int(request.GET.get("fleet", 0))
@@ -3719,8 +3723,8 @@ def planet(request):
     context = gcontext
     action = request.POST.get('action', request.GET.get('action', ''))
     if action == "assigncommander":
-        commander = request.POST.get('commander', request.GET.get('commander', 0))
-        if commander != 0:
+        commander = request.POST.get('commander', request.GET.get('commander', '0'))
+        if commander != '0':
             with connection.cursor() as cursor:
                 cursor.execute('SELECT * FROM sp_commanders_assign(%s, %s, %s, null)', [gcontext['exile_user'].id, commander, gcontext['CurrentPlanet']])
         else:
@@ -6110,6 +6114,7 @@ def radars(request):
             enteringfleetcount = 0 # fleets entering the sector
             leavingfleetcount = 0 # fleets leaving the sector
             gcontext['radar'][planame] = {
+                'plaid': planetid,
                 'moving': {'fleet': {}},
                 'leaving': {'fleet': {}},
                 'entering': {'fleet': {}},
