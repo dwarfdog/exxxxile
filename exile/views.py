@@ -1374,7 +1374,7 @@ def overview(request):
             'COALESCE(f.remaining_time, 0), COALESCE(f.total_time-f.remaining_time, 0), ' +
             '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = users.id)) AS from_radarstrength, ' +
             '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = users.id)) AS to_radarstrength, ' +
-            'attackonsight' +
+            'attackonsight,f.shared' +
             ' FROM users, vw_fleets f ' +
             ' WHERE users.id=%s AND (action = 1 OR action = -1) AND (ownerid=%s OR (destplanetid IS NOT NULL AND destplanetid IN (SELECT id FROM nav_planet WHERE ownerid=%s)))' +
             ' ORDER BY ownerid, COALESCE(remaining_time, 0)', [gcontext['exile_user'].id, gcontext['exile_user'].id, gcontext['exile_user'].id])
@@ -1426,6 +1426,10 @@ def overview(request):
                             fleet['owned'] = 'attack'
                         else:
                             fleet['owned'] = 'defend'
+                        if re[26]:
+                            fleet['shared'] = True
+                        else:
+                            fleet['shared'] = False
                     elif re[4] == config.rAlliance:
                         fleet['id'] = re[3]
                         fleet['name'] = re[5]

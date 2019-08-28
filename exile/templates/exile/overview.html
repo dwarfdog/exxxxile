@@ -92,7 +92,7 @@ function sig(signature){
 <td>
 	{% for ind,fleet in fleets.items %}
 		<div>
-		{% if fleet.owned %}Votre flotte {% if fleet.owned == 'attack' %}<img src="{% static 'exile/assets/interface/stance_attack.gif' %}" class="stance" alt="Attaque" width=10 height=10>{% else %}<img src="{% static 'exile/assets/interface/stance_defend.gif' %}" class="stance" alt="Riposte" width=10 height=10>{% endif %}<a href="{% url 'exile:fleet' %}?id={{ fleet.id }}" class="self">{{ fleet.name }}</a>{% endif %}
+		{% if fleet.owned %}Votre flotte {% if fleet.owned == 'attack' %}<img src="{% static 'exile/assets/interface/stance_attack.gif' %}" class="stance" alt="Attaque" width=10 height=10>{% else %}<img src="{% static 'exile/assets/interface/stance_defend.gif' %}" class="stance" alt="Riposte" width=10 height=10>{% endif %}{% if fleet.shared %}<img src="{% static 'exile/assets/interface/shared.png' %}" class="stance" alt="Partagée" width=10 height=10>{% endif %}<a href="{% url 'exile:fleet' %}?id={{ fleet.id }}" class="self">{{ fleet.name }}</a>{% endif %}
 		{% if fleet.ally %}Une flotte alliée de <a href="{% url 'exile:mails' %}?to={{ fleet.name }}" class="ally" title="Envoyer un message à {{ fleet.name }}">{{ fleet.name }}</a>{% endif %}
 		{% if fleet.friend %}Une flotte amie de <a href="{% url 'exile:mails' %}?to={{ fleet.name }}" class="friend" title="Envoyer un message à {{ fleet.name }}">{{ fleet.name }}</a>{% endif %}
 		{% if fleet.hostile %}Une flotte hostile de <a href="{% url 'exile:nation' %}?name={{ fleet.name }}" class="enemy" title="Envoyer un message à {{ fleet.name }}">{{ fleet.name }}</a>{% endif %}
