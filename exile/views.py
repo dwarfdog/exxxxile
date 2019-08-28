@@ -3081,7 +3081,7 @@ def fleetshandler(request):
                 ' recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action,' + # 32 33 34
                 '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %(UserId)s)) AS from_radarstrength, ' + # 35
                 '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %(UserId)s)) AS to_radarstrength,' + # 36
-                ' categoryid' + # 37
+                ' categoryid, shared' + # 37 38
                 ' FROM vw_fleets as f WHERE ownerid = %(UserId)s', {'UserId': gcontext['exile_user'].id})
             res = cursor.fetchall()
             gcontext['list'] = {'fleet': {}}
@@ -3154,6 +3154,10 @@ def fleetshandler(request):
                                 'ship_label':getShipLabel(ShipListArray[i][1]),
                                 'ship_quantity': ShipListArray[i][2],
                             }
+                    if re[38]:
+                        fleet['shared'] = True
+                    else:
+                        fleet['shared'] = False
                     fleet['resource'][1]['res_id'] = 1
                     fleet['resource'][1]['res_quantity'] = re[27]
                     fleet['resource'][2]['res_id'] = 2

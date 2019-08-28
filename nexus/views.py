@@ -350,14 +350,14 @@ def login(request):
         address = request.META['REMOTE_ADDR']
         addressForwarded = request.get_host()
         userAgent = request.headers.get('User-Agent','')
-        #try:
-        fingerprint = bfa.fingerprint.get(request)
-        #except (KeyError, Exception):
-        #    fingerprint = ''
+        try:
+            fingerprint = bfa.fingerprint.get(request)
+        except (KeyError, Exception):
+            fingerprint = address
         #    request.session['lastloginerror'] = 'credentials_invalid'
         #    return HttpResponseRedirect(reverse('nexus:index'))
         request.session['fingerprint'] = fingerprint
-        print(fingerprint)
+        #print(fingerprint)
         # try to log on
         try:
             user = NexusUsers.objects.raw('SELECT id, username, last_visit, last_universeid, privilege_see_hidden_universes FROM sp_account_login(%s, %s, %s, %s, %s) LIMIT 1',[username, password, address, addressForwarded, userAgent])[0]
