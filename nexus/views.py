@@ -46,7 +46,7 @@ def index(request):
             print(s.getElementsByTagName('pubDate')[0].childNodes[0].data)
             values = {
                 'title': s.getElementsByTagName('title')[0].childNodes[0].data,
-                'description': s.getElementsByTagName('description')[0].childNodes[0].data.replace('jcolliez', 'Exile'),
+                'description': s.getElementsByTagName('description')[0].childNodes[0].data.replace('jcolliez', 'Exile').replace('http://forum.exil.pw/img/smilies','/exile/static/exile/assets/smileys'),
                 'author': s.getElementsByTagName('author')[0].childNodes[0].data,
                 'pubDate': s.getElementsByTagName('pubDate')[0].childNodes[0].data,
             }

@@ -530,7 +530,7 @@ tiptext = $("hinttext");
 
 	<tr class="clear"><td colspan="2">&nbsp;</td></tr>
 	<tr class="title"><td colspan="2">Déplacer la flotte</td></tr>
-	<form method="post" action="?id={{ overview.fleetid }}">
+	<form method="post" action="?id={{ overview.fleetid }}&view={{ viewback }}">
 		{% csrf_token %}
 		<input type="hidden" name="action" value="move">
 		<input type="hidden" name="loop" value="0">

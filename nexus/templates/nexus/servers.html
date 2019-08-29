@@ -74,6 +74,8 @@ Continue: Serveur de type classique<br/>
 Par round: Serveur rapide à durée limitée, le Game Over est définitif et tous les joueurs commencent en même temps.
 </small>
 </div>
-<script type="text/javascript">
-selectServer({{ user.last_universeid }}, false);
-</script>
+{% if user.last_universeid  %}
+	<script type="text/javascript">
+		selectServer({{ user.last_universeid }}, false);
+	</script>
+{% endif %}
