@@ -1,5 +1,21 @@
 {% load static %}
+<script type="text/javascript" src="{% static 'exile/scripts/third-party/tooltip.js' %}?v=1"></script>
 <script>
+tipname = "hint";
+tipwidth = 250;
+tiptext = $("hinttext");
+
+var resources = [];
+resources[1] = { image:'ore', label:'Minerai' };
+resources[2] = { image:'hydrocarbon', label:'Hydrocarbure' };
+resources[3] = { image:'scientists', label:'Scientifiques' };
+resources[4] = { image:'soldiers', label:'Soldats' };
+resources[5] = { image:'workers', label:'Travailleurs' };
+
+function Resource(id, quantity) {
+	this.id = id;
+	this.quantity = quantity;
+}
 
 function getRelationClass(rel) {
 	switch(rel){
@@ -13,11 +29,64 @@ function getRelationClass(rel) {
 	return "";
 }
 
+function Fleet(id, resources) {
+	this.id = id;
+	this.resources = resources;
+}
 
-function r(rel,tag,owner,fleetid,fleet,sig,f_id,f_name,f_g,f_s,f_p,f_rel,t_id,t_name,t_g,t_s,t_p,t_rel,time,losing) {
+var currentList = [];
+{% if radar.items %}
+	{% for i,pla in radar.items %}
+		{% if pla.moving %}
+			{% for k,fle in pla.moving.fleet.items %}
+				{% if fleet.resource %}
+					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fleet.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
+					);
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		{% if pla.entering %}
+			{% for k,fle in pla.entering.fleet.items %}
+				{% if fleet.resource %}
+					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fleet.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
+					);
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		{% if pla.leaving %}
+			{% for k,fle in pla.entering.fleet.items %}
+				{% if fleet.resource %}
+					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fleet.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
+					);
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+	{% endfor %}
+{% endif %}
+
+
+function dCargo(id) {
+	for(var x in currentList){
+		var fleet = currentList[x];
+		if(fleet.id == id){
+			var s = '<table width="100%">';
+
+			for(var i=1;i<fleet.resources.length;i++){
+				var res = fleet.resources[i];
+				s+='<tr><td width="1%" nowrap><img src="/static/exile/assets/interface/' + resources[res.id].image + '.gif" width="16" height="16" class="res">' + resources[res.id].label + '</td><td width="1%" align="right" nowrap class="grey">' + res.quantity.n() + '</td></tr>';
+			}
+
+			return s + '</table>';
+		}
+	}
+
+	return '';
+}
+
+function r(rel,tag,owner,fleetid,fleet,sig,f_id,f_name,f_g,f_s,f_p,f_rel,t_id,t_name,t_g,t_s,t_p,t_rel,time,losing,resources) {
 	var c = getRelationClass(rel);
 
-	var s = '<tr class="smallitem"><td>';
+	var s = '<tr class="smallitem" onmouseover="ddrivetip(dCargo(' + fleetid + '))" onmouseout="hideddrivetip()"><td>';
 	if(tag != '') s+= '<a href="{% url 'exile:alliance' %}?tag='+tag+'" class='+c+'>['+tag+']</a> ';
 	s+= '<a href="{% url 'exile:nation' %}?name='+owner+'" title="Voir les informations sur '+owner+'" class="'+c+'">'+owner+'</a></td><td>';
 	if(rel==2)
@@ -73,7 +142,7 @@ function r(rel,tag,owner,fleetid,fleet,sig,f_id,f_name,f_g,f_s,f_p,f_rel,t_id,t_
 										<tr class="category"><td colspan="5">Mouvements des flottes</td></tr>
 										<script>
 											{% for k,fle in pla.moving.fleet.items %}
-												r({{ fle.relation }},"{{ fle.alliancetag }}","{{ fle.name|escapejs }}","{{ fle.fleetid }}","{{ fle.fleetname|escapejs }}",{{ fle.signature }},"{{ fle.f_planetid }}","{{ fle.f_planetname|escapejs }}","{{ fle.f_g }}","{{ fle.f_s }}","{{ fle.f_p }}",{{ fle.f_relation }},"{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }},{{ fle.time }}, {% if fle.losing %}true{% endif %}{% if fle.timeleft %}false{% endif %});
+												r({{ fle.relation }},"{{ fle.alliancetag }}","{{ fle.name|escapejs }}","{{ fle.fleetid }}","{{ fle.fleetname|escapejs }}",{{ fle.signature }},"{{ fle.f_planetid }}","{{ fle.f_planetname|escapejs }}","{{ fle.f_g }}","{{ fle.f_s }}","{{ fle.f_p }}",{{ fle.f_relation }},"{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }},{{ fle.time }}, {% if fle.losing %}true{% endif %}{% if fle.timeleft %}false{% endif %},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}));
 											{% endfor %}
 										</script>
 										{% if pla.moving.nofleets %}
@@ -85,7 +154,7 @@ function r(rel,tag,owner,fleetid,fleet,sig,f_id,f_name,f_g,f_s,f_p,f_rel,t_id,t_
 										<tr class="category"><td colspan="5">Flottes entrant dans vos secteurs</td></tr>
 										<script>
 											{% for k,fle in pla.entering.fleet.items %}
-												r({{ fle.relation }},"{{ fle.alliancetag }}","{{ fle.name|escapejs }}","{{ fle.fleetid }}","{{ fle.fleetname|escapejs }}",{{ fle.signature }},"{{ fle.f_planetid }}","{{ fle.f_planetname|escapejs }}","{{ fle.f_g }}","{{ fle.f_s }}","{{ fle.f_p }}",{{ fle.f_relation }},"{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }},{{ fle.time }}, {% if fle.losing %}true{% endif %}{% if fle.timeleft %}false{% endif %});
+												r({{ fle.relation }},"{{ fle.alliancetag }}","{{ fle.name|escapejs }}","{{ fle.fleetid }}","{{ fle.fleetname|escapejs }}",{{ fle.signature }},"{{ fle.f_planetid }}","{{ fle.f_planetname|escapejs }}","{{ fle.f_g }}","{{ fle.f_s }}","{{ fle.f_p }}",{{ fle.f_relation }},"{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }},{{ fle.time }}, {% if fle.losing %}true{% endif %}{% if fle.timeleft %}false{% endif %},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}));
 											{% endfor %}
 										</script>
 										{% if pla.entering.nofleets %}
@@ -97,7 +166,7 @@ function r(rel,tag,owner,fleetid,fleet,sig,f_id,f_name,f_g,f_s,f_p,f_rel,t_id,t_
 										<tr class="category"><td colspan="5">Flottes sortant de vos secteurs</td></tr>
 										<script>
 											{% for k,fle in pla.leaving.fleet.items %}
-												r({{ fle.relation }},"{{ fle.alliancetag }}","{{ fle.name|escapejs }}","{{ fle.fleetid }}","{{ fle.fleetname|escapejs }}",{{ fle.signature }},"{{ fle.f_planetid }}","{{ fle.f_planetname|escapejs }}","{{ fle.f_g }}","{{ fle.f_s }}","{{ fle.f_p }}",{{ fle.f_relation }},"{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }},{{ fle.time }}, {% if fle.losing %}true{% endif %}{% if fle.timeleft %}false{% endif %});
+												r({{ fle.relation }},"{{ fle.alliancetag }}","{{ fle.name|escapejs }}","{{ fle.fleetid }}","{{ fle.fleetname|escapejs }}",{{ fle.signature }},"{{ fle.f_planetid }}","{{ fle.f_planetname|escapejs }}","{{ fle.f_g }}","{{ fle.f_s }}","{{ fle.f_p }}",{{ fle.f_relation }},"{{ fle.t_planetid }}","{{ fle.t_planetname }}","{{ fle.t_g }}","{{ fle.t_s }}","{{ fle.t_p }}",{{ fle.t_relation }},{{ fle.time }}, {% if fle.losing %}true{% endif %}{% if fle.timeleft %}false{% endif %},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}));
 											{% endfor %}
 										</script>
 										{% if pla.leaving.nofleets %}

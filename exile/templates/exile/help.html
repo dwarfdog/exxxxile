@@ -415,6 +415,7 @@
 	Il est possible d'imbriquer les balises :<br/>
 	[u][b]mon texte[/b][/u] écrira <u><b>"mon texte" en gras et souligné</b></u><br/><br/>
 	<h2>Smileys</h2>
+	<p>Tous les caractères emoticones unicodes doivent fonctionner <a href="https://emojipedia.org/" target="_blank">emojipedia.org</a> (copié-collé) comme 🤠 🇫🇷 ☠️ par exemple.</p>
 			{% for i,smiley in smileys.items %}
 				<div style="border:1px solid white;padding:4px 4px;float:left;margin-right:4px;">{{ smiley.code }} <img src="/{{ smiley.image }}"/></div>
 			{% endfor %}

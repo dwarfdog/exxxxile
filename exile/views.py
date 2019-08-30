@@ -6092,13 +6092,14 @@ def alliancecreate(request):
 def radars(request):
     def displayRadar(planetid, planame, radarstrength, galaxy, sector):
         with connection.cursor() as cursor:
-            cursor.execute('SELECT v.id, v.name, attackonsight, engaged, size, signature, speed, remaining_time, ' +
-                ' ownerid, owner_name, owner_relation, ' +
-                ' planetid, planet_name, planet_galaxy, planet_sector, planet_planet, ' +
-                ' planet_ownerid, planet_owner_name, planet_owner_relation, ' +
-                ' destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, ' +
-                ' destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation, total_time, ' +
-                ' from_radarstrength, to_radarstrength, alliances.tag, radar_jamming, destplanet_radar_jamming ' +
+            cursor.execute('SELECT v.id, v.name, attackonsight, engaged, size, signature, speed, remaining_time, ' + # 0 1 2 3 4 5 6 7
+                ' ownerid, owner_name, owner_relation, ' + # 8 9 10
+                ' planetid, planet_name, planet_galaxy, planet_sector, planet_planet, ' + # 11 12 13 14 15
+                ' planet_ownerid, planet_owner_name, planet_owner_relation, ' + # 16 17 18
+                ' destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, ' + # 19 20 21 22 23
+                ' destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation, total_time, ' + # 24 25 26 27
+                ' from_radarstrength, to_radarstrength, alliances.tag, radar_jamming, destplanet_radar_jamming, ' + # 28 29 30 31 32
+                ' cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers ' + # 33 34 35 36 37 38
                 ' FROM vw_fleets_moving v ' +
                 '   LEFT JOIN alliances ON alliances.id = owner_alliance_id ' +
                 ' WHERE userid=%(userid)s AND ( ' +
@@ -6239,6 +6240,17 @@ def radars(request):
                     else:
                         radar["time"] = remaining_time
                         radar['timeleft'] = True
+                    if relation == config.rSelf:
+                        radar['resource'] = {
+                            '0': {'res_id':0, 'res_quantity':re[33]},
+                            '1': {'res_id':1, 'res_quantity':re[34]},
+                            '2': {'res_id':2, 'res_quantity':re[35]},
+                            '3': {'res_id':3, 'res_quantity':re[36]},
+                            '4': {'res_id':4, 'res_quantity':re[37]},
+                            '5': {'res_id':5, 'res_quantity':re[38]}
+                        }
+                    else:
+                        radar['resource'] = False
                     gcontext['radar'][planame][movement_type]['fleet'][i] = radar.copy()
                 i += 1
             if movingfleetcount == 0:
