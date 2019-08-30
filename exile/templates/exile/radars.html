@@ -40,7 +40,7 @@ var currentList = [];
 		{% if pla.moving %}
 			{% for k,fle in pla.moving.fleet.items %}
 				{% if fle.resource %}
-					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
+					currentList.push(new Fleet({{ fle.id }},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
 					);
 				{% endif %}
 			{% endfor %}
@@ -48,7 +48,7 @@ var currentList = [];
 		{% if pla.entering %}
 			{% for k,fle in pla.entering.fleet.items %}
 				{% if fle.resource %}
-					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
+					currentList.push(new Fleet({{ fle.id }},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
 					);
 				{% endif %}
 			{% endfor %}
