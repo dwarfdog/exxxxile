@@ -6242,7 +6242,6 @@ def radars(request):
                         radar['timeleft'] = True
                     if relation == config.rSelf:
                         radar['resource'] = {
-                            '0': {'res_id':0, 'res_quantity':re[33]},
                             '1': {'res_id':1, 'res_quantity':re[34]},
                             '2': {'res_id':2, 'res_quantity':re[35]},
                             '3': {'res_id':3, 'res_quantity':re[36]},
