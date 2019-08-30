@@ -39,24 +39,24 @@ var currentList = [];
 	{% for i,pla in radar.items %}
 		{% if pla.moving %}
 			{% for k,fle in pla.moving.fleet.items %}
-				{% if fleet.resource %}
-					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fleet.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
+				{% if fle.resource %}
+					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
 					);
 				{% endif %}
 			{% endfor %}
 		{% endif %}
 		{% if pla.entering %}
 			{% for k,fle in pla.entering.fleet.items %}
-				{% if fleet.resource %}
-					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fleet.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
+				{% if fle.resource %}
+					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
 					);
 				{% endif %}
 			{% endfor %}
 		{% endif %}
 		{% if pla.leaving %}
 			{% for k,fle in pla.entering.fleet.items %}
-				{% if fleet.resource %}
-					currentList.push(new Fleet({{ fleet.id }},new Array(0{% for key, resource in fleet.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
+				{% if fle.resource %}
+					currentList.push(new Fleet({{ fle.id }},new Array(0{% for key, resource in fle.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}))
 					);
 				{% endif %}
 			{% endfor %}
