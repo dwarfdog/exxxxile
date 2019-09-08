@@ -2,20 +2,25 @@
 <script>
 var costs = new Array();
 
-costs["nation"]=new Array({{ nation_cost_lvl_0 }},{{ nation_cost_lvl_1 }},{{ nation_cost_lvl_2 }},{{ nation_cost_lvl_3 }});
-costs["fleets"]=new Array({{ fleets_cost_lvl_0 }},{{ fleets_cost_lvl_1 }},{{ fleets_cost_lvl_2 }},{{ fleets_cost_lvl_3 }});
-costs["planet"]=new Array({{ planet_cost_lvl_0 }},{{ planet_cost_lvl_1 }},{{ planet_cost_lvl_2 }},{{ planet_cost_lvl_3 }});
+costs["nation"]=new Array({{ nation_cost_lvl_0 }},{{ nation_cost_lvl_10 }},{{ nation_cost_lvl_1 }},{{ nation_cost_lvl_11 }},{{ nation_cost_lvl_2 }},{{ nation_cost_lvl_12 }},{{ nation_cost_lvl_3 }},{{ nation_cost_lvl_13 }});
+costs["fleets"]=new Array({{ fleets_cost_lvl_0 }},{{ fleets_cost_lvl_10 }},{{ fleets_cost_lvl_1 }},{{ fleets_cost_lvl_11 }},{{ fleets_cost_lvl_2 }},{{ fleets_cost_lvl_12 }},{{ fleets_cost_lvl_3 }},{{ fleets_cost_lvl_13 }});
+costs["planet"]=new Array({{ planet_cost_lvl_0 }},{{ planet_cost_lvl_10 }},{{ planet_cost_lvl_1 }},{{ planet_cost_lvl_11 }},{{ planet_cost_lvl_2 }},{{ planet_cost_lvl_12 }},{{ planet_cost_lvl_3 }},{{ planet_cost_lvl_13 }});
 
 function updateCost(obj, type)
 {	
 	var selected = obj.selectedIndex;
 	document.getElementById(type+"cost").innerHTML = formatnumber(costs[type][selected]);
+	if(selected%2==1){
+		document.getElementById(type+"cost").innerHTML += ' Crédits';
+	}else{
+		document.getElementById(type+"cost").innerHTML += ' Points de Prestige';
+	}
 }
 
 function confirmAction(id)
 {	
 	var cost = $(id).innerHTML;
-	return confirm('Confirmez-vous la dépense de ' + cost + ' Points de Prestige pour l\'espionnage ?');
+	return confirm('Confirmez-vous la dépense de ' + cost + ' pour l\'espionnage ?');
 }
 
 </script><div id="intelligence">
@@ -34,11 +39,11 @@ function confirmAction(id)
 <tr>
 	<td>
 	<ul class="spy">
-		<li>Novice (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ nation_cost_lvl_0 }})<br/>Cet espion a <span class="highlight">60%</span> de chance de se faire repérer par la nation que vous espionnez<br/>et espionnera un maximum de <span class="highlight">5</span> planètes.</li>
-		<li>Initié (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ nation_cost_lvl_1 }})<br/>Cet espion a <span class="highlight">30%</span> de chance de se faire repérer par la nation que vous espionnez<br/>et espionnera un maximum de <span class="highlight">10</span> planètes.</li>
-		<li>Agent (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ nation_cost_lvl_2 }})<br/>Cet espion a <span class="highlight">15%</span> de chance de se faire repérer par la nation que vous espionnez,<br/> il s'infiltrera au sein des hautes instances de la nation pour en connaître <span class="highlight">tous les secrets</span> (recherches en cours, nombre exact et positions des planètes...).<br/>
+		<li>Novice (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ nation_cost_lvl_0 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ nation_cost_lvl_10 }})<br/>Cet espion a <span class="highlight">60%</span> de chance de se faire repérer par la nation que vous espionnez<br/>et espionnera un maximum de <span class="highlight">5</span> planètes.</li>
+		<li>Initié (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ nation_cost_lvl_1 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ nation_cost_lvl_11 }})<br/>Cet espion a <span class="highlight">30%</span> de chance de se faire repérer par la nation que vous espionnez<br/>et espionnera un maximum de <span class="highlight">10</span> planètes.</li>
+		<li>Agent (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ nation_cost_lvl_2 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ nation_cost_lvl_12 }})<br/>Cet espion a <span class="highlight">15%</span> de chance de se faire repérer par la nation que vous espionnez,<br/> il s'infiltrera au sein des hautes instances de la nation pour en connaître <span class="highlight">tous les secrets</span> (recherches en cours, nombre exact et positions des planètes...).<br/>
 		Cette mission peut être assez longue.</li>
-		<li>Taupe (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ nation_cost_lvl_3 }})<br/>Cet espion <span class="highlight">ne peut être détecté</span>,<br/> il s'infiltrera au sein des hautes instances de la nation pour en connaître <span class="highlight">tous les secrets</span> (recherches en cours, nombre exact et positions des planètes...).<br/>
+		<li>Taupe (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ nation_cost_lvl_3 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ nation_cost_lvl_13 }})<br/>Cet espion <span class="highlight">ne peut être détecté</span>,<br/> il s'infiltrera au sein des hautes instances de la nation pour en connaître <span class="highlight">tous les secrets</span> (recherches en cours, nombre exact et positions des planètes...).<br/>
 		Cette mission peut prendre beaucoup de temps.</li>
 	</ul>
 	</td>
@@ -47,16 +52,20 @@ function confirmAction(id)
 	<td align=center>
 	<input type="hidden" name="spy" value="nation">
 	Espionner <input type="text" name="nation_name" value="" size="" maxlength="" size="14" maxlength="12"> avec <select name="level" onchange="updateCost(this, 'nation');">
-		<option value="0">Novice</option>
-		<option value="1">Initié</option>
-		<option value="2">Agent</option>
-		<option value="3">Taupe</option>
+		<option value="0">Novice (prestige)</option>
+		<option value="10">Novice (crédits)</option>
+		<option value="1">Initié  (prestige)</option>
+		<option value="11">Initié (crédits)</option>
+		<option value="2">Agent  (prestige)</option>
+		<option value="12">Agent (crédits)</option>
+		<option value="3">Taupe  (prestige)</option>
+		<option value="13">Taupe (crédits)</option>
 	</select>
 	</td>
 </tr>
 <tr>
 	<td align=center>
-	Coût : <span id="nationcost">{{ nation_cost_lvl_0 }}</span> Points de Prestige&nbsp;&nbsp;
+	Coût : <span id="nationcost">{{ nation_cost_lvl_0 }} Points de Prestige</span>&nbsp;&nbsp;
 	<input type="submit" value="Espionner la nation">
 	</td>
 </tr>
@@ -84,10 +93,10 @@ function confirmAction(id)
 		<tr>
 			<td style="color:#BCBCC0;">
 			<ul>
-				<li>Novice (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ planet_cost_lvl_0 }})<br/>Cet espion a 50% de chance de se faire repérer par la nation que vous espionnez, <br/>et rassemblera des informations générales sans trop prendre de risque.</li>
-				<li>Initié (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ planet_cost_lvl_1 }})<br/>Cet espion a 20% de chance de se faire repérer par la nation que vous espionnez, <br/>et rassemblera plus d'informations que l'agent novice.</li>
-				<li>Agent (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ planet_cost_lvl_2 }})<br/>Cet espion a 5% de chance de se faire repérer par la nation que vous espionnez, <br/>et rassemblera le plus d'information possible.</li>
-				<li>Espion militaire (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ planet_cost_lvl_3 }})<br/>Cet espion est un vieux baroudeur, rompu à l'espionnage militaire, qui saura vous dire la composition (corvettes, frégates...) des flottes repérées.<br/>
+				<li>Novice (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_0 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_10 }})<br/>Cet espion a 50% de chance de se faire repérer par la nation que vous espionnez, <br/>et rassemblera des informations générales sans trop prendre de risque.</li>
+				<li>Initié (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_1 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_11 }})<br/>Cet espion a 20% de chance de se faire repérer par la nation que vous espionnez, <br/>et rassemblera plus d'informations que l'agent novice.</li>
+				<li>Agent (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_2 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_12 }})<br/>Cet espion a 5% de chance de se faire repérer par la nation que vous espionnez, <br/>et rassemblera le plus d'information possible.</li>
+				<li>Espion militaire (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_3 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_13 }})<br/>Cet espion est un vieux baroudeur, rompu à l'espionnage militaire, qui saura vous dire la composition (corvettes, frégates...) des flottes repérées.<br/>
 				Etant donné qu'il doit infitrer le commandement militaire et accéder à des informations techniques sur les flottes, cette mission prendra plus longtemps et le risque de se faire repérer est assez élevé.</li>
 			</ul>
 			</td>
@@ -96,16 +105,20 @@ function confirmAction(id)
 			<td align=center>
 			<input type="hidden" name="spy" value="fleets">
 			Espionner <input type="text" name="nation_name" value="" size="" maxlength="" size="14" maxlength="12"> avec <select name="level" onchange="updateCost(this, 'fleets');">
-				<option value="0">Novice</option>
-				<option value="1">Initié</option>
-				<option value="2">Agent</option>
-				<option value="3">Espion militaire</option>
+				<option value="0">Novice (prestige)</option>
+				<option value="10">Novice (crédits)</option>
+				<option value="1">Initié (prestige)</option>
+				<option value="11">Initié (crédits)</option>
+				<option value="2">Agent (prestige)</option>
+				<option value="12">Agent (crédits)</option>
+				<option value="3">Espion militaire (prestige)</option>
+				<option value="13">Espion militaire (crédits)</option>
 			</select>
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-			Coût : <span id="fleetscost">{{ fleets_cost_lvl_0 }}</span> Points de Prestige&nbsp;&nbsp;
+			Coût : <span id="fleetscost">{{ fleets_cost_lvl_0 }} Points de Prestige</span>&nbsp;&nbsp;
 			<input type="submit" value="Espionner la flotte">
 			</td>
 		</tr>
@@ -133,11 +146,11 @@ function confirmAction(id)
 		<tr>
 			<td style="color:#BCBCC0;">
 			<ul class="spy">
-				<li>Novice (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ planet_cost_lvl_0 }})<br/>Cet espion a <span class="highlight">60%</span> de chance de se faire repérer par la nation que vous espionnez,<br/>et aura <span class="highlight">peu de chance</span> d'obtenir des informations stratégiques.</li>
-				<li>Initié (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ planet_cost_lvl_1 }})<br/>Cet espion a <span class="highlight">30%</span> de chance de se faire repérer par la nation que vous espionnez, <br/>et aura <span class="highlight">plus de chance</span> d'obtenir des informations stratégiques.</li>
-				<li>Agent (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ planet_cost_lvl_2 }})<br/>Cet espion a <span class="highlight">15%</span> de chance de se faire repérer par la nation que vous espionnez, <br/> il s'infiltrera au sein de la planète pour en connaître <span class="highlight">tous les secrets</span> (constructions en cours, nombre de bâtiments plus précis ...).<br/>
+				<li>Novice (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_0 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_0 }})<br/>Cet espion a <span class="highlight">60%</span> de chance de se faire repérer par la nation que vous espionnez,<br/>et aura <span class="highlight">peu de chance</span> d'obtenir des informations stratégiques.</li>
+				<li>Initié (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_1 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_11 }})<br/>Cet espion a <span class="highlight">30%</span> de chance de se faire repérer par la nation que vous espionnez, <br/>et aura <span class="highlight">plus de chance</span> d'obtenir des informations stratégiques.</li>
+				<li>Agent (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_2 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_12 }})<br/>Cet espion a <span class="highlight">15%</span> de chance de se faire repérer par la nation que vous espionnez, <br/> il s'infiltrera au sein de la planète pour en connaître <span class="highlight">tous les secrets</span> (constructions en cours, nombre de bâtiments plus précis ...).<br/>
 				Cette mission peut être assez longue.</li>
-				<li>Infiltrateur (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16"> {{ planet_cost_lvl_3 }})<br/>Cet espion <span class="highlight">ne peut être détecté</span>, <br/> il s'infiltrera au sein de la planète pour en connaître <span class="highlight">tous les secrets</span> (constructions en cours, nombre de bâtiments plus précis ...).<br/>
+				<li>Infiltrateur (<img src="{% static 'exile/assets/interface/prestige.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_3 }} ou <img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" width="16" height="16">{{ planet_cost_lvl_13 }})<br/>Cet espion <span class="highlight">ne peut être détecté</span>, <br/> il s'infiltrera au sein de la planète pour en connaître <span class="highlight">tous les secrets</span> (constructions en cours, nombre de bâtiments plus précis ...).<br/>
 				Cette mission peut lui prendre beaucoup de temps.</li>
 			</ul>
 			</td>
@@ -147,16 +160,20 @@ function confirmAction(id)
 
 			<input type="hidden" name="spy" value="planet">
 			Espionner la planète <input type="text" name="g" value="{{ g }}" maxlength="2" size="2">&nbsp;<input type="text" name="s" value="{{ s }}" maxlength="2" size="2">&nbsp;<input type="text" name="p" value="{{ p }}" maxlength="2" size="2"> avec <select name="level" onchange="updateCost(this, 'planet');">
-				<option value="0">Novice</option>
-				<option value="1">Initié</option>
-				<option value="2">Agent</option>
-				<option value="3">Infiltrateur</option>
+				<option value="0">Novice (prestige)</option>
+				<option value="10">Novice (crédits)</option>
+				<option value="1">Initié (prestige)</option>
+				<option value="11">Initié (crédits)</option>
+				<option value="2">Agent (prestige)</option>
+				<option value="12">Agent (crédits)</option>
+				<option value="3">Infiltrateur (prestige)</option>
+				<option value="13">Infiltrateur (crédits)</option>
 			</select>
 			</td>
 		</tr>
 		<tr>
 			<td align="center">
-			Coût : <span id="planetcost">{{ planet_cost_lvl_0 }}</span> Points de Prestige&nbsp;&nbsp;
+			Coût : <span id="planetcost">{{ planet_cost_lvl_0 }} Points de Prestige</span>&nbsp;&nbsp;
 			<input type="submit" value="Espionner la planète">
 			</td>
 		</tr>

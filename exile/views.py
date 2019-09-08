@@ -9734,27 +9734,31 @@ def mercenaryintelligence(request):
                 return
             cursor.execute("UPDATE spy SET target_name=sp_get_user(%s) WHERE id=%s", [id, reportid])
             nb_planet = 0
-            if level == 0:
+            if level == 0 or level == 10:
                 planet_limit = 5
                 spottedChance = 0.6
-                cost = gcontext['nation_cost_lvl_0']
+                cost = gcontext['nation_cost_lvl_' + level]
                 spyingTime = 25
-            elif level == 1:
+            elif level == 1 or level == 11:
                 planet_limit = 15
                 spottedChance = 0.3
-                cost = gcontext['nation_cost_lvl_1']
+                cost = gcontext['nation_cost_lvl_' + level]
                 spyingTime = 30
-            elif level == 2:
+            elif level == 2 or level == 12:
                 planet_limit = 0 # no limit
                 spottedChance = 0.15
-                cost = gcontext['nation_cost_lvl_2']
+                cost = gcontext['nation_cost_lvl_' + level]
                 spyingTime = round(60 + random.random() * 30)
-            elif level == 3:
+            elif level == 3 or level == 13:
                 planet_limit = 0 # means no limit
                 spottedChance = 0
-                cost = gcontext['nation_cost_lvl_3']
+                cost = gcontext['nation_cost_lvl_' + level]
                 spyingTime = round(300 + random.random() * 150)
-            if gcontext['exile_user'].prestige_points < cost:
+            if level < 10 and gcontext['exile_user'].prestige_points < cost:
+                gcontext['intell_error'] = gcontext['e_not_enough_money']
+                transaction.set_rollback(True)
+                return
+            if level >= 10 and gcontext['exile_user'].credits < cost:
                 gcontext['intell_error'] = gcontext['e_not_enough_money']
                 transaction.set_rollback(True)
                 return
@@ -9779,7 +9783,7 @@ def mercenaryintelligence(request):
                     nb_planet += 1
 
             # For veteran spy, collect additionnal research infos
-            if level >= 2:
+            if level in [2,3,12,13]:
                 cursor.execute("SELECT researchid, level FROM sp_list_researches(%s) WHERE level > 0 ORDER BY researchid ", [id])
                 res = cursor.fetchall()
                 for re in res:
@@ -9797,8 +9801,12 @@ def mercenaryintelligence(request):
                 cursor.execute(" INSERT INTO reports(ownerid, type, subtype, datetime, spyid, description) " +
                     " VALUES(%s,%s,%s, now() + %s*interval '40 seconds', %S, sp_get_user(%s)) ", [id, category, typ, spyingTime+nb_planet, reportid, gcontext['exile_user'].id])
             
-            # withdraw the operation cost from player's account
-            cursor.execute("UPDATE users SET prestige_points=prestige_points - %s WHERE id=%s", [cost, gcontext['exile_user'].id])
+            if level in [0,1,2,3]:
+                # withdraw the operation cost from player's account
+                cursor.execute("UPDATE users SET prestige_points = prestige_points - %s WHERE id=%s", [cost, gcontext['exile_user'].id])
+            elif level in [10,11,12,13]:
+                # withdraw the operation cost from player's account
+                cursor.execute("UPDATE users SET credits = credits - %s WHERE id=%s", [cost, gcontext['exile_user'].id])
 
     # Retrieve info about a nation's fleets
     def SpyFleets(request,level):
@@ -9823,31 +9831,35 @@ def mercenaryintelligence(request):
                 transaction.set_rollback(True)
                 return
             cursor.execute("UPDATE spy SET target_name=sp_get_user(%s) WHERE id=%s", [id, reportid])
-            if level == 0:
+            if level == 0 or level == 10:
                 spottedChance = 0.1
                 getinfoModifier = 0.10
-                cost = gcontext['fleets_cost_lvl_0']
+                cost = gcontext['fleets_cost_lvl_' + level]
                 spyingTime = 15
                 sig_limit = 10000
-            elif level == 1:
+            elif level == 1 or level == 10:
                 spottedChance = 0.04
                 getinfoModifier = 0.05
-                cost = gcontext['fleets_cost_lvl_1']
+                cost = gcontext['fleets_cost_lvl_' + level]
                 spyingTime = 30
                 sig_limit = 30000
-            elif level == 2:
+            elif level == 2 or level == 10:
                 spottedChance = 0.01
                 getinfoModifier = 0.01
-                cost = gcontext['fleets_cost_lvl_2']
+                cost = gcontext['fleets_cost_lvl_' + level]
                 spyingTime = 45
                 sig_limit = 100000
-            elif level == 3:
+            elif level == 3 or level == 10:
                 spottedChance = 0.05
                 getinfoModifier = 0
-                cost = gcontext['fleets_cost_lvl_3']
+                cost = gcontext['fleets_cost_lvl_' + level]
                 spyingTime = 75
                 sig_limit = 0 # means no limit
-            if gcontext['exile_user'].prestige_points < cost:
+            if level < 10 and gcontext['exile_user'].prestige_points < cost:
+                gcontext['intell_error'] = gcontext['e_not_enough_money']
+                transaction.set_rollback(True)
+                return
+            if level >= 10 and gcontext['exile_user'].credits < cost:
                 gcontext['intell_error'] = gcontext['e_not_enough_money']
                 transaction.set_rollback(True)
                 return
@@ -9867,7 +9879,7 @@ def mercenaryintelligence(request):
                 # test if info is retrieved by the spy (failure probability increase for each new info)
                 if random.random() < ( 1 - ( getinfoModifier * i ) ) and (sig_limit==0 or sig < sig_limit):
                     # For veteran spy, collect additionnal destination info for moving fleets
-                    if level > 1 and re[7]:
+                    if level in [1,2,3,11,12,13] and re[7]:
                         cursor.execute(" INSERT INTO spy_fleet(spy_id, fleet_id, fleet_name, galaxy, sector, planet, size, signature, dest_galaxy, dest_sector, dest_planet) " +
                             " VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ", [reportid, re[0], re[1], re[2], re[3], re[4], re[5], re[6], re[7], re[8], re[9]])
                     else:
@@ -9886,8 +9898,12 @@ def mercenaryintelligence(request):
                 cursor.execute(" INSERT INTO reports(ownerid, type, subtype, datetime, spyid, description) " +
                     " VALUES (%s,%s,%s, now()+%s*interval '30 seconds', %s, sp_get_user(%s)) ", [id, category, typ*10, round(Spyingtime+math.log(sig)/math.log(5)), reportid, gcontext['exile_user'].id])
 
-            # withdraw the operation cost from player's account
-            cursor.execute("UPDATE users SET prestige_points = prestige_points - %s WHERE id=%s", [cost,gcontext['exile_user'].id])
+            if level in [0,1,2,3]:
+                # withdraw the operation cost from player's account
+                cursor.execute("UPDATE users SET prestige_points = prestige_points - %s WHERE id=%s", [cost, gcontext['exile_user'].id])
+            elif level in [10,11,12,13]:
+                # withdraw the operation cost from player's account
+                cursor.execute("UPDATE users SET credits = credits - %s WHERE id=%s", [cost, gcontext['exile_user'].id])
 
     # Retrieve info about a planet
     def SpyPlanet(request,level):
@@ -9922,30 +9938,33 @@ def mercenaryintelligence(request):
                 gcontext['intell_error'] = gcontext['e_general_error']
                 transaction.set_rollback(True)
                 return
-            if level == 0:
+            if level == 0 or level == 10:
                 spottedChance = 0.6
                 getinfoModifier = 0.05
-                cost = gcontext['planet_cost_lvl_0']
+                cost = gcontext['planet_cost_lvl_' + level]
                 spyingTime = 5
-            elif level == 1:
+            elif level == 1 or level == 11:
                 spottedChance = 0.3
                 getinfoModifier = 0.025
-                cost = gcontext['planet_cost_lvl_1']
+                cost = gcontext['planet_cost_lvl_' + level]
                 spyingTime = 10
-            elif level == 2:
+            elif level == 2 or level == 12:
                 spottedChance = 0.15
                 getinfoModifier = 0
-                cost = gcontext['planet_cost_lvl_2']
+                cost = gcontext['planet_cost_lvl_' + level]
                 spyingTime = round(20 + random.random() * 10)
-            elif level == 3:
+            elif level == 3 or level == 13:
                 spottedChance = 0
                 getinfoModifier = 0
-                cost = gcontext['planet_cost_lvl_3']
+                cost = gcontext['planet_cost_lvl_' + level]
                 spyingTime = round(100 + random.random() * 50)
-            if gcontext['exile_user'].prestige_points < cost:
+            if level < 10 and gcontext['exile_user'].prestige_points < cost:
                 gcontext['intell_error'] = gcontext['e_not_enough_money']
                 transaction.set_rollback(True)
                 return
+            if level >= 10 and gcontext['exile_user'].credits < cost:
+                gcontext['intell_error'] = gcontext['e_not_enough_money']
+                transaction.set_rollback(True)
             # retrieve planet info list
             cursor.execute("SELECT id, name, ownerid, sp_get_user(ownerid), floor, space, floor_occupied, space_occupied,  " +
                 " COALESCE((SELECT SUM(quantity*signature) " +
@@ -9988,10 +10007,10 @@ def mercenaryintelligence(request):
                     cursor.execute("UPDATE spy_planet SET radar_strength=%s, radar_jamming=%s, orbit_ore=%s, orbit_hydrocarbon=%s WHERE spy_id=%s AND planet_id=%s", [re[17], re[18], re[20], re[21], reportid, re[0]])
 
                 # uncommon info retrieved by skilled spies with level >= 1 : ore, hydrocarbon, energy
-                if level >= 1: 
+                if level in [1,2,3,11,12,13]: 
                     cursor.execute("UPDATE spy_planet SET ore=%s, hydrocarbon=%s, ore_capacity=%s, hydrocarbon_capacity=%s, ore_production=%s, hydrocarbon_production=%s, energy_consumption=%s, energy_production=%s WHERE spy_id=%s AND planet_id=%s", [re[9], re[10], re[11], re[12], re[13], re[14], re[15], re[16], reportid, re[0]])
 
-                if level >= 2:
+                if level in [2,3,12,13]:
                     # rare info that can be retrieved by veteran spies only : workers, scientists, soldiers
                     cursor.execute("UPDATE spy_planet SET workers=%s, workers_capacity=%s, scientists=%s, scientists_capacity=%s, soldiers=%s, soldiers_capacity=%s WHERE spy_id=%s AND planet_id=%s", [re[22], re[23], re[24], re[25], re[26], re[27], reportid, re[0]])
 
@@ -10059,23 +10078,39 @@ def mercenaryintelligence(request):
                 cursor.execute(" INSERT INTO reports(ownerid, type, subtype, datetime, spyid, planetid, description) " +
                         " VALUES(%s,%s,%s,now()+%s*interval '40 seconds',%s,%s, sp_get_user(%s))", [id, category, typ*10, spyingTime, reportid, planet, gcontext['exile_user'].id])
 
-            
-            # withdraw the operation cost from player's account
-            cursor.execute("UPDATE users SET prestige_points = prestige_points - %s WHERE id=%s", [cost, gcontext['exile_user'].id])
+            if level in [0,1,2,3]:
+                # withdraw the operation cost from player's account
+                cursor.execute("UPDATE users SET prestige_points = prestige_points - %s WHERE id=%s", [cost, gcontext['exile_user'].id])
+            elif level in [10,11,12,13]:
+                # withdraw the operation cost from player's account
+                cursor.execute("UPDATE users SET credits = credits - %s WHERE id=%s", [cost, gcontext['exile_user'].id])
+
     gcontext = request.session.get('gcontext',{})
     # Assign service costs
     gcontext['nation_cost_lvl_0'] = 250
     gcontext['nation_cost_lvl_1'] = 500
     gcontext['nation_cost_lvl_2'] = 1000
     gcontext['nation_cost_lvl_3'] = 2000
+    gcontext['nation_cost_lvl_10'] = 5000
+    gcontext['nation_cost_lvl_11'] = 15000
+    gcontext['nation_cost_lvl_12'] = 30000
+    gcontext['nation_cost_lvl_13'] = 60000
     gcontext['fleets_cost_lvl_0'] = 1000
     gcontext['fleets_cost_lvl_1'] = 5000
     gcontext['fleets_cost_lvl_2'] = 25000
     gcontext['fleets_cost_lvl_3'] = 65000
+    gcontext['fleets_cost_lvl_10'] = 20000
+    gcontext['fleets_cost_lvl_11'] = 100000
+    gcontext['fleets_cost_lvl_12'] = 400000
+    gcontext['fleets_cost_lvl_13'] = 1000000
     gcontext['planet_cost_lvl_0'] = 50
     gcontext['planet_cost_lvl_1'] = 100
     gcontext['planet_cost_lvl_2'] = 200
     gcontext['planet_cost_lvl_3'] = 400
+    gcontext['planet_cost_lvl_10'] = 5000
+    gcontext['planet_cost_lvl_11'] = 15000
+    gcontext['planet_cost_lvl_12'] = 30000
+    gcontext['planet_cost_lvl_13'] = 60000
     gcontext['e_no_error'] = 0
     gcontext['e_general_error'] = 1
     gcontext['e_not_enough_money'] = 2
