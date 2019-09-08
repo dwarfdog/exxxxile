@@ -9391,7 +9391,7 @@ def spyreport(request):
                     " ORDER BY galaxy, sector, planet, fleet_name", [id])
         res = cursor.fetchall()
         nbfleet = 0
-        gcontext['fleets'] = {}
+        gcontext['fleets'] = {'fleet':{}}
         for re in res:
             fleet = {
                 "fleet": re[0],
@@ -9410,7 +9410,7 @@ def spyreport(request):
             else:
                 fleet["nosize"] = True
                 fleet["nodest"] = True
-            gcontext['fleets'][nbfleet] = fleet.copy()
+            gcontext['fleets']['fleet'][nbfleet] = fleet.copy()
             nbfleet += 1
         gcontext["fleets"]["date"] = gcontext['spydate']
         gcontext["fleets"]["nation"] = gcontext['target']
