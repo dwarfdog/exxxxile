@@ -11,7 +11,7 @@ class ExileConfig(AppConfig):
     allowedOrientations = [1,2,3]
     allowedRetry = True
     allowedHolidays = True
-    allowMercenary = False
+    allowMercenary = True
     hasAdmins = False # allow to send messages to administrators or not
     maintenance = False # enable/disable maintenance
     maintenance_msg = "Maintenance serveur ..." #"Mise à jour logiciel ..." #"Maintenance serveur" #"Migration de la base de donnée"
