@@ -8356,7 +8356,7 @@ def orbit(request):
             cursor.execute("SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," +
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," +
                 " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation," +
-                " action, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" +
+                " action, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers, shared" +
                 " FROM vw_fleets " +
                 " WHERE planetid=%s AND action != 1 AND action != -1" +
                 " ORDER BY upper(name)", [gcontext['CurrentPlanet']])
@@ -8380,6 +8380,7 @@ def orbit(request):
                     "cargo_scientists": re[29],
                     "cargo_soldiers": re[30],
                     "cargo_workers": re[31],
+                    "shared": re[32],
                 }
                 if re[8]:
                     fleet["commanderid"] = re[8]
@@ -8394,17 +8395,17 @@ def orbit(request):
                 else:
                     fleet["patrolling"] = True
                 if re[17] == config.rHostile or re[17] == config.rWar:
-                        fleet["enemy"] = True
+                    fleet["enemy"] = True
                 elif re[17] == config.rAlliance:
-                        fleet["ally"] = True
+                    fleet["ally"] = True
                 elif re[17] == config.rFriend:
-                        fleet["friend"] = True
+                    fleet["friend"] = True
                 elif re[17] == config.rSelf:
-                        if re[26] == 0:
-                            fake = True
-                            #   manage = True
-                            #   trade = True
-                        fleet["owner"] = True
+                    if re[26] == 0:
+                        fake = True
+                        #   manage = True
+                        #   trade = True
+                    fleet["owner"] = True
                 if manage:
                     fleet["manage"] = True
                 else:
@@ -8525,7 +8526,7 @@ def orbits(request):
             cursor.execute("SELECT id, name, attackonsight, engaged, size, signature, speed, remaining_time, commanderid, commandername," +
                 " planetid, planet_name, planet_galaxy, planet_sector, planet_planet, planet_ownerid, planet_owner_name, planet_owner_relation," +
                 " destplanetid, destplanet_name, destplanet_galaxy, destplanet_sector, destplanet_planet, destplanet_ownerid, destplanet_owner_name, destplanet_owner_relation," +
-                " action, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers" +
+                " action, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers, shared" +
                 " FROM vw_fleets " +
                 " WHERE planetid=%s AND action != 1 AND action != -1" +
                 " ORDER BY upper(name)", [CurrentPlanet])
@@ -8549,6 +8550,7 @@ def orbits(request):
                     "cargo_scientists": re[29],
                     "cargo_soldiers": re[30],
                     "cargo_workers": re[31],
+                    "shared": re[32],
                 }
                 if re[8]:
                     fleet["commanderid"] = re[8]
@@ -8563,17 +8565,17 @@ def orbits(request):
                 else:
                     fleet["patrolling"] = True
                 if re[17] == config.rHostile or re[17] == config.rWar:
-                        fleet["enemy"] = True
+                    fleet["enemy"] = True
                 elif re[17] == config.rAlliance:
-                        fleet["ally"] = True
+                    fleet["ally"] = True
                 elif re[17] == config.rFriend:
-                        fleet["friend"] = True
+                    fleet["friend"] = True
                 elif re[17] == config.rSelf:
-                        if re[26] == 0:
-                            fake = True
-                            #   manage = True
-                            #   trade = True
-                        fleet["owner"] = True
+                    if re[26] == 0:
+                        fake = True
+                        #   manage = True
+                        #   trade = True
+                    fleet["owner"] = True
                 if manage:
                     fleet["manage"] = True
                 else:

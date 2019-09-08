@@ -44,7 +44,7 @@ function cargoDesc(id){
 						<td nowrap>
 							{% if fleet.owner %}<a href="{% url 'exile:fleet' %}?id={{ fleet.id }}"><b>{{ fleet.name }}</b></a>{% endif %}
 							{% if fleet.friend %}<p class="friend"><b>{{ fleet.name }}</b></p>{% endif %}
-							{% if fleet.ally %}<p class="ally"><b>{{ fleet.name }}</b></p>{% endif %}
+							{% if fleet.ally %}{% if fleet.shared %}<a href="{% url 'exile:fleet' %}?id={{ fleet.id }}"><p class="ally"><b>{{ fleet.name }}</b></p></a>{% else %}<p class="ally"><b>{{ fleet.name }}</b></p>{% endif %}{% endif %}
 							{% if fleet.enemy %}<p class="enemy"><b>{{ fleet.name }}</b></p>{% endif %}
 						</td>
 						<td nowrap align="right">{{ fleet.size }}</td>
