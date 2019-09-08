@@ -9398,7 +9398,7 @@ def spyreport(request):
                 "location": str(re[1]) + "." + str(re[2]) + "." + str(re[3]),
                 "signature": re[4],
             }
-            if level > 1:
+            if gcontext['level'] > 1:
                 if re[5]:
                     fleet["size"] = re[5]
                 else:
