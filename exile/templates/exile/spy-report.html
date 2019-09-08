@@ -78,7 +78,7 @@ function putlevel(level,levels){
 	<tr class="header">
 	<td align="center">Flotte</td><td align="center">Taille</td><td align="center">Signature</td><td align="center">Localisation</td><td align="center">Destination</td>
 	</tr>
-	{% for key,fl in fleets.fleet.items %}
+	{% for key,fl in fleets.items %}
 		<tr>
 		<td>{{ fl.fleet }}</td>
 		<td>{% if fl.size %}{{ fl.size }}{% endif %}{% if fl.nosize %}Inconnue{% endif %}</td>
