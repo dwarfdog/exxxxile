@@ -10139,13 +10139,13 @@ def mercenaryintelligence(request):
 
             # Add spy reports in report list
             cursor.execute(" INSERT INTO reports(ownerid, type, subtype, datetime, spyid, description) " +
-                " VALUES (%s,%s,%s, now()+%s*interval '1 minute',%s,sp_get_user(%s)) ", [gcontext['exile_user'].id, category, typ*10, round(Spyingtime+math.log(sig)/math.log(5)), reportid, id])
+                " VALUES (%s,%s,%s, now()+%s*interval '1 minute',%s,sp_get_user(%s)) ", [gcontext['exile_user'].id, category, typ*10, round(spyingTime+math.log(sig)/math.log(5)), reportid, id])
             # update report if spy has been spotted
             if spotted and gcontext['exile_user'].privilege < 100:
                 cursor.execute(" UPDATE spy SET spotted=%s WHERE id=%s AND userid=%s", [spotted, reportid, gcontext['exile_user'].id])
                 # add report in spied nation's report list
                 cursor.execute(" INSERT INTO reports(ownerid, type, subtype, datetime, spyid, description) " +
-                    " VALUES (%s,%s,%s, now()+%s*interval '30 seconds', %s, sp_get_user(%s)) ", [id, category, typ*10, round(Spyingtime+math.log(sig)/math.log(5)), reportid, gcontext['exile_user'].id])
+                    " VALUES (%s,%s,%s, now()+%s*interval '30 seconds', %s, sp_get_user(%s)) ", [id, category, typ*10, round(spyingTime+math.log(sig)/math.log(5)), reportid, gcontext['exile_user'].id])
 
             if level in [0,1,2,3]:
                 # withdraw the operation cost from player's account
