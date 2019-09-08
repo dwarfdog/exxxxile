@@ -9737,22 +9737,22 @@ def mercenaryintelligence(request):
             if level == 0 or level == 10:
                 planet_limit = 5
                 spottedChance = 0.6
-                cost = gcontext['nation_cost_lvl_' + level]
+                cost = gcontext['nation_cost_lvl_'+ str(level)]
                 spyingTime = 25
             elif level == 1 or level == 11:
                 planet_limit = 15
                 spottedChance = 0.3
-                cost = gcontext['nation_cost_lvl_' + level]
+                cost = gcontext['nation_cost_lvl_'+ str(level)]
                 spyingTime = 30
             elif level == 2 or level == 12:
                 planet_limit = 0 # no limit
                 spottedChance = 0.15
-                cost = gcontext['nation_cost_lvl_' + level]
+                cost = gcontext['nation_cost_lvl_'+ str(level)]
                 spyingTime = round(60 + random.random() * 30)
             elif level == 3 or level == 13:
                 planet_limit = 0 # means no limit
                 spottedChance = 0
-                cost = gcontext['nation_cost_lvl_' + level]
+                cost = gcontext['nation_cost_lvl_'+ str(level)]
                 spyingTime = round(300 + random.random() * 150)
             if level < 10 and gcontext['exile_user'].prestige_points < cost:
                 gcontext['intell_error'] = gcontext['e_not_enough_money']
@@ -9834,25 +9834,25 @@ def mercenaryintelligence(request):
             if level == 0 or level == 10:
                 spottedChance = 0.1
                 getinfoModifier = 0.10
-                cost = gcontext['fleets_cost_lvl_' + level]
+                cost = gcontext['fleets_cost_lvl_'+ str(level)]
                 spyingTime = 15
                 sig_limit = 10000
             elif level == 1 or level == 10:
                 spottedChance = 0.04
                 getinfoModifier = 0.05
-                cost = gcontext['fleets_cost_lvl_' + level]
+                cost = gcontext['fleets_cost_lvl_'+ str(level)]
                 spyingTime = 30
                 sig_limit = 30000
             elif level == 2 or level == 10:
                 spottedChance = 0.01
                 getinfoModifier = 0.01
-                cost = gcontext['fleets_cost_lvl_' + level]
+                cost = gcontext['fleets_cost_lvl_'+ str(level)]
                 spyingTime = 45
                 sig_limit = 100000
             elif level == 3 or level == 10:
                 spottedChance = 0.05
                 getinfoModifier = 0
-                cost = gcontext['fleets_cost_lvl_' + level]
+                cost = gcontext['fleets_cost_lvl_'+ str(level)]
                 spyingTime = 75
                 sig_limit = 0 # means no limit
             if level < 10 and gcontext['exile_user'].prestige_points < cost:
@@ -9941,22 +9941,22 @@ def mercenaryintelligence(request):
             if level == 0 or level == 10:
                 spottedChance = 0.6
                 getinfoModifier = 0.05
-                cost = gcontext['planet_cost_lvl_' + level]
+                cost = gcontext['planet_cost_lvl_'+ str(level)]
                 spyingTime = 5
             elif level == 1 or level == 11:
                 spottedChance = 0.3
                 getinfoModifier = 0.025
-                cost = gcontext['planet_cost_lvl_' + level]
+                cost = gcontext['planet_cost_lvl_'+ str(level)]
                 spyingTime = 10
             elif level == 2 or level == 12:
                 spottedChance = 0.15
                 getinfoModifier = 0
-                cost = gcontext['planet_cost_lvl_' + level]
+                cost = gcontext['planet_cost_lvl_'+ str(level)]
                 spyingTime = round(20 + random.random() * 10)
             elif level == 3 or level == 13:
                 spottedChance = 0
                 getinfoModifier = 0
-                cost = gcontext['planet_cost_lvl_' + level]
+                cost = gcontext['planet_cost_lvl_'+ str(level)]
                 spyingTime = round(100 + random.random() * 50)
             if level < 10 and gcontext['exile_user'].prestige_points < cost:
                 gcontext['intell_error'] = gcontext['e_not_enough_money']
