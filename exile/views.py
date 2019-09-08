@@ -1125,22 +1125,22 @@ def locked(request):
     set content = GetTemplate("locked")
     # check to unlock holidays mode
     action = Request.Form("unlock")
-    if action != "" and oRs(1) <= 0 then
+    if action != "" and re[1] <= 0 then
         oConn.Execute "UPDATE users SET privilege=0, ban_expire=NULL WHERE ban_expire <= now() AND privilege=-1 AND id="&UserId, , 128
         Response.Redirect "/game/overview.asp"
-    content.AssignValue "login", oRs(0)
-    content.AssignValue "remaining_time_before_unlock", oRs(1)
-    #content.AssignValue "admin_email", oRs(3)
+    content.AssignValue "login", re[0]
+    content.AssignValue "remaining_time_before_unlock", re[1]
+    #content.AssignValue "admin_email", re[3]
     content.AssignValue "admin_email", supportMail
     content.AssignValue "universe", Universe
-    if not IsNull(oRs(2)) and oRs(2) != "" then
-        content.AssignValue "reason", oRs(2)
+    if not IsNull(re[2]) and re[2] != "" then
+        content.AssignValue "reason", re[2]
         content.Parse "reason"
-    if not IsNull(oRs(1)) then
-        if oRs(1) < 0 then
+    if not IsNull(re[1]) then
+        if re[1] < 0 then
             content.Parse "unlock"
         else
-            content.AssignValue "remaining_time_before_unlock", oRs(1)
+            content.AssignValue "remaining_time_before_unlock", re[1]
             content.Parse "cant_unlock"
     """
     gcontext = request.session.get('gcontext',{})
@@ -9308,6 +9308,255 @@ def nation(request):
     if r:
         return r
     t = loader.get_template('exile/nation.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
+
+
+@construct
+@logged
+def spyreport(request):
+    # display the spy report of a nation
+    def DisplayNation(request,id):
+        # list spied planets
+        cursor.execute(" SELECT spy_id, planet_id, planet_name, spy_planet.floor, spy_planet.space, ground, galaxy, sector, planet, spy_planet.pct_ore, spy_planet.pct_hydrocarbon " +
+            " FROM spy_planet " +
+            " LEFT JOIN nav_planet " +
+            " ON ( spy_planet.planet_id=nav_planet.id) " +
+            " WHERE spy_id=%s", [id])
+        res = cursor.fetchall()
+        nbplanet = 0
+        gcontext['nation'] = {
+            'researches': {'category':{}},
+        }
+        for re in res:
+            planet = {
+                "g": re[6],
+                "s": re[7],
+                "p": re[8],
+                "floor": re[3],
+                "space": re[4],
+                "ground": re[5],
+                "pct_ore": re[9],
+                "pct_hydrocarbon": re[10],
+            }
+            if re[2]:
+                planet["planet"] = re[2]
+            else:
+                planet["planet"] = gcontext['target']
+            nbplanet += 1
+            gcontext['nation'][nbplanet] = planet.copy()
+        
+        # list spied technologies
+        cursor.execute(" SELECT category, db_research.id, research_level, levels " +
+            " FROM spy_research " +
+            " LEFT JOIN db_research " +
+            " ON ( spy_research.research_id=db_research.id) " +
+            " WHERE spy_id=%s" +
+            " ORDER BY category, db_research.id ", [id])
+        res = cursor.fetchall()
+        nbresearch = 0
+        for re in res:
+            ck = 'category' + str(re[0])
+            if not ck in gcontext['category']:
+                gcontext['nation']['researches']['category'][ck] = {}
+            gcontext['nation']['researches']['category'][ck][nbresearch] = {
+                "research": getResearchLabel(re[1]),
+                "level": re[2],
+                "levels": re[3],
+            }
+            nbresearch += 1
+        # display spied nation credits if possible
+        if gcontext['credits']:
+            gcontext['nation']["credits"] = gcontext['credits']
+        if nbresearch != 0:
+            gcontext['nation']['researches']["nb_research"] = nbresearch
+        gcontext["nation"]["date"] = gcontext['spydate']
+        gcontext["nation"]["nation"] = gcontext['target']
+        gcontext["nation"]["nb_planet"] = nbplanet
+        gcontext["nation"]["spy_" + str(gcontext['level'])] = True
+        # spotted is true if our spy has been spotted while he was doing his job
+        if gcontext['spotted']:
+            gcontext["nation"]["spotted"] = True
+        print(gcontext['nation'])
+    def DisplayFleets(request,id):
+        if gcontext['level'] > 1:
+            cursor.execute(" SELECT fleet_name, galaxy, sector, planet, signature, size, dest_galaxy, dest_sector, dest_planet " +
+                    " FROM spy_fleet " +
+                    " WHERE spy_id=%s" +
+                    " ORDER BY galaxy, sector, planet, fleet_name", [id])
+        else:
+            cursor.execute(" SELECT fleet_name, galaxy, sector, planet, signature " +
+                    " FROM spy_fleet " +
+                    " WHERE spy_id=%s" +
+                    " ORDER BY galaxy, sector, planet, fleet_name", [id])
+        res = cursor.fetchall()
+        nbfleet = 0
+        gcontext['fleets'] = {}
+        for re in res:
+            fleet = {
+                "fleet": re[0],
+                "location": str(re[1]) + "." + str(re[2]) + "." + str(re[3]),
+                "signature": re[4],
+            }
+            if level > 1:
+                if re[5]:
+                    fleet["size"] = re[5]
+                else:
+                    fleet["nosize"] = True
+                if re[6]:
+                    fleet["destination"] = str(re[6]) + "." + str(re[7]) + "." + str(re[8])
+                else:
+                    fleet["nodest"] = True
+            else:
+                fleet["nosize"] = True
+                fleet["nodest"] = True
+            gcontext['fleets'][nbfleet] = fleet.copy()
+            nbfleet += 1
+        gcontext["fleets"]["date"] = gcontext['spydate']
+        gcontext["fleets"]["nation"] = gcontext['target']
+        gcontext["fleets"]["nb_fleet"] = nbfleet
+        
+        gcontext["fleets"]["spy_" + str(gcontext['level'])] = True
+        # spotted is true if our spy has been spotted while he was doing his job
+        if gcontext['spotted']:
+            gcontext["fleets"]["spotted"] = True
+        print(gcontext['fleets'])
+    def DisplayPlanet(request,id):
+        cursor.execute(" SELECT spy_id,  planet_id,  planet_name,  s.owner_name,  s.floor,  s.space,  s.ground,  s.ore,  s.hydrocarbon,  s.ore_capacity, " +
+            " s.hydrocarbon_capacity,  s.ore_production,  s.hydrocarbon_production,  s.energy_consumption,  s.energy_production,  s.workers,  s.workers_capacity,  s.scientists, " +
+            " s.scientists_capacity,  s.soldiers,  s.soldiers_capacity,  s.radar_strength,  s.radar_jamming,  s.orbit_ore,  " +
+            " s.orbit_hydrocarbon, galaxy, sector, planet, s.pct_ore, s.pct_hydrocarbon " +
+            " FROM spy_planet AS s" +
+            " LEFT JOIN nav_planet " +
+            " ON ( s.planet_id=nav_planet.id) " +
+                " WHERE spy_id=%s", [id])
+        re = cursor.fetchone()
+        if not re:
+            return response(redirect('exile:reports'))
+        planet = re[1]
+        gcontext['planet'] = {
+            "name": re[2],
+            "location": str(re[25]) + ":" + str(re[26]) + ":" + str(re[27]),
+            "floor": re[4],
+            "space": re[5],
+            "ground": re[6],
+            "pct_ore": re[28],
+            "pct_hydrocarbon": re[29],
+            'buildings_pending': {},
+            'buildings': {},
+        }
+        if re[3]:
+            gcontext['planet']["owner"] = re[3]
+        else:
+            gcontext['planet']["no_owner"] = True
+            
+        if re[7]: # display common info
+            gcontext['planet']["ore"] = re[7]
+            gcontext['planet']["hydrocarbon"] = re[8]
+            gcontext['planet']["ore_capacity"] = re[9]
+            gcontext['planet']["hydrocarbon_capacity"] = re[10]
+            gcontext['planet']["ore_prod"] = re[11]
+            gcontext['planet']["hydrocarbon_prod"] = re[12]
+            gcontext['planet']["energy_consumption"] = re[13]
+            gcontext['planet']["energy_prod"] = re[14]
+            gcontext['planet']["common"] = True
+        if re[15]: # display rare info
+            gcontext['planet']["workers"] = re[15]
+            gcontext['planet']["workers_cap"] = re[16]
+            gcontext['planet']["scientists"] = re[17]
+            gcontext['planet']["scientists_cap"] = re[18]
+            gcontext['planet']["soldiers"] = re[19]
+            gcontext['planet']["soldiers_cap"] = re[20]
+            gcontext['planet']["rare"] = True
+        if re[21]: # display uncommon info
+            gcontext['planet']["radar_strength"] = re[21]
+            gcontext['planet']["radar_jamming"] = re[22]
+            gcontext['planet']["orbit_ore"] = re[23]
+            gcontext['planet']["orbit_hydrocarbon"] = re[24]
+            gcontext['planet']["uncommon"] = True
+        
+        # display pending buildings
+        cursor.execute(" SELECT s.building_id, s.quantity, label, s.endtime, category " +
+            " FROM spy_building AS s " +
+            " LEFT JOIN db_buildings " +
+            " ON (s.building_id=id) " +
+            " WHERE spy_id=%s AND planet_id=%s AND s.endtime IS NOT NULL " +
+            " ORDER BY category, label ", [id,planet])
+        res = cursor.fetchall()
+        for re in res:
+            pending = {
+                "building": re[2],
+                "qty": re[1],
+                "endtime": re[3],
+            }
+            gcontext['planet']['buildings_pending'][re[2]] = pending.copy()
+        # display built buildings
+        cursor.execute(" SELECT s.building_id, s.quantity, label, s.endtime, category " +
+                " FROM spy_building AS s " +
+                " LEFT JOIN db_buildings " +
+                    " ON (s.building_id=id) " +
+                " WHERE spy_id=%s AND planet_id=%s AND s.endtime IS NULL " +
+                " ORDER BY category, label ", [id,planet])
+        res = cursor.fetchall()
+        for re in res:
+            building = {
+                "building": re[2],
+                "qty": re[1],
+            }
+            gcontext['planet']['buildings'][re[2]] = building.copy()
+        
+        gcontext["planet"]["date"] = gcontext['spydate']
+        gcontext["planet"]["nation"] = gcontext['target']
+        gcontext["planet"]["spy_" + str(gcontext['level'])] = True
+        # spotted is true if our spy has been spotted while he was doing his job
+        if gcontext['spotted']:
+            gcontext["planet"]["spotted"] = True
+        print(gcontext['planet'])
+    gcontext = request.session.get('gcontext',{})
+    context = gcontext
+    gcontext['selectedmenu'] = 'mercenaryintelligence'
+    gcontext['menu'] = menu(request)
+    # process page
+    try:
+        id = int(request.GET.get("id","0"))
+    except (KeyError,Exception):
+        id = 0
+    if not id:
+        return response(redirect('exile:reports'))
+    key = request.GET.get("key","")
+    if not key:
+        return response(redirect('exile:reports'))
+    with connection.cursor() as cursor:
+        # retrieve report id and info
+        cursor.execute("SELECT id, key, userid, type, level, date, credits, spotted, target_name FROM spy WHERE id=%s AND key=%s", [id,key])
+        re = cursor.fetchone()
+        # check if report exists and if given key is correct otherwise redirect to the reports
+        if not re:
+            return response(redirect('exile:reports'))
+        #user = re[2]
+        typ = re[3]
+        gcontext['level'] = re[4]
+        gcontext['spydate'] = re[5]
+        if re[6]:
+            gcontext['credits'] = re[6]
+        gcontext['spotted'] = re[7]
+        if re[8]:
+            gcontext['target'] = re[8]
+        if typ == 1:
+            r = DisplayNation(request,id)
+            if r:
+                return r
+        elif typ == 2:
+            r = DisplayFleets(request,id)
+            if r:
+                return r
+        elif typ == 3:
+            r = DisplayPlanet(request,id)
+            if r:
+                return r
+        else:
+            return response(redirect('exile:overview'))
+    t = loader.get_template('exile/spy-report.html')
     context['content'] = t.render(gcontext, request)
     return render(request, 'exile/layout.html', context)
 

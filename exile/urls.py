@@ -59,6 +59,7 @@ urlpatterns = [
     path('chat', views.chat, name='chat'),
     path('notes', views.notes, name='notes'),
     path('mercenary-intelligence', views.mercenaryintelligence, name='mercenaryintelligence'),
+    path('spyreport', views.spyreport, name='spyreport'),
     path('exile-version', views.exileversion, name='exileversion'),
     path('dev-log-errors', views.devlogerrors, name='devlogerrors'),
     path('dev-log-notices', views.devlognotices, name='devlognotices'),
