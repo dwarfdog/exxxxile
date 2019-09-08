@@ -182,7 +182,7 @@ class Command(BaseCommand):
                 if not counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['mod_damage']:
                     counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['mod_damage'] = ship[14]
             print('running fight')
-            while True: #time.time()-rounds_time<120: # limit 2min
+            while r<50:
                 #if r%100 == 0:
                 print('round',str(r),str(time.time()))
                 targets = 0
