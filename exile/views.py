@@ -740,6 +740,11 @@ def admin(function):
 
     return decorator
 
+def refresh_user(request):
+    gcontext = request.session.get('gcontext',{})
+    user = Users.objects.get(pk=gcontext['exile_user'].id)
+    gcontext['exile_user'] = user
+
 def logged(function):
     global config
 
@@ -3883,6 +3888,7 @@ def marketsell(request):
                 if ore > 0 or hydrocarbon > 0:
                     #Session("details") = query
                     cursor.execute("SELECT sp_market_sell(%s, %s, %s, %s)", [gcontext['exile_user'].id, planetid, ore*1000, hydrocarbon*1000])
+                    refresh_user(request)
                     #Session("details") = "done:"&query
             if request.POST.get("rel") != 1:
                 log_notice(request, "market-sell", "hidden value is missing from form data", 1)
@@ -4020,6 +4026,7 @@ def marketbuy(request):
                 if ore > 0 or hydrocarbon > 0:
                     #Session("details") = query
                     cursor.execute("SELECT * FROM sp_buy_resources(%s, %s, %s, %s)", [gcontext['exile_user'].id, planetid, ore*1000, hydrocarbon*1000])
+                    refresh_user(request)
                     #Session("details") = "done:"&query
     gcontext = request.session.get('gcontext',{})
     ExecuteOrder()
@@ -10052,7 +10059,7 @@ def mercenaryintelligence(request):
                 cursor.execute(" UPDATE spy SET spotted=%s WHERE id=%s AND userid=%s", [spotted, reportid, gcontext['exile_user'].id])
                 # add report in spied nation's report list
                 cursor.execute(" INSERT INTO reports(ownerid, type, subtype, datetime, spyid, description) " +
-                    " VALUES(%s,%s,%s, now() + %s*interval '40 seconds', %S, sp_get_user(%s)) ", [id, category, typ, spyingTime+nb_planet, reportid, gcontext['exile_user'].id])
+                    " VALUES(%s,%s,%s, now() + %s*interval '40 seconds', %s, sp_get_user(%s)) ", [id, category, typ, spyingTime+nb_planet, reportid, gcontext['exile_user'].id])
             
             if level in [0,1,2,3]:
                 # withdraw the operation cost from player's account
