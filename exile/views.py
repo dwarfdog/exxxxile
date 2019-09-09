@@ -9548,9 +9548,11 @@ def spyreport(request):
         if gcontext['level']>9:
             gcontext['level'] -= 10
         gcontext['spydate'] = re[5]
+        gcontext['credits'] = 0
         if re[6]:
             gcontext['credits'] = re[6]
         gcontext['spotted'] = re[7]
+        gcontext['target'] = 0
         if re[8]:
             gcontext['target'] = re[8]
         if typ == 1:
