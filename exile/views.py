@@ -9353,7 +9353,7 @@ def spyreport(request):
             else:
                 planet["planet"] = gcontext['target']
             nbplanet += 1
-            gcontext['nation'][nbplanet] = planet.copy()
+            gcontext['nation']["planet"][nbplanet] = planet.copy()
         
         # list spied technologies
         cursor.execute(" SELECT category, db_research.id, research_level, levels " +
@@ -9366,7 +9366,7 @@ def spyreport(request):
         nbresearch = 0
         for re in res:
             ck = 'category' + str(re[0])
-            if not ck in gcontext['category']:
+            if not ck in gcontext['nation']['researches']['category']:
                 gcontext['nation']['researches']['category'][ck] = {}
             gcontext['nation']['researches']['category'][ck][nbresearch] = {
                 "research": getResearchLabel(re[1]),
