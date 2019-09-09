@@ -3965,7 +3965,7 @@ def marketbuy(request):
                 pla["hydrocarbon_max"] = int((re[8]-re[6])/1000)
                 pla["price_ore"] = re[21]
                 pla["price_hydrocarbon"] = re[22]
-                if re[12]:
+                if re[12] or re[13]:
                     pla["buying_ore"] = re[12]
                     pla["buying_hydrocarbon"] = re[13]
                     subtotal = re[12]/1000*re[14] + re[13]/1000*re[15]
