@@ -9336,6 +9336,7 @@ def spyreport(request):
         nbplanet = 0
         gcontext['nation'] = {
             'researches': {'category':{}},
+            'planet': {},
         }
         for re in res:
             planet = {
