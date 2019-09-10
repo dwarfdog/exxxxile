@@ -34,7 +34,14 @@ function putlevel(level,levels){
 		<table class="default" width="800">
 			<tr class="header"><td align="center">Recherche</td><td align="center">Niveau</td></tr>
 			{% for k,cat in nation.researches.category.items %}
-				<tr class="category"><td colspan=2>{{ k }}</td></tr>
+				<tr class="category"><td colspan=2>
+					{% if k == 'category10' %}Technologies{% endif %}
+					{% if k == 'category20' %}Industrie{% endif %}
+					{% if k == 'category30' %}Empire{% endif %}
+					{% if k == 'category40' %}Recherche{% endif %}
+					{% if k == 'category50' %}Technologies militaires{% endif %}
+					{% if k == 'category90' %}Vaisseaux spatiaux{% endif %}
+				</td></tr>
 				{% for j,res in cat.items %}<tr class="item"><td>{{ res.research }}</td><td align="center"><script>putlevel({{ res.level }},{{ res.levels }});</script></td></tr>{% endfor %}
 				<tr class="clear"><td colspan=2>&nbsp;</td></tr>
 			{% endfor %}
