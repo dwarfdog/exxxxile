@@ -10100,19 +10100,19 @@ def mercenaryintelligence(request):
                 cost = gcontext['fleets_cost_lvl_'+ str(level)]
                 spyingTime = 15
                 sig_limit = 10000
-            elif level == 1 or level == 10:
+            elif level == 1 or level == 11:
                 spottedChance = 0.04
                 getinfoModifier = 0.05
                 cost = gcontext['fleets_cost_lvl_'+ str(level)]
                 spyingTime = 30
                 sig_limit = 30000
-            elif level == 2 or level == 10:
+            elif level == 2 or level == 12:
                 spottedChance = 0.01
                 getinfoModifier = 0.01
                 cost = gcontext['fleets_cost_lvl_'+ str(level)]
                 spyingTime = 45
                 sig_limit = 100000
-            elif level == 3 or level == 10:
+            elif level == 3 or level == 13:
                 spottedChance = 0.05
                 getinfoModifier = 0
                 cost = gcontext['fleets_cost_lvl_'+ str(level)]
