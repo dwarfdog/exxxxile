@@ -49,7 +49,7 @@
 		<td>(<span class={% if planet.normal_energy_production %}"prod">+{% elif planet.medium_energy_production %}"medprod">+{% elif planet.negative_energy_production %}"negprod">{% endif %}{{ planet.energy_production }}</span>)</td>
 	</tr>
 	<tr><td><img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" width=16 height=16></td>
-		<td nowrap align="right"><span class={% if planet.credits_plus %}"prod">+{% elif planet.credits_minus %}"negprod">{% else %}"">{% endif %}{{ planet.credits }}</span></td>
+		<td nowrap align="right" title="estimation 24h"><span class={% if planet.credits_plus %}"prod">+{% elif planet.credits_minus %}"negprod">{% else %}"">{% endif %}{{ planet.credits }}k</span></td>
 		<td></td>
 		<td nowrap align="right"><img src="{% static 'exile/assets/interface/prestige.gif' %}" title="Prestige" class="icon" width=16 height=16> {{ planet.prestige }}</td>
 		<td></td>

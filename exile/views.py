@@ -3482,7 +3482,7 @@ def planets(request):
                     planet['normal_hydrocarbon'] = True
                 energy_level = getpercent(re[31], re[14], 10)
                 planet['normal_energy'] = True
-                planet['credits'] = int(re[37] + (re[38] / 2)) # - (re["upkeep"] / 24)
+                planet['credits'] = round((re[37] + (re[38] / 2)) * 24 / 1000,2) # - (re["upkeep"] / 24)
                 if planet['credits'] < 0:
                     planet['credits_minus'] = True
                 else:
