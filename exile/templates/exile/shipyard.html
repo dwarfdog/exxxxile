@@ -90,33 +90,37 @@ tiptext = $("hinttext");
 		</tr>
 
 		{% for i,ship in ships.items %}
-			<tr valign="middle" align="right" class="item">
+			{% if ship.id == 999 %}
 
-			<td nowrap align="left">
-				<table class="clear" width="100%">
-				<tr><td><a href="{% url 'exile:help' %}?cat=ships#{{ ship.id }}" onmouseover="ddrivetip(descShip({{ ship.id }}))" onmouseout="hideddrivetip()"><b>{{ ship.name }}</b></a></td><td align="right">x{{ ship.quantity }}</td></tr>
-				{% if ship.required_ship %}<tr><td colspan=2 nowrap><p class="shiprequirement">Requiert {{ ship.required_ship_name }} ({% if ship.none_available %}<span class=low>{% endif %}{{ ship.required_ship_available }}{% if ship.none_available %}</span>{% endif %})</p></td></tr>{% endif %}
-				{% if ship.required_pp %}<tr><td colspan=2 nowrap><p class="shiprequirement">Requiert {{ ship.required_pp }} points de prestige ({% if ship.not_enough %}<span class=low>{% endif %}{{ ship.pp }}{% if ship.not_enough %}</span>{% endif %})</p></td></tr>{% endif %}
-				</table>
-			</td>
-			<td nowrap{% if ship.not_enough_ore %} class="notenough"{% endif %}><img src="{% static 'exile/assets/interface/ore.gif' %}" class="icon" title="Minerai" width=16 height=16> {{ ship.ore }}</td>
-			<td nowrap{% if ship.not_enough_hydrocarbon %} class="notenough"{% endif %}><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" class="icon" title="Hydrocarbure" width=16 height=16> {{ ship.hydrocarbon }}</td>
-			<td nowrap{% if ship.not_enough_energy %} class="notenough"{% endif %}><img src="{% static 'exile/assets/interface/energy.gif' %}" class="icon" title="Énergie" width=16 height=16> {{ ship.energy }}</td>
-			<td nowrap{% if ship.not_enough_crew %} class="notenough"{% endif %}><img src="{% static 'exile/assets/interface/workers.gif' %}" class="icon" title="Équipage" width=16 height=16> {{ ship.crew }}</td>
-			<td align=center>
-			{% if ship.construction_time %}<script>document.write(formattime({{ ship.time }}));</script>{% endif %}
-			{% if ship.no_construction_time %}-{% endif %}
-			</td>
+			{% else %}
+				<tr valign="middle" align="right" class="item">
 
-			<td align="center" style="padding:0;margin:0">
-				{% if ship.build %}<input type="text" name="s{{ ship.id }}" onkeyup="updateNeeds()" size=3 maxlength="5" style="height:18px">{% endif %}
-				{% if ship.buildings_required %}<div class="error2" onmouseover="ddrivetip(descShip({{ ship.id }}))" onmouseout="hideddrivetip()">bâtiments requis</div>{% endif %}
-				{% if ship.researches_required %}<div class="error2" onmouseover="ddrivetip(descShip({{ ship.id }}))" onmouseout="hideddrivetip()">recherches requises</div>{% endif %}
-				{% if ship.notenoughresources %}<div class="error">ressources insuffisantes</div>{% endif %}
-				{% if ship.cant_build %}&nbsp;{% endif %}
-			</td>
+				<td nowrap align="left">
+					<table class="clear" width="100%">
+					<tr><td><a href="{% url 'exile:help' %}?cat=ships#{{ ship.id }}" onmouseover="ddrivetip(descShip({{ ship.id }}))" onmouseout="hideddrivetip()"><b>{{ ship.name }}</b></a></td><td align="right">x{{ ship.quantity }}</td></tr>
+					{% if ship.required_ship %}<tr><td colspan=2 nowrap><p class="shiprequirement">Requiert {{ ship.required_ship_name }} ({% if ship.none_available %}<span class=low>{% endif %}{{ ship.required_ship_available }}{% if ship.none_available %}</span>{% endif %})</p></td></tr>{% endif %}
+					{% if ship.required_pp %}<tr><td colspan=2 nowrap><p class="shiprequirement">Requiert {{ ship.required_pp }} points de prestige ({% if ship.not_enough %}<span class=low>{% endif %}{{ ship.pp }}{% if ship.not_enough %}</span>{% endif %})</p></td></tr>{% endif %}
+					</table>
+				</td>
+				<td nowrap{% if ship.not_enough_ore %} class="notenough"{% endif %}><img src="{% static 'exile/assets/interface/ore.gif' %}" class="icon" title="Minerai" width=16 height=16> {{ ship.ore }}</td>
+				<td nowrap{% if ship.not_enough_hydrocarbon %} class="notenough"{% endif %}><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" class="icon" title="Hydrocarbure" width=16 height=16> {{ ship.hydrocarbon }}</td>
+				<td nowrap{% if ship.not_enough_energy %} class="notenough"{% endif %}><img src="{% static 'exile/assets/interface/energy.gif' %}" class="icon" title="Énergie" width=16 height=16> {{ ship.energy }}</td>
+				<td nowrap{% if ship.not_enough_crew %} class="notenough"{% endif %}><img src="{% static 'exile/assets/interface/workers.gif' %}" class="icon" title="Équipage" width=16 height=16> {{ ship.crew }}</td>
+				<td align=center>
+				{% if ship.construction_time %}<script>document.write(formattime({{ ship.time }}));</script>{% endif %}
+				{% if ship.no_construction_time %}-{% endif %}
+				</td>
 
-			</tr>
+				<td align="center" style="padding:0;margin:0">
+					{% if ship.build %}<input type="text" name="s{{ ship.id }}" onkeyup="updateNeeds()" size=3 maxlength="5" style="height:18px">{% endif %}
+					{% if ship.buildings_required %}<div class="error2" onmouseover="ddrivetip(descShip({{ ship.id }}))" onmouseout="hideddrivetip()">bâtiments requis</div>{% endif %}
+					{% if ship.researches_required %}<div class="error2" onmouseover="ddrivetip(descShip({{ ship.id }}))" onmouseout="hideddrivetip()">recherches requises</div>{% endif %}
+					{% if ship.notenoughresources %}<div class="error">ressources insuffisantes</div>{% endif %}
+					{% if ship.cant_build %}&nbsp;{% endif %}
+				</td>
+
+				</tr>
+			{% endif %}
 		{% endfor %}
 	{% endfor %}
 
