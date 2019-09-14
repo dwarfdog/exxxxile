@@ -32,6 +32,7 @@
 								<td valign="top">{% if general.alliance %}<a href="{% url 'exile:alliance' %}?tag={{ alliancetag }}" class="self">[{{ alliancetag }}] {{ alliancename }}</a>, {{ rank_label|escape }}{% endif %}{% if general.noalliance %}indépendant{% endif %},&nbsp;<span class="self">{{ name }}</span>
 								<br/>
 								Date d'arrivée:&nbsp;{{ regdate|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}<br/>
+								</td>
 							</tr>
 						</table>
 					</td>
@@ -46,6 +47,9 @@
 					<td>Avatar taille 64x64 (Héberger sur <a href="https://www.zupimages.net/" target="_blank">zupimages.net</a> ou <a href="https://fr.imgbb.com/" target="_blank">imgbb.com</a>)</td>
 					<td><input type="text" name="avatar" id="avatar" value="{{ avatar_url }}" style="width:350px;"></td>
 				</tr>
+				<tr class="title"><td colspan="2">Changer de mot de passe</td></tr>
+				<tr><td>Ancien mdp</td><td><input type="password" name="oldpasswd"/></td></tr>
+				<tr><td>Nouveau mdp</td><td><input type="password" name="newpasswd"/></td></tr>
 				<tr class="title"><td colspan="2">Description</td></tr>
 				<tr class="item"><td colspan="2" align="center"><textarea name="description" cols="65" rows="10">{{ description }}</textarea><div align="center"><a href="{% url 'exile:help' %}?cat=tags" target="_blank">Balises supportées</a></div></td></tr>
 			{% endif %}
@@ -224,7 +228,7 @@
 				<tr><td colspan=2>&nbsp;</td></tr>
 				<tr><td colspan=2 align=center><input type="submit" name="submit" id="submit" value="Envoyer" class="button" {% if holidays %}onclick="return checkCheckBox()"{% endif %}></td></tr>
 			{% endif %}
-			{% if changes %}
+			{% if changes_status %}
 				<tr><td colspan=2><p class="error">
 				{% if changes_status == 'banned_email' %}Les emails provenant de ce nom de domaine ne sont pas autorisés{% endif %}
 				{% if changes_status == 'check_email' %}Email invalide, vérifiez votre saisie{% endif %}
@@ -233,6 +237,8 @@
 				{% if changes_status == 'done' %}Changements effectués{% endif %}
 				{% if changes_status == 'mail_changed' %}Changements effectués.<br/>Vous allez recevoir un courier sur votre nouvel email vous demandant de confirmer la modification.{% endif %}
 				{% if changes_status == 'mail_already_used' %}Cet email est déjà utilisé par un autre compte.{% endif %}
+				{% if changes_status == 'password_not_changed2' %}Le password n'a pas été modifié.{% endif %}
+				{% if changes_status == 'password_mismatch' %}Le password saisi n'est pas le bon.{% endif %}
 				</p></td></tr>
 			{% endif %}
 		</table>

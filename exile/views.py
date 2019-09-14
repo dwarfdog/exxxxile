@@ -1,4 +1,4 @@
-import sys, string, random, time, math, datetime, re
+import sys, string, random, time, math, datetime, re, hashlib
 from urllib.parse import urlencode
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -11,7 +11,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.core.cache import cache
 from django.utils.html import strip_tags
-from django.db import connection
+from django.db import connection, connections
 from .apps import ExileConfig
 from django.apps import apps
 from django.db import transaction
@@ -11019,6 +11019,9 @@ def help(request):
 @construct
 @logged
 def options(request):
+    def passwordhash(password):
+        dbpass = 'seed'+str(hashlib.md5(password.encode('utf-8')).hexdigest())
+        return str(hashlib.md5(dbpass.encode('utf-8')).hexdigest())
     def display_general():
         with connection.cursor() as cursor:
             cursor.execute("SELECT avatar_url, regdate, users.description, 0," +
@@ -11145,10 +11148,13 @@ def options(request):
             cursor.execute("UPDATE users SET inframe=true WHERE id=%s", [gcontext['exile_user'].id])
             return
     gcontext['holidays_breaktime'] = 7*24*60*60 # time before being able to set the holidays again
-    gcontext['changes_status'] = ""
+    gcontext['changes_status'] = False
     gcontext['showSubmit'] = True
     gcontext["submit"] = {}
+    gcontext['error'] = False
     avatar = request.POST.get("avatar","").strip()
+    oldpasswd = request.POST.get("oldpasswd","").strip()
+    newpasswd = request.POST.get("newpasswd","").strip()
     #email = request.POST.get("email").strip()
     description = strip_tags(request.POST.get("description","").strip())
     #password = Trim(request.POST.get("password"))
@@ -11190,6 +11196,20 @@ def options(request):
                 # save updated information
                 with connection.cursor() as cursor:
                     cursor.execute("UPDATE users SET avatar_url=%s, description=%s WHERE id=%s", [avatar, description, gcontext['exile_user'].id])
+                if oldpasswd and newpasswd:
+                    if passwordhash(oldpasswd) == gcontext['user'].password:
+                        try:
+                            with connections['exile_nexus'].cursor() as cursor:
+                                cursor.execute('SELECT sp_account_password_set(%s, %s)', [gcontext['exile_user'].id, newpasswd])
+                        except (KeyError, Exception):
+                            gcontext['changes_status'] = 'password_not_changed2'
+                        else:
+                            gcontext['changes_status'] = "done"
+                            request.session['gcontext']['user'].password = newpasswd
+                    else:
+                        gcontext['changes_status'] = 'password_mismatch'
+                else:
+                    gcontext['changes_status'] = 'password_not_changed2'
             except ValidationError:
                 #avatar is invalid
                 gcontext['changes_status'] = "check_avatar"
@@ -11209,6 +11229,7 @@ def options(request):
                     query += ", deletion_date=now() + INTERVAL '2 days'"
                 query += " WHERE id=" + str(gcontext['exile_user'].id)
                 cursor.execute("UPDATE users SET timers_enabled=%s ,display_alliance_planet_name=%s ,score_visibility=%s" + query, [timers_enabled, display_alliance_planet_name, score_visibility])
+            DoRedirect = True
         elif optionCat == 3:
             if request.POST.get("holidays",""):
                 with connection.cursor() as cursor:
@@ -11227,11 +11248,12 @@ def options(request):
                         continue
                     subtyp = int(x) % 100
                     cursor.execute("INSERT INTO users_reports(userid, type, subtype) VALUES(%s, %s, %s)", [gcontext['exile_user'].id, typ, subtyp])
+            DoRedirect = True
         elif optionCat == 5:
             if autosignature:
                 with connection.cursor() as cursor:
                     cursor.execute("UPDATE users SET autosignature=%s WHERE id=%s", [autosignature, gcontext['exile_user'].id])
-        DoRedirect = True
+            DoRedirect = True
     if DoRedirect:
         return HttpResponseRedirect(reverse('exile:options')+'?cat='+str(optionCat))
     else:
