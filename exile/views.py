@@ -1119,36 +1119,33 @@ def banned(request):
 @construct
 @logged
 def locked(request):
-    """
-    # retrieve remaining time
-    query = "SELECT login, int4(date_part('epoch', ban_expire-now())), ban_reason_public, (SELECT email FROM users WHERE id=u.ban_adminuserid)" +
-            " FROM users AS u" +
-            " WHERE privilege=-1 AND id=" & UserId
-    set oRs = oConn.Execute(query)
-    if oRs.EOF then
-        response.redirect "/"
-    set content = GetTemplate("locked")
-    # check to unlock holidays mode
-    action = Request.Form("unlock")
-    if action != "" and re[1] <= 0 then
-        oConn.Execute "UPDATE users SET privilege=0, ban_expire=NULL WHERE ban_expire <= now() AND privilege=-1 AND id="&UserId, , 128
-        Response.Redirect "/game/overview.asp"
-    content.AssignValue "login", re[0]
-    content.AssignValue "remaining_time_before_unlock", re[1]
-    #content.AssignValue "admin_email", re[3]
-    content.AssignValue "admin_email", supportMail
-    content.AssignValue "universe", Universe
-    if not IsNull(re[2]) and re[2] != "" then
-        content.AssignValue "reason", re[2]
-        content.Parse "reason"
-    if not IsNull(re[1]) then
-        if re[1] < 0 then
-            content.Parse "unlock"
-        else
-            content.AssignValue "remaining_time_before_unlock", re[1]
-            content.Parse "cant_unlock"
-    """
     gcontext = request.session.get('gcontext',{})
+    # retrieve remaining time
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT login, int4(date_part('epoch', ban_expire-now())), ban_reason_public, (SELECT email FROM users WHERE id=u.ban_adminuserid)" +
+            " FROM users AS u" +
+            " WHERE privilege=-1 AND id=%s", [gcontext['exile_user'].id])
+        re = cursor.fetchone()
+        if not re:
+            return HttpResponseRedirect(reverse('exile:index'))
+        # check to unlock holidays mode
+        action = request.POST.get("unlock","")
+        if action and re[1] <= 0:
+            cursor.execute("UPDATE users SET privilege=0, ban_expire=NULL WHERE ban_expire <= now() AND privilege=-1 AND id=%s", [gcontext['exile_user'].id])
+            return HttpResponseRedirect(reverse('exile:overview'))
+        gcontext["login"] = re[0]
+        gcontext["remaining_time_before_unlock"] = re[1]
+        #content.AssignValue "admin_email", re[3]
+        gcontext["admin_email"] = 'exxxxile@exxxxile.ovh';
+        gcontext["universe"] = Universe
+        if re[2] and re[2]:
+            gcontext["reason"] = re[2]
+        if re[1]:
+            if re[1] < 0:
+                gcontext["unlock"] = True
+            else:
+                gcontext["remaining_time_before_unlock"] = re[1]
+                gcontext["cant_unlock"] = True
     context = gcontext
     return render(request, 'exile/locked.html', context)
 
@@ -2232,6 +2229,13 @@ def fleetships(request):
 @construct
 @logged
 def fleet(request):
+    def loadRoutes(fleetid):
+        # list the routes
+        cursor.execute("SELECT id, name" +
+                " FROM routes" +
+                " WHERE ownerid=%s" +
+                " ORDER BY upper(name)", [gcontext['exile_user'].id])
+        gcontect['routes'] = cursor.fetchall()
     def RetrieveFleetOwnerId(fleetid):
         # retrieve fleet owner
         with connection.cursor() as cursor:
@@ -3382,6 +3386,175 @@ def fleetsshipsstats(request):
     ListShips()
     context = gcontext
     t = loader.get_template('exile/fleets-ships-stats.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
+def fleetsroutes(request):
+    # List the fleets owned by the player
+    def ListRoutes():
+        with connection.cursor() as cursor:
+            # list the routes
+            cursor.execute("SELECT id, name, int4((SELECT count(*) FROM routes_waypoints WHERE routeid=routes.id)), created, modified, repeat" +
+                    " FROM routes" +
+                    " WHERE ownerid=%s" +
+                    " ORDER BY upper(name)", [gcontext['exile_user'].id])
+            res = cursor.fetchall()
+            if not res:
+                gcontext["noroutes"] = True
+            else:
+                gcontext['routes'] = {}
+                for re in res:
+                    route = {
+                        "id": re[0],
+                        "name": re[1],
+                        "orders": re[2],
+                        "created": re[3],
+                        "modified": re[4],
+                    }
+                    if re[5]:
+                        route["looping"] = True
+                    else:
+                        route["notlooping"] = True
+                    gcontext['routes'][re[0]] = route.copy()
+    gcontext = request.session.get('gcontext',{})
+    gcontext['selectedmenu'] = 'fleets_routes'
+    gcontext['menu'] = menu(request)
+    route_name = request.POST.get("name","")
+    if route_name:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT sp_create_route(%s,%s)", [gcontext['exile_user'].id,route_name])
+            re = cursor.fetchone()
+        return HttpResponseRedirect(reverse('exile:fleetsroutes')+'?id='+str(re[0]))
+    try:
+        routeid = int(request.GET.get("id","0"))
+    except (KeyError,Exception):
+        routeid = 0
+    looping = request.GET.get("loop","")
+    if looping and routeid:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT sp_routes_toggle_loop(%s,%s)", [gcontext['exile_user'].id,routeid])
+        return HttpResponseRedirect(reverse('exile:fleetsroutes')+'?')
+    ListRoutes()
+    context = gcontext
+    t = loader.get_template('exile/fleets-traderoutes.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
+@transaction.atomic
+def fleetsroute(request):
+    # List the fleets owned by the player
+    def displayRoute(routeid,fleetid):
+        # populate destination list, there are 2 groups : planets and fleets
+        gcontext['planets'] = checkPlanetListCache(request,True)
+        gcontext['fleets'] = {}
+        # list planets where we have fleets not on our planets
+        gcontext['route'] = False
+        gcontext['fleet'] = False
+        with connection.cursor() as cursor:
+            if routeid:
+                cursor.execute("SELECT * FROM routes WHERE ownerid=%s" +
+                    " AND id=%s", [gcontext['exile_user'].id,routeid])
+                gcontext['route'] = dictfetchall(cursor) # id, ownerid, name, repeat, created, modified, last_used
+                cursor.execute("SELECT w.*,p.name,p.galaxy,p.sector,p.planet FROM routes_waypoints AS w LEFT JOIN nav_planet AS p ON w.planetid=p.id" +
+                    " WHERE w.routeid=%s order by w.id ASC", [routeid])
+                gcontext['waypoints'] = dictfetchall(cursor) # id, ownerid, name, repeat, created, modified, last_used
+            if fleetid:
+                cursor.execute("SELECT *" +
+                    " FROM fleets" +
+                    " WHERE ownerid=%s" +
+                    " AND id=%s", [gcontext['exile_user'].id,fleetid])
+                gcontext['fleet'] = dictfetchall(cursor)
+            cursor.execute(" SELECT DISTINCT ON (f.planetid) f.name, f.planetid, f.planet_galaxy, f.planet_sector, f.planet_planet" +
+                " FROM vw_fleets AS f" +
+                "    LEFT JOIN nav_planet AS p ON (f.planetid=p.id)" +
+                " WHERE f.ownerid=%(UserID)s AND p.ownerid IS DISTINCT FROM %(UserID)s" +
+                " ORDER BY f.planetid" +
+                " LIMIT 200", {'UserID': gcontext['exile_user'].id})
+            res = cursor.fetchall()
+            i = 0
+            for re in res:
+                fleet = {
+                    "fleetindex": i,
+                    "fleet_name": re[0],
+                    "fleet_g": re[2],
+                    "fleet_s": re[3],
+                    "fleet_p": re[4],
+                }
+                gcontext['fleets'][i] = fleet.copy()
+                i += 1
+            # list merchant planets in the galaxy of the fleet
+            query = " SELECT id, galaxy, sector, planet FROM nav_planet WHERE ownerid=3"
+            if gcontext['fleet'] and gcontext['fleet']['planetid']:
+                cursor.execute("SELECT galaxy from nav_planet where id=%s", [gcontext['fleet']['planetid']])
+                re = cursor.fetchone()
+                if re and re[0]:
+                    query += " AND galaxy=" + re[0]
+            else:
+                return
+            query += " ORDER BY id"
+            cursor.execute(query)
+            res2 = cursor.fetchall()
+            gcontext['move_fleet']['merchantplanetsgroup'] = {'location':{}}
+            for re in res2:
+                pla = {
+                    "index": cpt,
+                    "to_g": re[1],
+                    "to_s": re[2],
+                    "to_p": re[3],
+                }
+                if re[0] == res[10] and not hasAPlanetSelected:
+                    pla['selected'] = True
+                gcontext['move_fleet']['merchantplanetsgroup']['location'][cpt] = pla.copy()
+                cpt += 1
+    def createRoute(request):
+        for i in range(200):
+            action = request.POST.get('action'+str(i),'')
+            g = request.POST.get('g'+str(i),'')
+            s = request.POST.get('s'+str(i),'')
+            p = request.POST.get('p'+str(i),'')
+            ore = request.POST.get('ore'+str(i),'0')
+            hydrocarbon = request.POST.get('hydrocarbon'+str(i),'0')
+            scientists = request.POST.get('scientists'+str(i),'0')
+            soldiers = request.POST.get('soldiers'+str(i),'0')
+            workers = request.POST.get('workers'+str(i),'0')
+            if action!='':
+                planetid = False
+                with connection.cursor() as cursor:
+                    if g!='' and p!='' and s!='':
+                        cursor.execute("SELECT id FROM nav_planet WHERE galaxy=%s AND sector=%s AND planet=%s", [g,s,p])
+                        re = cursor.fetchone()
+                        if re and re[0]:
+                            planetid = re[0]
+                    cursor.execute("SELECT nextval('routes_waypoints_id_seq')")
+                    re = cursor.fetchone()
+                    if re and re[0]:
+                        if planetid:
+                            cursor.execute("INSERT INTO routes_waypoints(id, routeid, \"action\",planetid) VALUES(%s, %s, %s, %s)", [re[0],gcontext['routeid'],action,planetid])
+                        else:
+                            cursor.execute("INSERT INTO routes_waypoints(id, routeid, \"action\", ore, hydrocarbon, scientists, soldiers, workers)" +
+                                " VALUES(%s, %s, %s, %s, %s, %s, %s, %s);", [re[0],gcontext['routeid'],action,ore,hydrocarbon,scientists,soldiers,workers])
+    gcontext = request.session.get('gcontext',{})
+    gcontext['selectedmenu'] = 'fleets_routes'
+    gcontext['menu'] = menu(request)
+    try:
+        id = int(request.GET.get('id','0'))
+    except (KeyError,Exception):
+        id = 0
+    gcontext['routeid'] = id
+    try:
+        fleetid = int(request.GET.get('fleetid','0'))
+    except (KeyError,Exception):
+        fleetid = 0
+    if request.POST.get('create',''):
+        createRoute(request)
+    displayRoute(id,fleetid)
+    print(gcontext)
+    context = gcontext
+    t = loader.get_template('exile/fleets-traderoute.html')
     context['content'] = t.render(gcontext, request)
     return render(request, 'exile/layout.html', context)
 
@@ -8180,7 +8353,7 @@ def shipyard(request):
     def RecycleShips():
         for i in retrieveShipsCache():
             shipid = i[0]
-            quantity = int(request.POST.get("s" + shipid, 0))
+            quantity = int(request.POST.get("s" + str(shipid), 0))
             if quantity > 0:
                 RecycleShip(shipid, quantity)
         return HttpResponseRedirect(reverse('exile:shipyard') + "?recycle=1")
