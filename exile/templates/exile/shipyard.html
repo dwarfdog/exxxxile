@@ -63,7 +63,7 @@ tiptext = $("hinttext");
 </script>
 
 <div id="shipyard">
-<form method="post" action="?f={{ filter }}&planet={{ planetid }}&a=bui1d">
+<form method="post" action="?f={{ filter }}&planet={{ planetid }}&a={% if action_button == 'Recycler' %}recycle{% else %}bui1d{% endif %}">
 	{% csrf_token %}
 	<table class="default" width="800">
 	<tr class="header"><td>Vaisseau</td><td width=100>Minerai</td><td width=100>Hydrocarbure</td><td width=80>Énergie</td><td width=80>Équipage</td><td width=90>Temps</td><td width='1%'>{{ action_column }}</td></tr>
