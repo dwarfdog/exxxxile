@@ -8353,7 +8353,10 @@ def shipyard(request):
     def RecycleShips():
         for i in retrieveShipsCache():
             shipid = i[0]
-            quantity = int(request.POST.get("s" + str(shipid), 0))
+            try:
+                quantity = int(request.POST.get("s" + str(shipid), '0'))
+            except (KeyError,Exception):
+                quantity = 0
             if quantity > 0:
                 RecycleShip(shipid, quantity)
         return HttpResponseRedirect(reverse('exile:shipyard') + "?recycle=1")
