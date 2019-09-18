@@ -10675,7 +10675,7 @@ def devmulti(request):
                     item["disconnected2"] = re[27]
                 if re[28] and re[29] == 0 and re[30] == 0:
                     item["samebrowserid"] = True
-                if re[33] and re[33] == re[34]:
+                if re[33] and re[33] == re[34] and re[33] != '127.0.0.1':
                     item["samefingerprint"] = True
                 if re[29] == 0:
                     item["can_ban_multi"] = True
