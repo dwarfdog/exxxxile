@@ -9,7 +9,7 @@
 			<tr class="smallitem">
 				<td><b><a href="{% url 'exile:orbit' %}?planet={{ pla.planetid }}">{{ pla.planetname }}</a>&nbsp;<a href="{% url 'exile:map' %}?g={{ pla.g }}&s={{ pla.s }}&p={{ pla.p }}">({{ pla.g }}.{{ pla.s }}.{{ pla.p }})</a></b></td>
 				<td align=left>{% for j,sh in pla.ship.items %}<div>
-			{% if sh.id == 999 %}
+			{% if j == 999 %}
 
 			{% else %}
 				{{ sh.ship }} x{{ sh.quantity }}
