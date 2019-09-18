@@ -389,6 +389,8 @@ def lostpassword(request):
         for i in range(22 ,60 ,3):
             s += hash[i]
         return s
+    def passwordhash(password):
+        return hashlib.md5('seed'+hashlib.md5(password))
     error = ''
     email = request.POST.get('email', False)
     userid = int(request.GET.get('id', 0))
@@ -399,9 +401,6 @@ def lostpassword(request):
         except (KeyError, IndexError):
             error = 'password_not_changed1'
         else:
-            print(key)
-            print(user.password)
-            print(passwordkey(user.password))
             if(key == passwordkey(user.password)):
                 try:
                     with connections['exile_nexus'].cursor() as cursor:

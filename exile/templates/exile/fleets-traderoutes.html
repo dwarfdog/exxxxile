@@ -1,38 +1,40 @@
+{% load static %}{% load tz %}
 <div id="traderoutes">
-<table class="default" width="350">
-<tr class="header">
-	<td>Nom</td>
-	<td width="1%">Ordres</td>
-	<td width="1%">Date de création</td>
-	<td width="1%">Date de modification</td>
-</tr>
+	<table class="default" width="350">
+		<tr class="header">
+			<td>Nom</td>
+			<td width="1%">Ordres</td>
+			<td width="1%">Date de crÃ©ation</td>
+			<td width="1%">Date de modification</td>
+		</tr>
 
-[[route]]
-<tr class="smallitem">
-	<td><a href="fleets-traderoute.asp?id={id}">{name}</a></td>
-	<td>{orders}</td>
-	<td>{created:dd/mm/yyyy}</td>
-	<td>{modified:dd/mm/yyyy}</td>
-</tr>
-[/route]]
-[[noroutes]]
-<tr class="smallitem">
-	<td colspan="2" align="center">Aucune route commerciale définie</td>
-</tr>
-[/noroutes]]
-</table>
-<br/>
-<form action="?" method="post">
-<table class="default" width="350">
-<tr class="header">
-	<td colspan="2">Nouvelle route commerciale</td>
-</tr>
-<tr>
-	<td>Nom</td><td><input type="text" name="name" maxlength="32" size="32"></td>
-</tr>
-<tr>
-	<td colspan="2" align="center"><input type="submit" value="Créer"></td>
-</tr>
-</table>
-</form>
+		{% for k,rou in routes.items %}
+			<tr class="smallitem">
+				<td><a href="{% url 'exile:fleetsroute' %}?id={{ rou.id }}">{{ rou.name }}</a></td>
+				<td>{{ rou.orders }}</td>
+				<td>{{ rou.created|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td>
+				<td>{{ rou.modified|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }}</td>
+			</tr>
+		{% endfor %}
+		{% if noroutes %}
+			<tr class="smallitem">
+				<td colspan="4" align="center">Aucune route commerciale dÃ©finie</td>
+			</tr>
+		{% endif %}
+	</table>
+	<br/>
+	<form action="?" method="post">
+		{% csrf_token %}
+		<table class="default" width="350">
+			<tr class="header">
+				<td colspan="2">Nouvelle route commerciale</td>
+			</tr>
+			<tr>
+				<td>Nom</td><td><input type="text" name="name" maxlength="32" size="32"></td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center"><input type="submit" value="CrÃ©er"></td>
+			</tr>
+		</table>
+	</form>
 </div>

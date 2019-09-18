@@ -1,117 +1,219 @@
-<link href="/game/exile.css" type="text/css" rel="stylesheet" media="all"/>
-
+{% load static %}
 <style>
-div .parent
-{
-	text-align:center;
-}
-div .item
-{
-	width:450px;
-	background: url('/images/interface/grad50.gif') repeat-x;
-	background-color: #3c3c3c; 
-	border: #222 1px solid;
-	margin: 2px 2px;
-	padding:5px 10px;
-	text-align:left;
-}
-div .title
-{
-	font-weight:bold;
-}
-div .center
-{
-	text-align:center;
-}
+	div .parent
+	{
+		text-align:center;
+	}
+	div .item
+	{
+		width:450px;
+		background: url('/images/interface/grad50.gif') repeat-x;
+		background-color: #3c3c3c; 
+		border: #222 1px solid;
+		margin: 2px 2px;
+		padding:5px 10px;
+		text-align:left;
+	}
+	div .title
+	{
+		font-weight:bold;
+	}
+	div .center
+	{
+		text-align:center;
+	}
 </style>
 <script>
-function toggleObj(id,visible) { var ob = document.getElementById(id); ob.className=visible?'':'hidden'; }
-function setval(obj, val){ document.getElementById(obj).value = val; }
+	function toggleObj(id,visible) { var ob = document.getElementById(id); ob.className=visible?'':'hidden'; }
+	function setval(obj, val){ document.getElementById(obj).value = val; }
 
-function changeAction(id, obj)
-{
-	toggleObj("move"+id,obj.selectedIndex==1);
-}
+	function changeAction(id, obj)
+	{
+		if(obj.selectedIndex==1){
+			toggleObj("cargo"+id,obj.selectedIndex==1);
+		}
+		if(obj.selectedIndex==2){
+			toggleObj("move"+id,obj.selectedIndex==2);
+		}
+	}
 
-[[comment]]Fill the list of destination planets[/comment]]
-var tab = new Array();
+	// Fill the list of destination planets
+	var tab = new Array();
 
-function fillDest(id,obj){
-	var dest = obj.selectedIndex;
-	setval("g"+id,tab[dest][0]);
-	setval("s"+id,tab[dest][1]);
-	setval("p"+id,tab[dest][2]);	
-}
-function d(idx,name,g,s,p){tab[idx]=new Array(g,s,p);}
-[[planetgroup]]
-[[planet]]d({index},'{name}',{to_g},{to_s},{to_p});[/planet]]
-[/planetgroup]]
+	function fillDest(id,obj){
+		var dest = obj.selectedIndex+1;
+		setval("g"+id,tab[dest][0]);
+		setval("s"+id,tab[dest][1]);
+		setval("p"+id,tab[dest][2]);	
+	}
+	function d(idx,name,g,s,p){tab[idx]=new Array(g,s,p);}
+	{% for k,pla in planets.items %}
+		d({{ pla.index }},'{{ pla.name | escapejs }}',{{ pla.to_g }},{{ pla.to_s }},{{ pla.to_p }});
+	{% endfor %}
 
-[[fleetgroup]]
-[[fleet_location]]d({fleetindex},'{fleet_name}',{fleet_g},{fleet_s},{fleet_p});[/fleet_location]]
-[/fleetgroup]]
+	{% for k,fle in fleets.items %}
+		d({{ fle.fleetindex }},'{{ fle.fleet_name | escapejs }}',{{ fle.fleet_g }},{{ fle.fleet_s }},{{ fle.fleet_p }});
+	{% endfor %}
 
+	{% for k,pla in merchants.items %}
+		d({{ pla.index }},'{{ pla.name | escapejs }}',{{ pla.to_g }},{{ pla.to_s }},{{ pla.to_p }});
+	{% endfor %}
 
-var idx = 0;
-function insertAction(action,ore,hydro,workers,scientists,soldiers,g,s,p,obj)
-{
-	var model=document.getElementById('model');
+	var idx = 0;
+	function insertAction(action,ore,hydro,workers,scientists,soldiers,g,s,p,obj)
+	{
+		var model=document.getElementById('model');
 
-	var nod=document.createElement("DIV");
-	nod.innerHTML='<a href="#" onclick="insertAction(0,0,0,0,0,0,0,0,0,this.parentNode)">Ins�rer une action</a>';
-	nod.className='item center';
-	document.getElementById("orders").insertBefore(nod, obj);
+		var nod=document.createElement("DIV");
+		nod.innerHTML='<a href="#" onclick="insertAction(0,0,0,0,0,0,0,0,0,this.parentNode)">Insérer une action</a>';
+		nod.className='item center';
+		document.getElementById("orders").insertBefore(nod, obj);
 
-	var nod=document.createElement("DIV");
-	nod.innerHTML=model.innerHTML.replace(/XX/g,idx);
-	nod.className='item';
-	document.getElementById("orders").insertBefore(nod, obj);
+		var nod=document.createElement("DIV");
+		nod.innerHTML=model.innerHTML.replace(/XX/g,idx);
+		nod.className='item';
+		document.getElementById("orders").insertBefore(nod, obj);
 
-	idx++;
-}
+		idx++;
+	}
 </script>
 
 <div class=hidden id=model>
-<table>
-<tr><td>
-	<select name="action" onchange="changeAction(XX,this)">
-		<option value="0">Charger/D�charger</option>
-		<option value="1">Aller vers</option>
-		<option value="2">Recycler</option>
-	</select>
-</td><td>
-	<div class=hidden id="moveXX">
-	<input type="text" name="g" id="gXX" size=3 maxlength=2 value="{g}">&nbsp;<input type="text" name="s" id="sXX" size=3 maxlength=2 value="{s}">&nbsp;<input type="text" name="p" id="pXX" size=3 maxlength=2 value="{p}">&nbsp;
-	<select name="planetlist" onchange="fillDest(XX,this)">
-		[[planetgroup]]<optgroup label="Plan�tes">
-		[[planet]]<option [[selected]] selected[/selected]]>{name} ({to_g}:{to_s}:{to_p})</option>[/planet]]
-		</optgroup>[/planetgroup]]
-		[[fleetgroup]]<optgroup label="Vers Flottes">
-		[[fleet_location]]<option>{fleet_name} ({fleet_g}:{fleet_s}:{fleet_p})</option>[/fleet_location]]
-		</optgroup>[/fleetgroup]]
-	</select>
-	</div>
-</td></tr>
-</table>
+	<table>
+		<tr>
+			<td>
+				<select name="actionXX" onchange="changeAction(XX,this)">
+					<option>Choisir une action</option>
+					<option value="0">Charger(+)/Décharger(-)</option>
+					<option value="1">Aller vers</option>
+					<option value="2">Recycler</option>
+					<!--<option value="3">Transférer</option>-->
+				</select>
+			</td>
+			<td nowrap>
+				<div class="hidden" id="cargoXX">
+					<table class=default width=300>
+						<tr>
+							<td nowrap><img src='{% static 'exile/assets/interface/ore.gif' %}' title='Minerai' class=res width=16 height=16> Minerai</td>
+							<td align=right><input type="text" name="oreXX" value="0"/></td>
+						</tr>
+						<tr>
+							<td nowrap><img src='{% static 'exile/assets/interface/hydrocarbon.gif' %}' title='Hydrocarbure' class=res width=16 height=16> Hydrocarbure</td>
+							<td align=right><input type="text" name="hydrocarbonXX" value="0"/></td>
+						</tr>
+						<tr>
+							<td nowrap><img src='{% static 'exile/assets/interface/scientists.gif' %}' title='Scientifiques' class=res width=16 height=16> Scientifiques</td>
+							<td align=right><input type="text" name="scientistsXX" value="0"/></td>
+						</tr>
+						<tr>
+							<td nowrap><img src='{% static 'exile/assets/interface/soldiers.gif' %}' title='Soldats' class=res width=16 height=16> Soldats</td>
+							<td align=right><input type="text" name="soldiersXX" value="0"/></td>
+						</tr>
+						<tr>
+							<td nowrap><img src='{% static 'exile/assets/interface/workers.gif' %}' title='Travailleurs' class=res width=16 height=16> Travailleurs</td>
+							<td align=right><input type="text" name="workersXX" value="0"/></td>
+						</tr>
+					</table>
+				</div>
+				<div class=hidden id="moveXX">
+					{% if fleet %}
+						<input type="text" name="gXX" id="gXX" size=3 maxlength=2 value="{{ g }}">&nbsp;
+						<input type="text" name="sXX" id="sXX" size=3 maxlength=2 value="{{ s }}">&nbsp;
+						<input type="text" name="pXX" id="pXX" size=3 maxlength=2 value="{{ p }}">&nbsp;
+					{% else %}
+						<input type="text" name="gXX" id="gXX" size=3 maxlength=2>&nbsp;
+						<input type="text" name="sXX" id="sXX" size=3 maxlength=2>&nbsp;
+						<input type="text" name="pXX" id="pXX" size=3 maxlength=2>&nbsp;
+					{% endif %}
+					<select name="planetlist" onchange="fillDest(XX,this)">
+						<option>Choisir une destination</option>
+						<optgroup label="Planètes">
+						{% for k,pla in planets.items %}
+								<option>{{ pla.name }} ({{ pla.to_g }}:{{ pla.to_s }}:{{ pla.to_p }})</option>
+						{% endfor %}
+						</optgroup>
+						<optgroup label="Vers Flottes">
+						{% for k,fle in fleets.items %}
+								<option>{{ fle.fleet_name }} ({{ fle.fleet_g }}:{{ fle.fleet_s }}:{{ fle.fleet_p }})</option>
+						{% endfor %}
+						</optgroup>
+						<optgroup label="Marchands">
+						{% for k,pla in merchants.items %}
+							<option>Marchand ({{ pla.to_g }}.{{ pla.to_s }}.{{ pla.to_p }})</option>
+						{% endfor %}
+						</optgroup>
+					</select>
+				</div>
+			</td>
+		</tr>
+	</table>
 </div>
 
 <div align=center>
 
-<form action="?" method="post">
+	<form action="?id={{ routeid }}" method="post">
+		{% csrf_token %}
 
-<div id="traderoute">
+		<div id="traderoute">
 
-<div id="orders" class="parent">
+			<div id="orders" class="parent">
 
-<div class="item title center">{traderoute}</div>
+				<div class="item title center">{{ route.0.name }}</div>
 
-<div class="item center"><a href="#" onclick="insertAction(0,0,0,0,0,0,0,0,0,this.parentNode)">Ins�rer une action</a></div>
+				<div class="item center"><label>Répéter la route en boucle</label>&nbsp;<input type="checkbox" name="loop" value="1" {% if route.0.repeat %}checked="checked"{% endif %}/></div>
 
-<div class="item center"><input type="submit" value="Valider"></div>
+				{% for wayp in waypoints %}
+					{% if wayp.action != '' %}
+						<div class="item center" id="wayp">
+							{% if wayp.action == 0 %}Charger/décharger{% endif %}
+							{% if wayp.action == 1 %}Déplacer{% endif %}
+							{% if wayp.action == 2 %}Recycler{% endif %}
+							{% if wayp.action == 0 %}
+								<div>
+									<table class=default width="100%">
+										<tr>
+											<td nowrap><img src='{% static 'exile/assets/interface/ore.gif' %}' title='Minerai' class=res width=16 height=16> Minerai</td>
+											<td align=right>{{ wayp.ore }}</td>
+										</tr>
+										<tr>
+											<td nowrap><img src='{% static 'exile/assets/interface/hydrocarbon.gif' %}' title='Hydrocarbure' class=res width=16 height=16> Hydrocarbure</td>
+											<td align=right>{{ wayp.hydrocarbon }}</td>
+										</tr>
+										<tr>
+											<td nowrap><img src='{% static 'exile/assets/interface/scientists.gif' %}' title='Scientifiques' class=res width=16 height=16> Scientifiques</td>
+											<td align=right>{{ wayp.scientists }}</td>
+										</tr>
+										<tr>
+											<td nowrap><img src='{% static 'exile/assets/interface/soldiers.gif' %}' title='Soldats' class=res width=16 height=16> Soldats</td>
+											<td align=right>{{ wayp.soldiers }}</td>
+										</tr>
+										<tr>
+											<td nowrap><img src='{% static 'exile/assets/interface/workers.gif' %}' title='Travailleurs' class=res width=16 height=16> Travailleurs</td>
+											<td align=right>{{ wayp.workers }}</td>
+										</tr>
+									</table>
+								</div>
+							{% endif %}
+							{% if wayp.action == 1 %}
+								{% if wayp.galaxy %}
+									<div>
+										{{ wayp.galaxy }}.{{ wayp.sector }}.{{ wayp.planet }}
+									</div>
+								{% endif %}
+								<script type="text/javascript">idx++;</script>
+							{% endif %}
+						</div>
+					{% endif %}
+				{% endfor %}
 
-</div>
+				<div class="item center"><a href="#" onclick="insertAction(0,0,0,0,0,0,0,0,0,this.parentNode)">Insérer une action</a></div>
 
-</div>
+				<div class="item center"><input type="submit" name="create" value="Valider"></div>
 
-</form>
+			</div>
+
+		</div>
+
+	</form>
+
 </div>
