@@ -131,18 +131,24 @@ class Command(BaseCommand):
                             if chance_to_hit < 0:
                                 chance_to_hit = 0
                             degats = shot[0]*(shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100)
+                            degats_without_mod = degats
                             if degats > target[3] + target[4]:
                                 degats = target[3] + target[4]
+                            if degats_without_mod > target[3] + target[4]/target[11]*100:
+                                degats_without_mod = target[3] + target[4]/target[11]*100
                             avg_degats = degats * chance_to_hit
+                            avg_degats_without_mod = degats_without_mod * chance_to_hit
                             if not target[10][0]:
                                 avg_degats /= 10000
+                                avg_degats_without_mod /= 10000
                             possible_targets_stats[ship_key][target_key] = {
                                 'degats':degats,
                                 'avg_degats':avg_degats,
+                                'avg_degats_without_mod':avg_degats_without_mod,
                                 'chance_to_hit':chance_to_hit,
                                 #'back_link':[k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies'] and target_key == str(x[0])+'|'+str(x[1])+'|'+str(x[2])],#list(filter(lambda x: x[0] in players[ship[0]]['enemies'] and target_key == str(x[0])+'|'+str(x[1])+'|'+str(x[2]), ships))
                             }
-                            possible_targets_order[ship_key].append((target_key, avg_degats, [k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies'] and target_key == str(x[0])+':'+str(x[1])+':'+str(x[2])]))
+                            possible_targets_order[ship_key].append((target_key, avg_degats_without_mod, [k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies'] and target_key == str(x[0])+':'+str(x[1])+':'+str(x[2])]))
             
             for ship_key in possible_targets_order:
                 print(ship_key)
