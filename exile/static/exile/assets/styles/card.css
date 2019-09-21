@@ -3,7 +3,7 @@
     box-shadow: 0px 0px 6px 6px rgba(0,0,0,0.4);
     transition: 0.3s;
     border-radius: 5px; /* 5px rounded corners */
-    border: 1px solid #777;
+    /*border: 1px solid #777;*/
     padding: 2px;
     /*background: #1f1f1f;*/
     background: url('../interface/header-bg.png');
