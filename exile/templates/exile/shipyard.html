@@ -90,9 +90,6 @@ tiptext = $("hinttext");
 		</tr>
 
 		{% for i,ship in ships.items %}
-			{% if ship.id == 999 and action_button != 'Recycler' %}
-
-			{% else %}
 				<tr valign="middle" align="right" class="item">
 
 				<td nowrap align="left">
@@ -120,7 +117,6 @@ tiptext = $("hinttext");
 				</td>
 
 				</tr>
-			{% endif %}
 		{% endfor %}
 	{% endfor %}
 
