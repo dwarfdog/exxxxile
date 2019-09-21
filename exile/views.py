@@ -1897,7 +1897,6 @@ def fleettrade(request):
 
 @construct
 @logged
-@transaction.atomic
 def fleetsplit(request):
     # display fleet info
     def DisplayExchangeForm(fleetid):
@@ -1946,11 +1945,11 @@ def fleetsplit(request):
                     "signature": re[3],
                     "quantity": re[4],
                 }
-                if fleet_split_error != e_no_error:
-                    ship["transfer"], request.POST.get("transfership"+str(re[0]),"")
+                if gcontext['fleet_split_error'] != gcontext['e_no_error']:
+                    ship["transfer"] = request.POST.get("transfership"+str(re[0]),"")
                 gcontext['ship'][shipCount] = ship.copy()
-            if fleet_split_error != e_no_error:
-                gcontext["error"+str(fleet_split_error)] = True
+            if gcontext['fleet_split_error'] != gcontext['e_no_error']:
+                gcontext["error"+str(gcontext['fleet_split_error'])] = True
                 gcontext["t_ore"] = request.POST.get("load_ore","")
                 gcontext["t_hydrocarbon"] = request.POST.get("load_hydrocarbon","")
                 gcontext["t_scientists"] = request.POST.get("load_scientists","")
@@ -1958,17 +1957,18 @@ def fleetsplit(request):
                 gcontext["t_soldiers"] = request.POST.get("load_soldiers","")
             return False
     # split current fleet into 2 fleets
+    @transaction.atomic
     def SplitFleet(fleetid):
         newfleetname = request.POST.get("newname","")
         if not isValidName(newfleetname):
-            fleet_split_error = e_bad_name
-            return
+            gcontext['fleet_split_error'] = gcontext['e_bad_name']
+            return False
         # retrieve the planet where the current fleet is patrolling
         with connection.cursor() as cursor:
             cursor.execute("SELECT planetid FROM vw_fleets WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, fleetid])
             re = cursor.fetchone()
             if not re:
-                return
+                return False
             fleetplanetid = re[0]
             # retrieve 'source' fleet cargo and action
             cursor.execute(" SELECT id, action, cargo_ore, cargo_hydrocarbon, " +
@@ -1977,8 +1977,8 @@ def fleetsplit(request):
                     " WHERE ownerid=%s AND id=%s", [gcontext['exile_user'].id, fleetid])
             re = cursor.fetchone()
             if not re:
-                fleet_split_error = e_occupied
-                return
+                gcontext['fleet_split_error'] = gcontext['e_occupied']
+                return False
             try:
                 ore = min(int(request.POST.get("load_ore", "0")), re[2])
             except (KeyError, Exception):
@@ -2003,16 +2003,16 @@ def fleetsplit(request):
             cursor.execute("SELECT sp_create_fleet(%s, %s, %s)", [gcontext['exile_user'].id, fleetplanetid, newfleetname])
             re = cursor.fetchone()
             if not re:
-                return
+                return False
             newfleetid = re[0]
             if newfleetid < 0:
                 if newfleetid == -1:
-                    fleet_split_error = e_already_exists
+                    gcontext['fleet_split_error'] = gcontext['e_already_exists']
                 elif newfleetid == -2:
-                    fleet_split_error = e_already_exists
+                    gcontext['fleet_split_error'] = gcontext['e_already_exists']
                 elif newfleetid == -3:
-                    fleet_split_error = e_limit_reached
-                return
+                    gcontext['fleet_split_error'] = gcontext['e_limit_reached']
+                return False
             # 2/ add the ships to the new fleet
             # retrieve ships belonging to current fleet
             cursor.execute("SELECT db_ships.id, " +
@@ -2056,14 +2056,19 @@ def fleetsplit(request):
             workers = min( workers, newload)
             newload -= workers
             if ore or hydrocarbon or scientists or soldiers or workers:
-                # a/ put the resources to the new fleet
-                cursor.execute("UPDATE fleets SET cargo_ore=%s, cargo_hydrocarbon=%s, cargo_scientists=%s, cargo_soldiers=%s, cargo_workers=%s WHERE id=%s AND ownerid=%s",
-                    [ore, hydrocarbon, scientists, soldiers, workers, newfleetid, gcontext['exile_user'].id])
-                # b/ remove the resources from the 'source' fleet
-                cursor.execute("UPDATE fleets SET" +
+                try:
+                    # a/ put the resources to the new fleet
+                    cursor.execute("UPDATE fleets SET cargo_ore=%s, cargo_hydrocarbon=%s, cargo_scientists=%s, cargo_soldiers=%s, cargo_workers=%s WHERE id=%s AND ownerid=%s",
+                        [ore, hydrocarbon, scientists, soldiers, workers, newfleetid, gcontext['exile_user'].id])
+                    # b/ remove the resources from the 'source' fleet
+                    cursor.execute("UPDATE fleets SET" +
                             " cargo_ore=cargo_ore-%s, cargo_hydrocarbon=cargo_hydrocarbon-%s, " +
                             " cargo_scientists=cargo_scientists-%s, cargo_soldiers=cargo_soldiers-%s, cargo_workers=cargo_workers-%s" +
                             " WHERE id=%s AND ownerid=%s", [ore, hydrocarbon, scientists, soldiers, workers, fleetid, gcontext['exile_user'].id])
+                except (KeyError,Exception):
+                    transaction.set_rollback(True)
+                    gcontext['fleet_split_error'] = gcontext['e_capacity']
+                    return False
             # 4/ Remove the ships from the 'source' fleet
             for i in availableArray:
                 shipid = i[0]
@@ -2072,8 +2077,13 @@ def fleetsplit(request):
                 except (KeyError, Exception):
                     quantity = 0
                 if quantity > 0:
-                    # remove the ships from the 'source' fleet
-                    cursor.execute(" UPDATE fleets_ships SET quantity=quantity-%s WHERE fleetid=%s AND shipid=%s", [quantity, fleetid, shipid])
+                    try:
+                        # remove the ships from the 'source' fleet
+                        cursor.execute(" UPDATE fleets_ships SET quantity=quantity-%s WHERE fleetid=%s AND shipid=%s", [quantity, fleetid, shipid])
+                    except (KeyError,Exception):
+                        transaction.set_rollback(True)
+                        gcontext['fleet_split_error'] = gcontext['e_capacity']
+                        return False
             cursor.execute("DELETE FROM fleets WHERE ownerid=%s AND size=0", [gcontext['exile_user'].id])
             return HttpResponseRedirect(reverse('exile:fleet')+"?id="+str(newfleetid))
     def ExecuteOrder(fleetid):
@@ -2081,12 +2091,13 @@ def fleetsplit(request):
             return SplitFleet(fleetid)
     gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'fleets'
-    e_no_error = 0
-    e_bad_name = 1
-    e_already_exists = 2
-    e_occupied = 3
-    e_limit_reached = 4
-    fleet_split_error = e_no_error
+    gcontext['e_no_error'] = 0
+    gcontext['e_bad_name'] = 1
+    gcontext['e_already_exists'] = 2
+    gcontext['e_occupied'] = 3
+    gcontext['e_limit_reached'] = 4
+    gcontext['e_capacity'] = 5
+    gcontext['fleet_split_error'] = gcontext['e_no_error']
     try:
         fleetid = int(request.GET.get("id", "0"))
     except (KeyError, Exception):
