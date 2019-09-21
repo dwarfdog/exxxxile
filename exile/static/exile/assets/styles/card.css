@@ -17,7 +17,8 @@
 }
 
 .card.current {
-  border: 1px solid #ffab00;
+  /*border: 1px solid #ffab00;*/
+  background: #444;
 }
 
 /* On mouse-over, add a deeper shadow */
