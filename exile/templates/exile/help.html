@@ -166,30 +166,70 @@
 	{% endfor %}
 	{% if tree %}
 		{% for shipid,ship in tree.items %}
-			{% if ship.buildings or ship.research %}
+			{% if ship.buildings or ship.reseach %}
 				<tr valign="top" class="item">
-					<td>
+					<td colspan=3>
 						<div class="label">{{ ship.label }}</div>
 						<div class="description">{{ ship.description|safe }}</div>
-						{% if ship.buildings %}
-							<div class="required">Bâtiments requis</div>
-								<ul class="requirements">
-									{% for j,bui in ship.buildings.items %}
-										<li>{{ bui }}</li>
-									{% endfor %}
-								</ul>
-							</div>
-							<br/>
-						{% endif %}
-						{% if ship.research %}
-							<div class="required">Recherches requises</div>
-								<ul class="requirements">
-									{% for j,bui in ship.research.items %}
-										<li>{{ bui.label }} <img src="{% static 'exile/assets/research/level' %}5_{{ bui.level }}.gif" alt="Niveau {{ bui.level }}"></li>
-									{% endfor %}
-								</ul>
-							</div>
-							<br/>
+						<table style="width:100%;">
+							<thead>
+								<tr>
+									<th style="text-align:center;width:50%;">Bâtiments requis</th>
+									<th style="text-align:center;width:50%;">Recherches requises</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<ul class="requirements">
+											{% for j,bui in ship.buildings.items %}
+												<li>{{ bui }}</li>
+											{% endfor %}
+										</ul>
+									</td>
+									<td>
+										<ul class="requirements">
+											{% for j,bui in ship.research.items %}
+												<li>{{ bui.label }} <img src="{% static 'exile/assets/research/level' %}5_{{ bui.level }}.gif" alt="Niveau {{ bui.level }}"></li>
+											{% endfor %}
+										</ul>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						{% if ship.degats %}
+							<table style="width:100%;">
+								<thead>
+									<tr>
+										<th style="text-align:center;width:50%;">
+											Types de dégats
+										</th>
+										<th style="text-align:center;width:50%;">
+											Résistances
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<ul>
+												<li>EM : {{ ship.degats.weapon_dmg_em }}</li>
+												<li>Explosive : {{ ship.degats.weapon_dmg_explosive }}</li>
+												<li>Kinetic : {{ ship.degats.weapon_dmg_kinetic }}</li>
+												<li>Thermal : {{ ship.degats.weapon_dmg_thermal }}</li>
+											</ul>
+										</td>
+										<td>
+											<ul>
+												<li>{{ ship.resistances.resist_em }}%</li>
+												<li>{{ ship.resistances.resist_explosive }}%</li>
+												<li>{{ ship.resistances.resist_kinetic }}%</li>
+												<li>{{ ship.resistances.resist_thermal }}%</li>
+											</ul>
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						{% endif %}
 					</td>
 				</tr>
@@ -222,30 +262,70 @@
 	
 	{% if tree %}
 		{% for shipid,ship in tree.items %}
-			{% if ship.buildings or ship.research %}
+			{% if ship.buildings or ship.reseach %}
 				<tr valign="top" class="item">
-					<td>
+					<td colspan=3>
 						<div class="label">{{ ship.label }}</div>
 						<div class="description">{{ ship.description|safe }}</div>
-						{% if ship.buildings %}
-							<div class="required">Bâtiments requis</div>
-								<ul class="requirements">
-									{% for j,bui in ship.buildings.items %}
-										<li>{{ bui }}</li>
-									{% endfor %}
-								</ul>
-							</div>
-							<br/>
-						{% endif %}
-						{% if ship.research %}
-							<div class="required">Recherches requises</div>
-								<ul class="requirements">
-									{% for j,bui in ship.research.items %}
-										<li>{{ bui.label }} <img src="{% static 'exile/assets/research/level' %}5_{{ bui.level }}.gif" alt="Niveau {{ bui.level }}"></li>
-									{% endfor %}
-								</ul>
-							</div>
-							<br/>
+						<table style="width:100%;">
+							<thead>
+								<tr>
+									<th style="text-align:center;width:50%;">Bâtiments requis</th>
+									<th style="text-align:center;width:50%;">Recherches requises</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<ul class="requirements">
+											{% for j,bui in ship.buildings.items %}
+												<li>{{ bui }}</li>
+											{% endfor %}
+										</ul>
+									</td>
+									<td>
+										<ul class="requirements">
+											{% for j,bui in ship.research.items %}
+												<li>{{ bui.label }} <img src="{% static 'exile/assets/research/level' %}5_{{ bui.level }}.gif" alt="Niveau {{ bui.level }}"></li>
+											{% endfor %}
+										</ul>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						{% if ship.degats %}
+							<table style="width:100%;">
+								<thead>
+									<tr>
+										<th style="text-align:center;width:50%;">
+											Types de dégats
+										</th>
+										<th style="text-align:center;width:50%;">
+											Résistances
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<ul>
+												<li>EM : {{ ship.degats.weapon_dmg_em }}</li>
+												<li>Explosive : {{ ship.degats.weapon_dmg_explosive }}</li>
+												<li>Kinetic : {{ ship.degats.weapon_dmg_kinetic }}</li>
+												<li>Thermal : {{ ship.degats.weapon_dmg_thermal }}</li>
+											</ul>
+										</td>
+										<td>
+											<ul>
+												<li>{{ ship.resistances.resist_em }}%</li>
+												<li>{{ ship.resistances.resist_explosive }}%</li>
+												<li>{{ ship.resistances.resist_kinetic }}%</li>
+												<li>{{ ship.resistances.resist_thermal }}%</li>
+											</ul>
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						{% endif %}
 					</td>
 				</tr>
@@ -345,30 +425,70 @@
 
 	{% if tree %}
 		{% for shipid,ship in tree.items %}
-			{% if ship.buildings or ship.research %}
+			{% if ship.buildings or ship.reseach %}
 				<tr valign="top" class="item">
-					<td>
+					<td colspan=3>
 						<div class="label">{{ ship.label }}</div>
 						<div class="description">{{ ship.description|safe }}</div>
-						{% if ship.buildings %}
-							<div class="required">Bâtiments requis</div>
-								<ul class="requirements">
-									{% for j,bui in ship.buildings.items %}
-										<li>{{ bui }}</li>
-									{% endfor %}
-								</ul>
-							</div>
-							<br/>
-						{% endif %}
-						{% if ship.research %}
-							<div class="required">Recherches requises</div>
-								<ul class="requirements">
-									{% for j,bui in ship.research.items %}
-										<li>{{ bui.label }} <img src="{% static 'exile/assets/research/level' %}5_{{ bui.level }}.gif" alt="Niveau {{ bui.level }}"></li>
-									{% endfor %}
-								</ul>
-							</div>
-							<br/>
+						<table style="width:100%;">
+							<thead>
+								<tr>
+									<th style="text-align:center;width:50%;">Bâtiments requis</th>
+									<th style="text-align:center;width:50%;">Recherches requises</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<ul class="requirements">
+											{% for j,bui in ship.buildings.items %}
+												<li>{{ bui }}</li>
+											{% endfor %}
+										</ul>
+									</td>
+									<td>
+										<ul class="requirements">
+											{% for j,bui in ship.research.items %}
+												<li>{{ bui.label }} <img src="{% static 'exile/assets/research/level' %}5_{{ bui.level }}.gif" alt="Niveau {{ bui.level }}"></li>
+											{% endfor %}
+										</ul>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						{% if ship.degats %}
+							<table style="width:100%;">
+								<thead>
+									<tr>
+										<th style="text-align:center;width:50%;">
+											Types de dégats
+										</th>
+										<th style="text-align:center;width:50%;">
+											Résistances
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<ul>
+												<li>EM : {{ ship.degats.weapon_dmg_em }}</li>
+												<li>Explosive : {{ ship.degats.weapon_dmg_explosive }}</li>
+												<li>Kinetic : {{ ship.degats.weapon_dmg_kinetic }}</li>
+												<li>Thermal : {{ ship.degats.weapon_dmg_thermal }}</li>
+											</ul>
+										</td>
+										<td>
+											<ul>
+												<li>{{ ship.resistances.resist_em }}%</li>
+												<li>{{ ship.resistances.resist_explosive }}%</li>
+												<li>{{ ship.resistances.resist_kinetic }}%</li>
+												<li>{{ ship.resistances.resist_thermal }}%</li>
+											</ul>
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						{% endif %}
 					</td>
 				</tr>

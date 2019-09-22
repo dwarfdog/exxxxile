@@ -114,6 +114,20 @@ def retrieveShipsCache():
                 cache.add('db_ships', {}, 300)
     return cache.get('db_ships')
 
+def retrieveFullShipsCache():
+    cache.add('full_db_ships_last_retrieve', time.time(), None)
+    if not cache.get('full_db_ships'):
+        # retrieve general Ships info
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM db_Ships ORDER BY category, id')
+            res = dictfetchall(cursor)
+            if res:
+                cache.add('full_db_ships', res, None)
+                cache.add('full_db_ships_retrieved', time.time(), None)
+            else:
+                cache.add('full_db_ships', {}, 300)
+    return cache.get('full_db_ships')
+
 def retrieveShipsReqCache():
     cache.add('db_ships_req_last_retrieve', time.time(), None)
     if not cache.get('db_ships_req'):
@@ -11108,6 +11122,9 @@ def help(request):
                 gcontext['tree'][resear[0]] = resea.copy()
             print(gcontext['tree'])
         elif cat == "ships": # display help on ships
+            gcontext['db_ships'] = {}
+            for re in retrieveFullShipsCache():
+                gcontext['db_ships'][re['id']] = re
             with connection.cursor() as cursor:
                 cursor.execute("SELECT id, category, cost_ore, cost_hydrocarbon, crew," +
                     " signature, capacity, handling, speed, weapon_turrets, weapon_dmg_em + weapon_dmg_explosive + weapon_dmg_kinetic + weapon_dmg_thermal AS weapon_power, " +
@@ -11173,7 +11190,19 @@ def help(request):
                     'label': ship[1],
                     'description': ship[2],
                     'buildings': {},
-                    'research': {}
+                    'research': {},
+                    'degats': {
+                        'weapon_dmg_em': gcontext['db_ships'][ship[0]]['weapon_dmg_em'],
+                        'weapon_dmg_explosive': gcontext['db_ships'][ship[0]]['weapon_dmg_explosive'],
+                        'weapon_dmg_kinetic': gcontext['db_ships'][ship[0]]['weapon_dmg_kinetic'],
+                        'weapon_dmg_thermal': gcontext['db_ships'][ship[0]]['weapon_dmg_thermal']
+                    },
+                    'resistances': {
+                        'resist_em': gcontext['db_ships'][ship[0]]['resist_em'],
+                        'resist_explosive': gcontext['db_ships'][ship[0]]['resist_explosive'],
+                        'resist_kinetic': gcontext['db_ships'][ship[0]]['resist_kinetic'],
+                        'resist_thermal': gcontext['db_ships'][ship[0]]['resist_thermal']
+                    }
                 }
                 for i in shipbreq:
                     if i[0] == ship[0]:
