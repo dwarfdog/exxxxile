@@ -11006,6 +11006,8 @@ def devstats(request):
 @logged
 def help(request):
     def display_help(cat):
+        def sortDegats2(target):
+            return target[1]
         if cat == "buildings": # display help on buildings
             with connection.cursor() as cursor:
                 cursor.execute("SELECT id, category," +
@@ -11222,13 +11224,125 @@ def help(request):
                         'image': re[1],
                     }
                     gcontext['smileys'][re[0]] = smiley.copy()
+        elif cat == "targeting":
+            oFleets = []
+            for ship in retrieveFullShipsCache():
+                if not ship['buildable']:
+                    continue
+                if not ship['weapon_ammo']:
+                    continue
+                oFleets.append([
+                    1,1,ship['id'],ship['hull'],ship['shield'],ship['handling'],
+                    ship['weapon_ammo'],ship['weapon_power'],ship['weapon_tracking_speed'],
+                    ship['weapon_turrets'],1,False,100,100,100,100,True,
+                    ship['weapon_dmg_em'],ship['weapon_dmg_explosive'],ship['weapon_dmg_kinetic'],ship['weapon_dmg_thermal'],
+                    ship['resist_em'],ship['resist_explosive'],ship['resist_kinetic'],ship['resist_thermal'],ship['tech'],
+                ])
+                oFleets.append([
+                    2,2,ship['id'],ship['hull'],ship['shield'],ship['handling'],
+                    ship['weapon_ammo'],ship['weapon_power'],ship['weapon_tracking_speed'],
+                    ship['weapon_turrets'],1,False,100,100,100,100,True,
+                    ship['weapon_dmg_em'],ship['weapon_dmg_explosive'],ship['weapon_dmg_kinetic'],ship['weapon_dmg_thermal'],
+                    ship['resist_em'],ship['resist_explosive'],ship['resist_kinetic'],ship['resist_thermal'],ship['tech'],
+                ])
+            shoots = []
+            ships = []
+            players = {}
+            for oFleet in oFleets:
+                #print(oFleet)
+                if not oFleet[0] in players.keys():
+                    friends = []
+                    players[oFleet[0]] = {'friends': friends.copy()}
+                for i in range(oFleet[10]):
+                    #  owner, id, shipid, hull, shield, handling, res_em, res_expl, res_kin, res_ther, [shot], mod_shield, mod_handling, mod_tracking_speed, mod_damage, tech, i
+                    if not [oFleet[11]]:
+                        ships.append([oFleet[0], oFleet[1], oFleet[2], oFleet[3], oFleet[4]*oFleet[12]/100, oFleet[5]*oFleet[13]/100, oFleet[21] , oFleet[22], oFleet[23], oFleet[24], [oFleet[9], oFleet[14]*oFleet[8]/100, oFleet[15]*oFleet[17]/100, oFleet[15]*oFleet[18]/100, oFleet[15]*oFleet[19]/100, oFleet[15]*oFleet[20]/100], oFleet[12], oFleet[13], oFleet[14], oFleet[15], oFleet[25], i])
+                    else:
+                        ships.append([oFleet[0], oFleet[1], oFleet[2], oFleet[3], oFleet[4]*oFleet[12]/100, oFleet[5]*oFleet[13]/100, oFleet[21] , oFleet[22], oFleet[23], oFleet[24], [oFleet[9], oFleet[14]/2*oFleet[8]/100, oFleet[15]*oFleet[17]/100, oFleet[15]*oFleet[18]/100, oFleet[15]*oFleet[19]/100, oFleet[15]*oFleet[20]/100], oFleet[12], oFleet[13], oFleet[14], oFleet[15], oFleet[25], i])
+            for d, player in players.items():
+                enemies = [k for k, v in players.items() if k != d and not d in v['friends']]
+                players[d]['enemies'] = enemies.copy()
+            counter = {}
+            possible_targets = {}
+            reverse_possible_targets = {}
+            selected_targets = {}
+            possible_targets_stats = {}
+            possible_targets_order = {}
+            for ship in ships:
+                cship_key = str(ship[0])+':'+str(ship[1])+':'+str(ship[2])
+                if cship_key in counter.keys():
+                    continue
+                counter[cship_key] = {'killed':{}, 'damages':0, 'before':0, 'after':0, 'mod_shield':0, 'mod_handling':0, 'mod_tracking_speed':0, 'mod_damage':0}
+                if not cship_key in possible_targets.keys():
+                    listOfStr = [k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies']]
+                    #random.shuffle(listOfStr)
+                    possible_targets[cship_key] = { i : listOfStr[i] for i in range(0, len(listOfStr) ) }
+                    #possible_targets[ship[0]] = [k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies']]#list(filter(lambda x: x[0] in players[ship[0]]['enemies'], ships))
+                shot = ship[10]
+                if shot[0]: # ship can shot
+                    ship_key = cship_key
+                    if not ship_key in possible_targets_stats.keys():
+                        possible_targets_stats[ship_key] = {}
+                        possible_targets_order[ship_key] = []
+                    for target in possible_targets[cship_key].values():
+                        target = ships[target]
+                        target_key = str(target[0])+':'+str(target[1])+':'+str(target[2])
+                        if not target_key in possible_targets_stats[ship_key].keys():
+                            if target[5]:
+                                chance_to_hit = max(shot[1]/target[5],1)
+                            else:
+                                chance_to_hit = 1
+                            tech_diff = ship[15] - target[15]
+                            if tech_diff < 0:
+                                chance_to_hit *= 0.85**abs(tech_diff);
+                            elif tech_diff > 0:
+                                chance_to_hit *= 1.10**tech_diff;
+                            if chance_to_hit >= 1:
+                                chance_to_hit = 1
+                            if chance_to_hit < 0:
+                                chance_to_hit = 0
+                            degats = shot[0]*(shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100)
+                            degats_without_mod = degats
+                            if target[3] + target[4]:
+                                if degats > target[3] + target[4]:
+                                    degats = target[3] + target[4]
+                            if not target[11]:
+                                target[11] = 1
+                            if degats_without_mod > target[3] + target[4]/target[11]*100:
+                                degats_without_mod = target[3] + target[4]/target[11]*100
+                            avg_degats = degats * chance_to_hit
+                            avg_degats_without_mod = degats_without_mod * chance_to_hit
+                            if not target[10][0]:
+                                avg_degats /= 10000
+                                avg_degats_without_mod /= 10000
+                            possible_targets_stats[ship_key][target_key] = {
+                                'degats':degats,
+                                'avg_degats':avg_degats,
+                                'avg_degats_without_mod':avg_degats_without_mod,
+                                'chance_to_hit':chance_to_hit,
+                                #'back_link':[k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies'] and target_key == str(x[0])+'|'+str(x[1])+'|'+str(x[2])],#list(filter(lambda x: x[0] in players[ship[0]]['enemies'] and target_key == str(x[0])+'|'+str(x[1])+'|'+str(x[2]), ships))
+                            }
+                            possible_targets_order[ship_key].append((target_key, avg_degats_without_mod, [k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies'] and target_key == str(x[0])+':'+str(x[1])+':'+str(x[2])]))
+            for ship_key in possible_targets_order:
+                possible_targets_order[ship_key].sort(key = sortDegats2, reverse=True)
+                listOfStr = []
+                for k in possible_targets_order[ship_key]:
+                    listOfStr.extend(k[2])
+                possible_targets[ship_key] = { i : listOfStr[i] for i in range(0, len(listOfStr) ) }
+            lines = {}
+            for sh,pt in possible_targets.items():
+                ind = int(sh.split(':')[2])
+                lines[getShipLabel(ind)] = []
+                for k,tar in pt.items():
+                    lines[getShipLabel(ind)].append(getShipLabel(ships[tar][2]))
+            gcontext['lines'] = lines
         gcontext['tabnav'] = {'cat': cat}
     gcontext = request.session.get('gcontext',{})
     context = gcontext
     gcontext['selectedmenu'] = 'help'
     gcontext['menu'] = menu(request)
     cat = request.GET.get("cat", "general").strip()
-    if cat != "buildings" and cat != "research" and cat != "ships" and cat != "tags":
+    if cat != "buildings" and cat != "research" and cat != "ships" and cat != "tags" and cat != "targeting":
         cat = "general"
     display_help(cat)
     t = loader.get_template('exile/help.html')

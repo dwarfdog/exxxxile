@@ -9,6 +9,7 @@
 	     <li {% if tabnav.cat == 'buildings' %}class="active"{% endif %}><a href="{% url 'exile:help' %}?cat=buildings">Construction</a></li>
 	     <li {% if tabnav.cat == 'research' %}class="active"{% endif %}><a href="{% url 'exile:help' %}?cat=research">Recherche</a></li>
 	     <li {% if tabnav.cat == 'ships' %}class="active"{% endif %}><a href="{% url 'exile:help' %}?cat=ships">Vaisseaux</a></li>
+	     <li {% if tabnav.cat == 'targeting' %}class="active"{% endif %}><a href="{% url 'exile:help' %}?cat=targeting">Ciblage (combat)</a></li>
 	     <li {% if tabnav.cat == 'tags' %}class="active"{% endif %}><a href="{% url 'exile:help' %}?cat=tags">Balises</a></li>
 	</ul>
 	</div>
@@ -541,6 +542,35 @@
 			{% endfor %}
 		</td>
 	</td>
+{% endif %}
+
+
+{% if tabnav.cat == 'targeting' %}
+	<tr class="header"><td colspan="6">Ciblages prioritaires lors des combats</td></tr>
+	<tr>
+		<td colspan="6">
+			<table style="border:1px solid #444;border-collapse: collapse;">
+				<thead>
+					<tr>
+						<th style="text-align:center;padding: 10px 6px;font-weight:bold;border:1px solid #444;">Vaisseau attaquant</th>
+						<th>&nbsp;</th>
+						<th colspan="12" style="text-align:center;padding: 10px 6px;font-weight:bold;border:1px solid #444;">Cibles prioritaires</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for sh,line in lines.items %}
+						<tr>
+							<td style="padding: 10px 6px;border:1px solid #444;font-weight:bold;">{{ sh }}</td>
+							<td>&nbsp;</td>
+							{% for target in line %}
+								<td style="padding: 10px 6px;border:1px solid #444;text-shadow: 1px 1px 2px #444;">{{ target }}</td>
+							{% endfor %}
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</td>
+	</tr>
 {% endif %}
 
 </table>
