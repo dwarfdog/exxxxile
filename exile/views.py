@@ -11836,3 +11836,32 @@ def battle(request):
         t = loader.get_template('exile/battle.html')
         context['content'] = t.render(gcontext, request)
     return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
+def stats(request):
+    global config
+    gcontext = request.session.get('gcontext',{})
+    gcontext['selectedmenu'] = 'statistics'
+    with connection.cursor() as cursor:
+        cursor.execute("select id,ownerid,ore_production,floor_occupied,floor,pct_ore from nav_planet where ownerid > 100 order by ore_production desc limit 50;")
+        gcontext['top50ore'] = dictfetchall(cursor)
+        for re in gcontext['top50ore']:
+            re['pct_floor'] = round(re['floor_occupied'] * 100 / re['floor'],2)
+            if re['ownerid']==gcontext['exile_user'].id:
+                re['class'] = 'highlight'
+            else:
+                re['class'] = ''
+        cursor.execute("select id,ownerid,hydrocarbon_production,floor_occupied,floor,pct_hydrocarbon from nav_planet where ownerid > 100 order by hydrocarbon_production desc limit 50;")
+        gcontext['top50hydrocarbon'] = dictfetchall(cursor)
+        for re in gcontext['top50hydrocarbon']:
+            re['pct_floor'] = round(re['floor_occupied'] * 100 / re['floor'],2)
+            if re['ownerid']==gcontext['exile_user'].id:
+                re['class'] = 'highlight'
+            else:
+                re['class'] = ''
+    context = gcontext
+    gcontext['menu'] = menu(request)
+    t = loader.get_template('exile/helpstatistics.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)

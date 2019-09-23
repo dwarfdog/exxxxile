@@ -1,0 +1,60 @@
+{% load static %}
+<style>
+table tr.highlight {
+	color: green;
+}
+table,tr,td {
+	border: 1px solid #444;
+}
+</style>
+<div id="helpstatistics">
+	<h1>top50 production de minerai</h1>
+	<table style="text-align:center;">
+		<tr class="header">
+			<td></td><td>Production minerai (/h)</td><td>terrain</td><td>Occupation terrain</td><td>Coef minerai</td>
+		</tr>
+		<tr class="clear"><td colspan="4">&nbsp;</td></tr>
+		{% for pla in top50ore %}
+			<tr valign="top" class="item {{ pla.class }}">
+				<td style="color:white;">{{ forloop.counter }}</td>
+				<td>
+					<div class="label">{{ pla.ore_production }}</div>
+				</td>
+				<td>
+					<div class="description">{{ pla.floor }}</div>
+				</td>
+				<td>
+					{{ pla.pct_floor }}%
+				</td>
+				<td>
+					{{ pla.pct_ore }}%
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+<br/><br/><br/>
+	<h1>top50 production d'hydrocarbure</h1>
+	<table style="text-align:center;">
+		<tr class="header">
+			<td></td><td>Production hydrocarbure (/h)</td><td>terrain</td><td>Occupation terrain</td><td>Coef hydrocarbure</td>
+		</tr>
+		<tr class="clear"><td colspan="4">&nbsp;</td></tr>
+		{% for pla in top50hydrocarbon %}
+			<tr valign="top" class="item {{ pla.class }}">
+				<td style="color:white;">{{ forloop.counter }}</td>
+				<td>
+					<div class="label">{{ pla.hydrocarbon_production }}</div>
+				</td>
+				<td>
+					<div class="description">{{ pla.floor }}</div>
+				</td>
+				<td>
+					{{ pla.pct_floor }}%
+				</td>
+				<td>
+					{{ pla.pct_hydrocarbon }}%
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+</div>

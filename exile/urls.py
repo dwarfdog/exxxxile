@@ -74,6 +74,7 @@ urlpatterns = [
     path('dev-playas', views.devplayas, name='devplayas'),
     path('dev-stats', views.devstats, name='devstats'),
     path('help', views.help, name='help'),
+    path('statistics', views.stats, name='statistics'),
     path('options', views.options, name='options'),
     path('logout', views.logout, name='logout'),
 ]
