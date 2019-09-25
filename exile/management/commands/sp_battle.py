@@ -131,13 +131,23 @@ class Command(BaseCommand):
                             if chance_to_hit < 0:
                                 chance_to_hit = 0
                             degats = shot[0]*(shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100)
+                            #degats_without_mod = shot[0]*(shot[2]*(min(100,100-target[6]))/100 + shot[3]*(min(100,100-target[7]))/100 + shot[4]*(min(100,100-target[8]))/100 + shot[5]*(min(100,100-target[9]))/100)
                             degats_without_mod = degats
                             if degats > target[3] + target[4]:
                                 degats = target[3] + target[4]
                             if degats_without_mod > target[3] + target[4]/target[11]*100:
                                 degats_without_mod = target[3] + target[4]/target[11]*100
                             avg_degats = degats * chance_to_hit
-                            avg_degats_without_mod = degats_without_mod * chance_to_hit
+                            if ship[15] == 1:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                            elif ship[15] == 2:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                            elif ship[15] == 3:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit * 0.85**tech_diff
+                            elif ship[15] == 4:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                            else:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
                             if not target[10][0]:
                                 avg_degats /= 10000
                                 avg_degats_without_mod /= 10000
@@ -151,13 +161,25 @@ class Command(BaseCommand):
                             possible_targets_order[ship_key].append((target_key, avg_degats_without_mod, [k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies'] and target_key == str(x[0])+':'+str(x[1])+':'+str(x[2])]))
             
             for ship_key in possible_targets_order:
-                print(ship_key)
+                #print(ship_key)
                 possible_targets_order[ship_key].sort(key = sortDegats2, reverse=True)
-                listOfStr = []
+                pto = {}
                 for k in possible_targets_order[ship_key]:
-                    listOfStr.extend(k[2])
+                    if k[1] not in pto.keys():
+                        pto[k[1]] = []
+                    for kk in k[2]:
+                        pto[k[1]].append(kk)
+                #print(pto)
+                for k in pto.keys():
+                    random.shuffle(pto[k])
+                #print(pto)
+                listOfStr = []
+                for k in pto.keys():
+                    listOfStr.extend(pto[k])
+                #for k in possible_targets_order[ship_key]:
+                #    listOfStr.extend(k[2])
                 possible_targets[ship_key] = { i : listOfStr[i] for i in range(0, len(listOfStr) ) }
-                print(len(possible_targets[ship_key]))
+                #print(len(possible_targets[ship_key]))
                 #possible_targets[ship[0]] = [k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies']]#list(filter(lambda x: x[0] in players[ship[0]]['enemies'], ships))
                 for k,pt in possible_targets[ship_key].items():
                     if pt not in reverse_possible_targets.keys():

@@ -11302,6 +11302,7 @@ def help(request):
                             if chance_to_hit < 0:
                                 chance_to_hit = 0
                             degats = shot[0]*(shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100)
+                            #degats_without_mod = shot[0]*(shot[2]*(min(100,100-target[6]))/100 + shot[3]*(min(100,100-target[7]))/100 + shot[4]*(min(100,100-target[8]))/100 + shot[5]*(min(100,100-target[9]))/100)
                             degats_without_mod = degats
                             if target[3] + target[4]:
                                 if degats > target[3] + target[4]:
@@ -11311,7 +11312,16 @@ def help(request):
                             if degats_without_mod > target[3] + target[4]/target[11]*100:
                                 degats_without_mod = target[3] + target[4]/target[11]*100
                             avg_degats = degats * chance_to_hit
-                            avg_degats_without_mod = degats_without_mod * chance_to_hit
+                            if ship[15] == 1:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                            elif ship[15] == 2:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                            elif ship[15] == 3:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit * 0.9**tech_diff
+                            elif ship[15] == 4:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                            else:
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
                             if not target[10][0]:
                                 avg_degats /= 10000
                                 avg_degats_without_mod /= 10000
