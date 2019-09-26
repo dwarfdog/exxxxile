@@ -11099,9 +11099,7 @@ def help(request):
                         gcontext['category'][ck] = {}
                     gcontext['category'][ck][re[0]] = research.copy()
             searbreq = retrieveResearchReqCache()
-            print(searbreq)
             searrreq = retrieveResearchReqRCache()
-            print(searrreq)
             gcontext['tree'] = {}
             for resear in retrieveResearchCache():
                 if resear[3] < 10:
@@ -11122,7 +11120,6 @@ def help(request):
                             continue
                         resea['research'][i[1]] = {'label': getResearchLabel(i[1]),'level': i[2]}
                 gcontext['tree'][resear[0]] = resea.copy()
-            print(gcontext['tree'])
         elif cat == "ships": # display help on ships
             gcontext['db_ships'] = {}
             for re in retrieveFullShipsCache():
