@@ -19,6 +19,8 @@
 .card.current {
   /*border: 1px solid #ffab00;*/
   background: #444;
+  box-shadow: 0px 0px 3px 3px rgba(60,160,255,0.8);
+  animation: pulseblue 1s infinite;
 }
 
 /* On mouse-over, add a deeper shadow */
