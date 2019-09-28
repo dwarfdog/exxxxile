@@ -66,9 +66,11 @@ function formatLine(author,line)
 	{
 		var tab = words[i].match(regexpCoords);
 
+		words[i] = words[i].replace('<a ','<a target="_blank" ');
+
 		if(tab != null && tab[1] > 0 && tab[2] > 0 && tab[2] < 100 && tab[3] > 0 && tab[3] <= 25)
 		{
-			words[i] = "<a href='{% url 'exile:map' %}?g="+tab[1] + "&s=" + tab[2] + "&p=" + tab[3] + "' target=_blank>" + words[i] + "</a>";
+			words[i] = "<a href='{% url 'exile:map' %}?g="+tab[1] + "&s=" + tab[2] + "&p=" + tab[3] + "' target=\"_blank\">" + words[i] + "</a>";
 			continue;
 		}
 
