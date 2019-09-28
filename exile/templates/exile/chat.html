@@ -66,7 +66,7 @@ function formatLine(author,line)
 	{
 		var tab = words[i].match(regexpCoords);
 
-		words[i] = words[i].replace('<a ','<a target="_blank" ');
+		words[i] = words[i].replace('href="','target="_blank" href="');
 
 		if(tab != null && tab[1] > 0 && tab[2] > 0 && tab[2] < 100 && tab[3] > 0 && tab[3] <= 25)
 		{
