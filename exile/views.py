@@ -290,6 +290,14 @@ def getResearchDescription(ResearchId):
             return research[2]
     return ''
 
+def getPlayerName(id):
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT login FROM users WHERE id=%s', [id])
+        res = cursor.fetchone()
+        if res:
+            return res[0]
+    return ''
+
 def getPlanetName(request,relation, radar_strength, ownerName, planetName):
     global config
     gcontext = request.session.get('gcontext',{})
@@ -773,6 +781,7 @@ def logged(function):
         if not user:
             return HttpResponseRedirect(reverse('exile:connect'))
         gcontext['exile_user'] = user
+        gcontext['iszurg'] = isZurg(request)
         log_notice(request, 'login_check', 'exile_user='+str(user.id)+' nexus_user='+str(request.session.get('user_id', 0)), 1)
         gcontext['dev'] = user.privilege >= 100
         if user.skin:
@@ -6779,7 +6788,7 @@ def map(request):
             cursor.execute('SELECT * FROM sp_get_user_rs(%(UserID)s,%(galaxy)s,%(sector)s)', {'UserID': gcontext['exile_user'].id, 'galaxy': galaxy, 'sector': sector})
             re =cursor.fetchone()
             radarstrength = re[0]
-            if isZurg(request) and not radarstrength:
+            if gcontext['iszurg'] and not radarstrength:
                 radarstrength = 1
             if not gcontext['exile_user'].alliance_id:
                 aid = -1
@@ -11851,23 +11860,26 @@ def stats(request):
     gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'statistics'
     with connection.cursor() as cursor:
-        cursor.execute("select id,ownerid,ore_production,floor_occupied,floor,pct_ore from nav_planet where ownerid > 100 order by ore_production desc limit 50;")
+        cursor.execute("select id,name,galaxy,sector,planet,ownerid,ore_production,floor_occupied,floor,pct_ore from nav_planet where ownerid > 100 order by ore_production desc limit 50;")
         gcontext['top50ore'] = dictfetchall(cursor)
         for re in gcontext['top50ore']:
             re['pct_floor'] = round(re['floor_occupied'] * 100 / re['floor'],2)
+            re['owner'] = getPlayerName(re['ownerid'])
             if re['ownerid']==gcontext['exile_user'].id:
                 re['class'] = 'highlight'
             else:
                 re['class'] = ''
-        cursor.execute("select id,ownerid,hydrocarbon_production,floor_occupied,floor,pct_hydrocarbon from nav_planet where ownerid > 100 order by hydrocarbon_production desc limit 50;")
+        cursor.execute("select id,name,galaxy,sector,planet,ownerid,hydrocarbon_production,floor_occupied,floor,pct_hydrocarbon from nav_planet where ownerid > 100 order by hydrocarbon_production desc limit 50;")
         gcontext['top50hydrocarbon'] = dictfetchall(cursor)
         for re in gcontext['top50hydrocarbon']:
             re['pct_floor'] = round(re['floor_occupied'] * 100 / re['floor'],2)
+            re['owner'] = getPlayerName(re['ownerid'])
             if re['ownerid']==gcontext['exile_user'].id:
                 re['class'] = 'highlight'
             else:
                 re['class'] = ''
     context = gcontext
+    print(context)
     gcontext['menu'] = menu(request)
     t = loader.get_template('exile/helpstatistics.html')
     context['content'] = t.render(gcontext, request)

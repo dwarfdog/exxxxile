@@ -14,11 +14,15 @@ td {
 	<h1>top50 production de minerai</h1>
 	<table style="text-align:center;" class="default">
 		<tr class="header">
-			<td></td><td>Production minerai (/h)</td><td>terrain</td><td>Occupation terrain</td><td>Coef minerai</td>
+			<td></td>{% if iszurg %}<td>position</td><td>proprio</td>{% endif %}<td>Production minerai (/h)</td><td>terrain</td><td>Occupation terrain</td><td>Coef minerai</td>
 		</tr>
 		{% for pla in top50ore %}
 			<tr valign="top" class="item {{ pla.class }}">
 				<td style="color:white;">{{ forloop.counter }}</td>
+				{% if iszurg %}
+					<td><a href="{% url 'exile:map' %}?g={{ pla.galaxy }}&s={{ pla.sector }}">{{ pla.name }} ({{ pla.galaxy }}.{{ pla.sector }}.{{ pla.planet }})</a></td>
+					<td>{{ pla.owner }}</td>
+				{% endif %}
 				<td>
 					<div class="label">{{ pla.ore_production }}</div>
 				</td>
@@ -38,11 +42,15 @@ td {
 	<h1>top50 production d'hydrocarbure</h1>
 	<table style="text-align:center;" class="default">
 		<tr class="header">
-			<td></td><td>Production hydrocarbure (/h)</td><td>terrain</td><td>Occupation terrain</td><td>Coef hydrocarbure</td>
+			<td></td>{% if iszurg %}<td>position</td><td>proprio</td>{% endif %}<td>Production hydrocarbure (/h)</td><td>terrain</td><td>Occupation terrain</td><td>Coef hydrocarbure</td>
 		</tr>
 		{% for pla in top50hydrocarbon %}
 			<tr valign="top" class="item {{ pla.class }}">
 				<td style="color:white;">{{ forloop.counter }}</td>
+				{% if iszurg %}
+					<td><a href="{% url 'exile:map' %}?g={{ pla.galaxy }}&s={{ pla.sector }}">{{ pla.name }} ({{ pla.galaxy }}.{{ pla.sector }}.{{ pla.planet }})</a></td>
+					<td>{{ pla.owner }}</td>
+				{% endif %}
 				<td>
 					<div class="label">{{ pla.hydrocarbon_production }}</div>
 				</td>
