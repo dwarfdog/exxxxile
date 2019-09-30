@@ -1773,6 +1773,23 @@ def commanders(request):
         with connection.cursor() as cursor:
             cursor.execute('SELECT sp_commanders_train(%s, %s)', [gcontext['exile_user'].id, CommanderId])
             return HttpResponseRedirect(reverse('exile:commanders'))
+    def ResetCommander(CommanderId):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT salary FROM commanders WHERE id=%s AND ownerid=%s", [CommanderId, gcontext['exile_user'].id])
+            re = cursor.fetchone()
+            if not re:
+                return HttpResponseRedirect(reverse('exile:commanders'))
+            if re[0]==0:
+                points = 14
+            else:
+                points = 10
+            cursor.execute("UPDATE commanders SET mod_production_ore=1, mod_production_hydrocarbon=1, mod_production_workers=1," +
+                " mod_fleet_speed=1, mod_fleet_shield=1, mod_fleet_handling=1, mod_fleet_tracking_speed=1," +
+                " mod_production_energy=1, mod_fleet_signature=1,"
+                " mod_fleet_damage=1, mod_construction_speed_buildings=1, mod_construction_speed_ships=1, points=%s" +
+                " WHERE id=%s AND ownerid=%s", [points, CommanderId, gcontext['exile_user'].id])
+            cursor.execute("UPDATE users SET credits=credits-1000000 WHERE id=%s", [gcontext['exile_user'].id])
+            return HttpResponseRedirect(reverse('exile:commanders'))
     gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'commanders'
     gcontext['menu'] = menu(request)
@@ -1792,6 +1809,12 @@ def commanders(request):
         DisplayCommanderEdition(CommanderId)
     elif a == "train":
         return TrainCommander(CommanderId)
+    elif a == "reset":
+        if gcontext['exile_user'].credits<1000000:
+            gcontext['error'] = 'not_enough_credits'
+            ListCommanders()
+        else:
+            return ResetCommander(CommanderId)
     else:
         ListCommanders()
     gcontext['max_commanders'] = int(gcontext['exile_user'].mod_commanders)

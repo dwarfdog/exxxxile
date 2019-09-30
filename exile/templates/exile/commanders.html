@@ -8,6 +8,14 @@ function confirmFireCommander(name){
 	return false;
 }
 
+function confirmResetCommander(name){
+	if(confirm('Êtes-vous sûr de vouloir infliger un neuro-formatage au commandant "' + name + '" ?')) {
+		if(confirm('Êtes-vous VRAIMENT sûr de vouloir effacer la mémoire du commandant "' + name + '" ?\nNote: Les commandants neuro-formatés perdent tous leurs points d\'expérience !'))
+			return true;
+	}
+	return false;
+}
+
 function confirmTrain(prestige) {
 	return confirm('Êtes-vous sûr de vouloir effectuer un entraînement intensif pour ' + prestige + ' points de prestige ?');
 }
@@ -30,6 +38,9 @@ function confirmTrain(prestige) {
 
 {% if commanders %}
 <table class=default width=600>
+	{% if error %}
+		<tr class=error><td colspan=2>{{ error }}</td></tr>
+	{% endif %}
 <tr class=title><td colspan=2>Les commandants de votre empire ({{ commanders|length }}/{{ max_commanders }})</td></tr>
 <tr class=header><td width=220>Commandant</td><td>Compétences</td></tr>
 
@@ -51,7 +62,8 @@ function confirmTrain(prestige) {
 	</td>
 	<td valign=top>
 	<table class=clear>
-	{% if commander.bonus %}
+	{% if commander.bonus.description %}
+		<tr><td><a href="?a=reset&id={{ commander.id }}" onclick="return confirmResetCommander('{{ commander.name }}')" title="Cette action réinitialise le commandant, tous les points d'expérience seront perdus !">Neuro-formatage (1M crédits)</a><br/><br/></td></tr>
 	{% for ind, description in commander.bonus.description.items %}
 		<tr><td class="{% if description > 0 %}positive{% elif description < 0 %}minus{% endif %}">
 		{% if ind == 14 %}Production : Minerai
@@ -70,8 +82,8 @@ function confirmTrain(prestige) {
 		&nbsp;{{ description }} %</td></tr>
 	{% endfor %}
 	{% endif %}
-	{% if commander.levelup %}<tr><td><a href="?a=skills&id={{ commander.id }}">Répartir les {{ commander.levelup }} points de compétences restants</a></td></tr>{% endif %}
-	{% if commander.train %}<tr><td><a href="?a=train&id={{ commander.id }}" onclick="return confirmTrain('{{ commander.prestige }}')">Entrainement intensif pour <img src="{% static 'exile/assets/interface/prestige.gif' %}" width="16" height="16" class="res" title="Prestige">{{ commander.prestige }}&nbsp;/&nbsp;{{ exile_user.prestige_points }}</a></td></tr>{% endif %}
+	{% if commander.levelup %}<tr><td><br/><a href="?a=skills&id={{ commander.id }}">Répartir les {{ commander.levelup }} points de compétences restants</a></td></tr>{% endif %}
+	{% if commander.train %}<tr><td><br/><a href="?a=train&id={{ commander.id }}" onclick="return confirmTrain('{{ commander.prestige }}')">Entrainement intensif pour <img src="{% static 'exile/assets/interface/prestige.gif' %}" width="16" height="16" class="res" title="Prestige">{{ commander.prestige }}&nbsp;/&nbsp;{{ exile_user.prestige_points }}</a></td></tr>{% endif %}
 	{% if commander.cant_train %}<tr><td>Vous ne pouvez entrainer ce commandant qu'une fois par jour</td></tr>{% endif %}
 	{% if commander.cant_train_anymore %}<tr><td>Vous ne pouvez pas entrainer ce commandant plus</td></tr>{% endif %}
 	</table>
