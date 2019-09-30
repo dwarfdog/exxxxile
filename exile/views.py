@@ -1785,7 +1785,7 @@ def commanders(request):
                 points = 10
             cursor.execute("UPDATE commanders SET mod_production_ore=1, mod_production_hydrocarbon=1, mod_production_workers=1," +
                 " mod_fleet_speed=1, mod_fleet_shield=1, mod_fleet_handling=1, mod_fleet_tracking_speed=1," +
-                " mod_production_energy=1, mod_fleet_signature=1,"
+                " mod_production_energy=1, mod_fleet_signature=1, salary_increases=0,"
                 " mod_fleet_damage=1, mod_construction_speed_buildings=1, mod_construction_speed_ships=1, points=%s" +
                 " WHERE id=%s AND ownerid=%s", [points, CommanderId, gcontext['exile_user'].id])
             cursor.execute("UPDATE users SET credits=credits-1000000 WHERE id=%s", [gcontext['exile_user'].id])
