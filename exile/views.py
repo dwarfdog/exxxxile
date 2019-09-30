@@ -8725,6 +8725,7 @@ def orbit(request):
     if request.GET.get("a", "") == "new":
         NewFleet()
     DisplayFleets()
+    gcontext['fleetname'] = gcontext['exile_user'].login[0:4]+str(random.randint(10000,99999))
     gcontext['contextinfo'] = header(request)
     context = gcontext
     t = loader.get_template('exile/orbit.html')
@@ -8895,7 +8896,7 @@ def orbits(request):
     gcontext['menu'] = menu(request)
     gcontext['plaurl'] = reverse('exile:orbits')
     for CurrentPlanet in checkVWPlanetListCache(request):
-        gcontext['planets'][CurrentPlanet[0]] = {'fleet_creation_error':'','name':CurrentPlanet[1]}
+        gcontext['planets'][CurrentPlanet[0]] = {'fleet_creation_error':'','name':CurrentPlanet[1],'fleetname':gcontext['exile_user'].login[0:4]+str(random.randint(10000,99999))}
     if request.GET.get("a", "") == "new":
         for CurrentPlanet in checkVWPlanetListCache(request):
             NewFleet(CurrentPlanet[0])
