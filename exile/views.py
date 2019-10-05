@@ -1402,7 +1402,7 @@ def overview(request):
             'attackonsight,f.shared' +
             ' FROM users, vw_fleets f ' +
             ' WHERE users.id=%s AND (action = 1 OR action = -1) AND (ownerid=%s OR (destplanetid IS NOT NULL AND destplanetid IN (SELECT id FROM nav_planet WHERE ownerid=%s)))' +
-            ' ORDER BY ownerid, COALESCE(remaining_time, 0)', [gcontext['exile_user'].id, gcontext['exile_user'].id, gcontext['exile_user'].id])
+            ' ORDER BY COALESCE(remaining_time, 0)', [gcontext['exile_user'].id, gcontext['exile_user'].id, gcontext['exile_user'].id])
             res = cursor.fetchall()
             if not res:
                 raise Exception('can\'t get fleets')
@@ -6513,6 +6513,40 @@ def radars(request):
                 displayRadar(re[0], re[1], re[2], re[3], re[4])
     context = gcontext
     t = loader.get_template('exile/radars.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
+@admin
+def heatmap(request):
+    global config
+    gcontext = request.session.get('gcontext',{})
+    gcontext['selectedmenu'] = 'heatmap'
+    gcontext['menu'] = menu(request)
+    gstr = {}
+    #for galaxy in [1,2,3,4,5]:
+    for galaxy in [6,7,8,9,10]:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT floor FROM nav_planet WHERE galaxy=%s ORDER BY id', [galaxy])
+            res = cursor.fetchall()
+            maxx = 0
+            cpt = 0
+            for re in res:
+                if cpt not in gstr.keys():
+                    gstr[cpt] = 0
+                cpt+=1
+                maxx = max(maxx,re[0]-80)
+            cpt = 0
+            for re in res:
+                gstr[cpt] = max(gstr[cpt],int((re[0]-80)*255/maxx))
+                cpt+=1
+    gcontext['gstr'] = ''
+    for st in gstr.values():
+        gcontext['gstr'] += str(st)+','
+    gcontext['gstr'] = gcontext['gstr'][0:-1]
+    context = gcontext
+    t = loader.get_template('exile/heatmap.html')
     context['content'] = t.render(gcontext, request)
     return render(request, 'exile/layout.html', context)
 
