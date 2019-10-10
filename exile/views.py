@@ -7744,13 +7744,25 @@ def production(request):
                 to_g = request.POST.getlist("to_g",'0')
                 to_s = request.POST.getlist("to_s",'0')
                 to_p = request.POST.getlist("to_p",'0')
-                nrj = request.POST.getlist("energy")
+                nrj  = request.POST.getlist("energy",'0')
                 for I in range(0,len(to_g)):
-                    if to_g[I] and to_s[I] and to_p[I]:
-                        g = int(to_g[I], 0)
-                        s = int(to_s[I], 0)
-                        p = int(to_p[I], 0)
-                        energy = int(nrj[I], 0)
+                    if to_g[I] and to_s[I] and to_p[I] and nrj[I]:
+                        try:
+                            g = int(to_g[I])
+                        except(KeyError,Exception):
+                            continue
+                        try:
+                            s = int(to_s[I])
+                        except(KeyError,Exception):
+                            continue
+                        try:
+                            p = int(to_p[I])
+                        except(KeyError,Exception):
+                            continue
+                        try:
+                            energy = int(nrj[I])
+                        except(KeyError,Exception):
+                            continue
                         if g != 0 and s != 0 and p != 0 and energy > 0:
                             cursor.execute('INSERT INTO planet_energy_transfer(planetid, target_planetid, energy) VALUES(%s, sp_planet(%s, %s, %s), %s)', [gcontext['CurrentPlanet'], g, s, p, energy])
                             update_planet = True
