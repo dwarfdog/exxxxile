@@ -7741,18 +7741,19 @@ def production(request):
                     if query != "":
                         cursor.execute('UPDATE planet_energy_transfer SET ' + query + ' WHERE planetid=%s AND target_planetid=%s', [gcontext['CurrentPlanet'], re[0]])
                         update_planet = True
-                to_g = request.POST.getlist("to_g")
-                to_s = request.POST.getlist("to_s")
-                to_p = request.POST.getlist("to_p")
+                to_g = request.POST.getlist("to_g",'0')
+                to_s = request.POST.getlist("to_s",'0')
+                to_p = request.POST.getlist("to_p",'0')
                 nrj = request.POST.getlist("energy")
                 for I in range(0,len(to_g)):
-                    g = int(to_g[I], 0)
-                    s = int(to_s[I], 0)
-                    p = int(to_p[I], 0)
-                    energy = int(nrj[I], 0)
-                    if g != 0 and s != 0 and p != 0 and energy > 0:
-                        cursor.execute('INSERT INTO planet_energy_transfer(planetid, target_planetid, energy) VALUES(%s, sp_planet(%s, %s, %s), %s)', [gcontext['CurrentPlanet'], g, s, p, energy])
-                        update_planet = True
+                    if to_g[I] and to_s[I] and to_p[I]:
+                        g = int(to_g[I], 0)
+                        s = int(to_s[I], 0)
+                        p = int(to_p[I], 0)
+                        energy = int(nrj[I], 0)
+                        if g != 0 and s != 0 and p != 0 and energy > 0:
+                            cursor.execute('INSERT INTO planet_energy_transfer(planetid, target_planetid, energy) VALUES(%s, sp_planet(%s, %s, %s), %s)', [gcontext['CurrentPlanet'], g, s, p, energy])
+                            update_planet = True
             if update_planet:
                 try:
                     cursor.execute('SELECT sp_update_planet(%s)', [gcontext['CurrentPlanet']])
@@ -11249,8 +11250,8 @@ def help(request):
             shiprreq = retrieveShipsReqRCache()
             gcontext['tree'] = {}
             for ship in retrieveShipsCache():
-                if not ship[3]:
-                    continue
+                #if not ship[3]:
+                #    continue
                 shipp = {
                     'id': ship[0],
                     'label': ship[1],
@@ -11403,6 +11404,7 @@ def help(request):
                 for k in possible_targets_order[ship_key]:
                     listOfStr.extend(k[2])
                 possible_targets[ship_key] = { i : listOfStr[i] for i in range(0, len(listOfStr) ) }
+            print(possible_targets_order)
             lines = {}
             for sh,pt in possible_targets.items():
                 ind = int(sh.split(':')[2])
