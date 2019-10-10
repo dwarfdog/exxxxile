@@ -139,15 +139,15 @@ class Command(BaseCommand):
                                 degats_without_mod = target[3] + target[4]/target[11]*100
                             avg_degats = degats * chance_to_hit
                             if ship[15] == 1:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             elif ship[15] == 2:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             elif ship[15] == 3:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit * 0.85**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit * 0.85**tech_diff + (ship[2] - target[2])/100
                             elif ship[15] == 4:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             else:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             if not target[10][0]:
                                 avg_degats /= 10000
                                 avg_degats_without_mod /= 10000
@@ -210,7 +210,9 @@ class Command(BaseCommand):
                 if not counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['mod_damage']:
                     counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['mod_damage'] = ship[14]
             print('running fight')
+            rounds = {}
             while r<50:
+                rounds[r] = {}
                 #if r%100 == 0:
                 print('round',str(r),str(time.time()))
                 targets = 0
@@ -288,6 +290,10 @@ class Command(BaseCommand):
                                 if not target[2] in counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'].keys():
                                     counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]] = 0
                                 counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]] += 1
+                                rounds[r][str(ship[0])+':'+str(ship[1])+':'+str(ship[2])] = {
+                                  'target':target[2],
+                                  'killed':counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]]
+                                }
                                 #print('avant destruction')
                                 #print(len(possible_targets_stats[ship_key][prioritary_target_key]['back_link']))
                                 #print(len(possible_targets[ship[0]]))

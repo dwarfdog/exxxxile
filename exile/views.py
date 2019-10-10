@@ -11390,15 +11390,15 @@ def help(request):
                                 degats_without_mod = target[3] + target[4]/target[11]*100
                             avg_degats = degats * chance_to_hit
                             if ship[15] == 1:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             elif ship[15] == 2:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             elif ship[15] == 3:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit * 0.9**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit * 0.9**tech_diff + (ship[2] - target[2])/100
                             elif ship[15] == 4:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             else:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit #* 0.85**tech_diff
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             if not target[10][0]:
                                 avg_degats /= 10000
                                 avg_degats_without_mod /= 10000
@@ -11416,7 +11416,6 @@ def help(request):
                 for k in possible_targets_order[ship_key]:
                     listOfStr.extend(k[2])
                 possible_targets[ship_key] = { i : listOfStr[i] for i in range(0, len(listOfStr) ) }
-            print(possible_targets_order)
             lines = {}
             for sh,pt in possible_targets.items():
                 ind = int(sh.split(':')[2])
