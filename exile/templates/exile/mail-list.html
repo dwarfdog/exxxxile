@@ -99,7 +99,7 @@ document.onkeydown = keydown;
 				</td>
 				<td valign="top">
 				<div class="subject">
-				{{ p.date|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} | {{ p.subject|escape }}{% if p.money %} | Somme reçue : <img src="{PATH_IMAGES}/interface/credits.gif" title="Crédits" class="icon" width=16 height=16> {{ p.moneyamount }}{% endif %} {% if p.to_admins %}(Aux administrateurs){% endif %}{% if p.to_alliance %}(À l'alliance){% endif %}</div>
+				{{ p.date|timezone:"Europe/Paris"|date:"d/m/Y H:i:s" }} | {{ p.subject|escape }}{% if p.money %} | Somme reçue : <img src="{% static 'exile/assets/interface/credits.gif' %}" title="Crédits" class="icon" width=16 height=16> {{ p.moneyamount }}{% endif %} {% if p.to_admins %}(Aux administrateurs){% endif %}{% if p.to_alliance %}(À l'alliance){% endif %}</div>
 				<div class="body{% if p.from_admin %}{% endif %}">{% if p.html %}{{ p.body|safe }}{% endif %}{% if p.bodybb %}{{ p.body|bbcode|safe }}{% endif %}</div>
 				<hr/><a href="?a=reply&mailid={{ p.mailid }}" title="Répondre à {{ p.from }}">Répondre</a>
 				</td>
