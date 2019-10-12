@@ -675,7 +675,7 @@ div#hint{
 	position:absolute;
 	z-index:100;
 	background: transparent;
-	width:200px;
+	width:auto !important;
 	visibility: hidden;
 }
 
