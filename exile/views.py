@@ -11304,7 +11304,7 @@ def help(request):
         elif cat == "targeting":
             oFleets = []
             for ship in retrieveFullShipsCache():
-                if not ship['buildable']:
+                if not ship['buildable'] and ship['id']!=605:
                     continue
                 if not ship['weapon_ammo']:
                     continue
