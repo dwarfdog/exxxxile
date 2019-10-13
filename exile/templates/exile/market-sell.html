@@ -68,44 +68,44 @@
 	<input type="hidden" name="rel" value="1">
 
 	<table class="default" width="750">
-		<tr class="title"><td colspan="3">Vente de ressources</td></tr>
+		<tr class="title"><td colspan="3" nowrap>Vente de ressources</td></tr>
 		<tr class="header"><td>Planète</td><td>Ressources</td><td width=100>Total</td></tr>
 		{% for i,pla in planet.items %}
 		<tr valign="middle" class="item{% if pla.highlight %}highlight{% endif %}">
 			<td nowrap>
 				<table cellpadding="0" cellspacing="0" class="clear">
 				<tr>
-					<td rowspan="3"><img src="{% static 'exile/assets/planets/p' %}{{ pla.planet_img }}.gif" class="smallplanet" width="64" height="64"></td>
+					<td rowspan="3" nowrap><img src="{% static 'exile/assets/planets/p' %}{{ pla.planet_img }}.gif" class="smallplanet" width="64" height="64"></td>
 					<td nowrap colspan="2"><b><a href="{% url 'exile:planet' %}?planet={{ pla.planet_id }}">{{ pla.planet_name }}</a> <a href="{% url 'exile:map' %}?g={{ pla.g }}&s={{ pla.s }}&p={{ pla.p }}">({{ pla.g }}.{{ pla.s }}.{{ pla.p }})</a></b></td>
 				</tr>
-				<tr><td><img src="{% static 'exile/assets/interface/ore.gif' %}" title="Minerai" width="16" height="16"></td><td align="left" nowrap>{% if pla.high_ore_capacity %}<span class="high2">{% endif %}{{ pla.planet_ore }} / {{ pla.planet_ore_capacity }}{% if pla.high_ore_capacity %}</span>{% endif %} (<span class=prod>+{{ pla.planet_ore_production }}</span>)</td></tr>
-				<tr><td><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width="16" height="16"></td><td align="left" nowrap>{% if pla.high_hydrocarbon_capacity %}<span class="high2">{% endif %}{{ pla.planet_hydrocarbon }} / {{ pla.planet_hydrocarbon_capacity }}{% if pla.high_hydrocarbon_capacity %}</span>{% endif %} (<span class=prod>+{{ pla.planet_hydrocarbon_production }}</span>)</td></tr>
+				<tr><td nowrap><img src="{% static 'exile/assets/interface/ore.gif' %}" title="Minerai" width="16" height="16"></td><td align="left" nowrap>{% if pla.high_ore_capacity %}<span class="high2">{% endif %}{{ pla.planet_ore }} / {{ pla.planet_ore_capacity }}{% if pla.high_ore_capacity %}</span>{% endif %} (<span class=prod>+{{ pla.planet_ore_production }}</span>)</td></tr>
+				<tr><td nowrap><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width="16" height="16"></td><td align="left" nowrap>{% if pla.high_hydrocarbon_capacity %}<span class="high2">{% endif %}{{ pla.planet_hydrocarbon }} / {{ pla.planet_hydrocarbon_capacity }}{% if pla.high_hydrocarbon_capacity %}</span>{% endif %} (<span class=prod>+{{ pla.planet_hydrocarbon_production }}</span>)</td></tr>
 				</table>
 			</td>
-			<td>
+			<td nowrap>
 				<table cellpadding=0 cellspacing=2 class="clear" width="100%">
 				<tr>
-					<td width="16"><img src="{% static 'exile/assets/interface/ore.gif' %}" title="Minerai" width="16" height="16"></td>
+					<td width="16" nowrap><img src="{% static 'exile/assets/interface/ore.gif' %}" title="Minerai" width="16" height="16"></td>
 					<td width="1%" nowrap><input type="text" id="o{{ pla.planet_id }}" name="o{{ pla.planet_id }}" value="{{ pla.ore }}" onkeyup="updateprice({{ pla.planet_id }})" size="3" maxlength="4"> x1000 (<img src="{% static 'exile/assets/interface/credits.gif' %}" class="icon" title="Credits" width="16" height="16"> {{ pla.ore_price }})</td>
-					<td align="left"><a href="javascript:setval('o{{ pla.planet_id }}', {{ pla.ore_max }}); updateprice({{ pla.planet_id }})">Max</a></td>
-					<td><a href="javascript:setval('o{{ pla.planet_id }}', 0); setval('h{{ pla.planet_id }}', 0); updateprice({{ pla.planet_id }})">Rien</a></td>
+					<td align="left" nowrap><a href="javascript:setval('o{{ pla.planet_id }}', {{ pla.ore_max }}); updateprice({{ pla.planet_id }})">Max</a></td>
+					<td nowrap><a href="javascript:setval('o{{ pla.planet_id }}', 0); setval('h{{ pla.planet_id }}', 0); updateprice({{ pla.planet_id }})">Rien</a></td>
 				</tr>
 				<tr>
-					<td width="16"><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width="16" height="16"></td>
+					<td width="16" nowrap><img src="{% static 'exile/assets/interface/hydrocarbon.gif' %}" title="Hydrocarbure" width="16" height="16"></td>
 					<td width="1%" nowrap><input type="text" id="h{{ pla.planet_id }}" name="h{{ pla.planet_id }}" value="{{ pla.hydrocarbon }}" onkeyup="updateprice({{ pla.planet_id }})" size="3" maxlength="4"> x1000 (<img src="{% static 'exile/assets/interface/credits.gif' %}" class="icon" title="Credits" width="16" height="16"> {{ pla.hydrocarbon_price }})</td>
-					<td align="left"><a href="javascript:setval('h{{ pla.planet_id }}', {{ pla.hydrocarbon_max }}); updateprice({{ pla.planet_id }})">Max</a></td>
-					<td><a href="javascript:setval('o{{ pla.planet_id }}', {{ pla.ore_max }}); setval('h{{ pla.planet_id }}', {{ pla.hydrocarbon_max }}); updateprice({{ pla.planet_id }})">Tout</a></td>
+					<td align="left" nowrap><a href="javascript:setval('h{{ pla.planet_id }}', {{ pla.hydrocarbon_max }}); updateprice({{ pla.planet_id }})">Max</a></td>
+					<td nowrap><a href="javascript:setval('o{{ pla.planet_id }}', {{ pla.ore_max }}); setval('h{{ pla.planet_id }}', {{ pla.hydrocarbon_max }}); updateprice({{ pla.planet_id }})">Tout</a></td>
 				</tr>
 				</table>
 			</td>
-			<td align="right"><img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" title="Credits" width="16" height="16"><span id="totalprice{{ pla.planet_id }}">{{ pla.selling_price }}</span></td>
+			<td align="right" nowrap><img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" title="Credits" width="16" height="16"><span id="totalprice{{ pla.planet_id }}">{{ pla.selling_price }}</span></td>
 		</tr>
 		{% endfor %}
 		{% if totalprice %}
-			<tr><td colspan="2" align="right">Total</td><td align=right><img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" title="Credits" width="16" height="16"><span id="total">0</span></td></tr>
+			<tr><td colspan="2" align="right" nowrap>Total</td><td align=right nowrap><img src="{% static 'exile/assets/interface/credits.gif' %}" class="res" title="Credits" width="16" height="16"><span id="total">0</span></td></tr>
 		{% endif %}
 		{% if sell %}
-			<tr><td colspan="3" align="center"><input type="submit" value="Vendre"></td></tr>
+			<tr><td colspan="3" align="center" nowrap><input type="submit" value="Vendre"></td></tr>
 		{% endif %}
 	</table>
 </form>
