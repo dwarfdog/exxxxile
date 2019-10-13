@@ -682,7 +682,9 @@ div#hint{
 	position:absolute;
 	z-index:100;
 	background: transparent;
-	width:300px !important;
+	width:auto !important;
+	min-width: 200px !important;
+	max-width: 450px !important;
 	visibility: hidden;
 }
 
