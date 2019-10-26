@@ -185,7 +185,7 @@ tiptext = $("hinttext");
 	{% endif %}
 	{% for key,sen in sendreceive.sent.items %}
 	<tr class="smallitem">
-		<td align="center" nowrap><input type="checkbox" class="checkbox" name="enabled_{{ sen.planetid }}" value="1" {% if sen.enabled %}checked="checked"{% endif %}><script>putplanet({{ sen.planetid }},'{{ sen.name }}',{{ sen.g }},{{ sen.s }},{{ sen.p }},{{ sen.rel });</script></td>
+		<td align="center" nowrap><input type="checkbox" class="checkbox" name="enabled_{{ sen.planetid }}" value="1" {% if sen.enabled %}checked="checked"{% endif %}><script>putplanet({{ sen.planetid }},'{{ sen.name }}',{{ sen.g }},{{ sen.s }},{{ sen.p }},{{ sen.rel }});</script></td>
 		<td align="center"><input type="text" name="energy_{{ sen.planetid }}" value="{{ sen.energy }}" maxlength="6" size="6"></td>
 		<td align="center">{{ sen.effective_energy }} (perte: {{ sen.loss }}%) <a href="?cat={{ cat }}&a=cancel&to={{ sen.planetid }}">retirer</a></td>
 	</tr>
