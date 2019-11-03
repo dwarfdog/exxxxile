@@ -1647,7 +1647,7 @@ def commanders(request):
                             "p": re[10],
                             "commandment": re[11],
                         }
-                    for i in range(15,26):
+                    for i in range(14,26):
                         if re[i] != 1:
                             commander['bonus']['description'][i] = round((re[i]-1)*100)
                     if re[26] and re[28]:
