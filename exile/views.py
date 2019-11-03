@@ -3246,7 +3246,7 @@ def fleetshandler(request):
                     if re[39]:
                         cursor.execute('SELECT action' +
                             ' FROM routes_waypoints' +
-                            ' WHERE ownerid=%s AND id=%s', [gcontext['exile_user'].id],re[39])
+                            ' WHERE ownerid=%s AND id=%s', [gcontext['exile_user'].id,re[39]])
                         re2 = cursor.fetchone()
                         if re:
                             fleet['next_action'] = re[0]
