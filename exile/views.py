@@ -3155,7 +3155,7 @@ def fleetshandler(request):
                 ' recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action,' + # 32 33 34
                 '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %(UserId)s)) AS from_radarstrength, ' + # 35
                 '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %(UserId)s)) AS to_radarstrength,' + # 36
-                ' categoryid, shared' + # 37 38
+                ' categoryid, shared, next_waypointid' + # 37 38 39
                 ' FROM vw_fleets as f WHERE ownerid = %(UserId)s', {'UserId': gcontext['exile_user'].id})
             res = cursor.fetchall()
             gcontext['list'] = {'fleet': {}}
@@ -3242,6 +3242,14 @@ def fleetshandler(request):
                     fleet['resource'][4]['res_quantity'] = re[30]
                     fleet['resource'][5]['res_id'] = 5
                     fleet['resource'][5]['res_quantity'] = re[31]
+                    fleet['next_action'] = -1
+                    if re[39]:
+                        cursor.execute('SELECT action' +
+                            ' FROM routes_waypoints' +
+                            ' WHERE ownerid=%s AND id=%s', [gcontext['exile_user'].id],re[39])
+                        re2 = cursor.fetchone()
+                        if re:
+                            fleet['next_action'] = re[0]
                     gcontext['list']['fleet'][re[0]] = fleet.copy()
     global config
     gcontext = request.session.get('gcontext',{})

@@ -55,7 +55,7 @@ function Ship(id, quantity) {
 	this.quantity = quantity;
 }
 
-function Fleet(id, name, category, stance, size, signature, cargoload, cargocapacity, action, timeremaining, commandername, position, destination, ships, resources, shared) {
+function Fleet(id, name, category, stance, size, signature, cargoload, cargocapacity, action, timeremaining, commandername, position, destination, ships, resources, shared, next_action) {
 	this.id = id;
 	this.name = name;
 	this.category = category;
@@ -72,6 +72,7 @@ function Fleet(id, name, category, stance, size, signature, cargoload, cargocapa
 	this.ships = ships;
 	this.resources = resources;
 	this.shared = shared;
+	this.next_action = next_action;
 
 	this.remainingTime = function(){
 		return Math.max(0, Math.ceil((this.endtime - new Date().getTime())/1000));
@@ -274,7 +275,15 @@ function displayFleetList(list) {
 			break;
 			case '1':
 				var c = startCountdown('fleetcountdown' + fleet.id, fleet.remainingTime(), null, '<a href="{% url 'exile:fleets' %}?id=' + fleet.id + '">Arrivé</a>', counterFinished, 'La flotte '+fleet.name+' est arrivée à '+fleet.destination.name+' ('+fleet.destination.g+'.'+fleet.destination.s+'.'+fleet.destination.p+')',"/static/exile/assets/reports/400.jpg");
-				z+= '<span class="state_moving">En transit vers ' + fleet.destination + ' - (' + c + ')';
+				if(fleet.next_action==-1){
+					z+= '<span class="state_moving">En transit vers ' + fleet.destination + ' - (' + c + ')';
+				}else if(fleet.next_action==0){
+					z+= '<span class="state_moving">En décharge vers ' + fleet.destination + ' - (' + c + ')';
+				}else if(fleet.next_action==2){
+					z+= '<span class="state_moving">En recyclage vers ' + fleet.destination + ' - (' + c + ')';
+				}else{
+					z+= '<span class="state_moving">En transit vers ' + fleet.destination + ' - (' + c + ')';
+				}
 			break;
 			case '2':
 				var c = startCountdown('fleetcountdown' + fleet.id, fleet.remainingTime(), null, '<a href="{% url 'exile:fleets' %}?id=' + fleet.id + '">Cycle terminé</a>', counterFinished);
@@ -587,7 +596,7 @@ displayCategory(activeCategory);
 					new Planet({{ fleet.t_planetid }},'{{ fleet.t_planetname }}',{{ fleet.t_relation }},"{{ fleet.t_g }}","{{ fleet.t_s }}","{{ fleet.t_p }}"),
 					new Array(0{% for key, ship in fleet.ship.items %},new Ship('{{ ship.ship_label }}',{{ ship.ship_quantity }}){% endfor %}),
 					new Array(0{% for key, resource in fleet.resource.items %},new Resource({{ resource.res_id }},{{ resource.res_quantity }}){% endfor %}),
-					{% if fleet.shared %}true{% else %}false{% endif %})
+					{% if fleet.shared %}true{% else %}false{% endif %},{{ fleet.next_action }})
 		);
 	{% endfor %}
 	displayCategory(activeCategory);
