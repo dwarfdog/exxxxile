@@ -1399,7 +1399,7 @@ def overview(request):
             'COALESCE(f.remaining_time, 0), COALESCE(f.total_time-f.remaining_time, 0), ' +
             '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = users.id)) AS from_radarstrength, ' +
             '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = users.id)) AS to_radarstrength, ' +
-            'attackonsight,f.shared' +
+            'attackonsight,f.shared,f.next_waypointid' +
             ' FROM users, vw_fleets f ' +
             ' WHERE users.id=%s AND (action = 1 OR action = -1) AND (ownerid=%s OR (destplanetid IS NOT NULL AND destplanetid IN (SELECT id FROM nav_planet WHERE ownerid=%s)))' +
             ' ORDER BY COALESCE(remaining_time, 0)', [gcontext['exile_user'].id, gcontext['exile_user'].id, gcontext['exile_user'].id])
@@ -1443,6 +1443,7 @@ def overview(request):
                             fleet['movingfrom'] = True
                         else:
                             fleet['movingfrom'] = False
+                fleet['next_action'] = -1
                 if parseFleet:
                     if re[4] == config.rSelf:
                         fleet['id'] = re[0]
@@ -1455,6 +1456,13 @@ def overview(request):
                             fleet['shared'] = True
                         else:
                             fleet['shared'] = False
+                        if re[27]:
+                            cursor.execute('SELECT action' +
+                                ' FROM routes_waypoints' +
+                                ' WHERE id=%s', [re[27]])
+                            re2 = cursor.fetchone()
+                            if re2:
+                                fleet['next_action'] = re2[0]
                     elif re[4] == config.rAlliance:
                         fleet['id'] = re[3]
                         fleet['name'] = re[5]
@@ -1462,6 +1470,13 @@ def overview(request):
                             fleet['ally'] = 'attack'
                         else:
                             fleet['ally'] = 'defend'
+                        if re[27]:
+                            cursor.execute('SELECT action' +
+                                ' FROM routes_waypoints' +
+                                ' WHERE id=%s', [re[27]])
+                            re2 = cursor.fetchone()
+                            if re2:
+                                fleet['next_action'] = re2[0]
                     elif re[4] == config.rFriend:
                         fleet['id'] = re[3]
                         fleet['name'] = re[5]
@@ -1469,6 +1484,13 @@ def overview(request):
                             fleet['friend'] = 'attack'
                         else:
                             fleet['friend'] = 'defend'
+                        if re[27]:
+                            cursor.execute('SELECT action' +
+                                ' FROM routes_waypoints' +
+                                ' WHERE id=%s', [re[27]])
+                            re2 = cursor.fetchone()
+                            if re2:
+                                fleet['next_action'] = re2[0]
                     else:
                         fleet['id'] = re[3]
                         fleet['name'] = re[5]
