@@ -3248,8 +3248,8 @@ def fleetshandler(request):
                             ' FROM routes_waypoints' +
                             ' WHERE id=%s', [re[39]])
                         re2 = cursor.fetchone()
-                        if re:
-                            fleet['next_action'] = re[0]
+                        if re2:
+                            fleet['next_action'] = re2[0]
                     gcontext['list']['fleet'][re[0]] = fleet.copy()
     global config
     gcontext = request.session.get('gcontext',{})
