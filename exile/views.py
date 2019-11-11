@@ -1182,8 +1182,8 @@ def gameover(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT int4(count(1)) FROM nav_planet WHERE ownerid=%s", [gcontext['exile_user'].id])
         row = cursor.fetchone()
-        if row:
-            return HttpResponseRedirect(reverse('exile:index'))
+        #if row:
+        #    return HttpResponseRedirect(reverse('exile:index'))
         planets = row[0]
         # retreive player username and number of resets
         cursor.execute("SELECT login, resets, credits_bankruptcy, int4(score_research) FROM users WHERE id=%s", [gcontext['exile_user'].id])
