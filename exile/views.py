@@ -1233,7 +1233,7 @@ def gameover(request):
                         reset_error = row[0]
             elif action == "abandon":
                 cursor.execute("UPDATE users SET deletion_date=now() WHERE id=%s", [gcontext['exile_user'].id])
-            return HttpResponseRedirect(reverse('exile:index'))
+                return HttpResponseRedirect(reverse('exile:index'))
         # display Game Over page
         gcontext["login"] = username
         if changeNameError:
