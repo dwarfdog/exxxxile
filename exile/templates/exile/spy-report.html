@@ -83,7 +83,7 @@ function putlevel(level,levels){
 
 	<table width="800" class="default">
 	<tr class="header">
-	<td align="center">Flotte</td><td align="center">Taille</td><td align="center">Signature</td><td align="center">Localisation</td><td align="center">Destination</td>
+	<td align="center">Flotte</td><td align="center">Taille</td><td align="center">Signature</td><td align="center">Localisation</td><td align="center">Destination</td>{% if fleets.spy_3 %}<td align="right">Composition</td>{% endif %}
 	</tr>
 	{% for key,fl in fleets.fleet.items %}
 		<tr>
@@ -92,6 +92,13 @@ function putlevel(level,levels){
 			<td>{{ fl.signature }}</td>
 			<td>{{ fl.location }}</td>
 			<td>{% if fl.destination %}{{ fl.destination }}{% endif %}{% if fl.nodest %}-{% endif %}</td>
+			{% if fleets.spy_3 %}
+				<td>
+					{% for k,sh in fl.ship.items %}
+						{{ sh.quantity }} x {{ sh.label }}<br/>
+					{% endfor %}
+				</td>
+			{% endif %}
 		</tr>
 	{% endfor %}
 	</table>

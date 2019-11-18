@@ -9701,7 +9701,7 @@ def spyreport(request):
         print(gcontext['nation'])
     def DisplayFleets(request,id):
         if gcontext['level'] > 1:
-            cursor.execute(" SELECT fleet_name, galaxy, sector, planet, signature, size, dest_galaxy, dest_sector, dest_planet " +
+            cursor.execute(" SELECT fleet_name, galaxy, sector, planet, signature, size, dest_galaxy, dest_sector, dest_planet, fleet_id " +
                     " FROM spy_fleet " +
                     " WHERE spy_id=%s" +
                     " ORDER BY galaxy, sector, planet, fleet_name", [id])
@@ -9731,6 +9731,17 @@ def spyreport(request):
             else:
                 fleet["nosize"] = True
                 fleet["nodest"] = True
+            if gcontext['level'] in [3,13]:
+                ships = []
+                cursor.execute("SELECT id,quantity from fleet_ships WHERE fleetid = %s ORDER BY id", [re[9]])
+                res2 = cursor.fetchall()
+                for re2 in res2:
+                    ship = {
+                        'label': getShipLabel(re2[0]),
+                        'quantity': re2[1],
+                    }
+                    ships[re2[0]] = ship.copy()
+                fleet['ship'] = ships.copy()
             gcontext['fleets']['fleet'][nbfleet] = fleet.copy()
             nbfleet += 1
         gcontext["fleets"]["date"] = gcontext['spydate']
