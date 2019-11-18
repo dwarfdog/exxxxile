@@ -9733,7 +9733,7 @@ def spyreport(request):
                 fleet["nodest"] = True
             if gcontext['level'] in [3,13]:
                 ships = []
-                cursor.execute("SELECT id,quantity from fleet_ships WHERE fleetid = %s ORDER BY id", [re[9]])
+                cursor.execute("SELECT id,quantity from fleets_ships WHERE fleetid = %s ORDER BY id", [re[9]])
                 res2 = cursor.fetchall()
                 for re2 in res2:
                     ship = {
