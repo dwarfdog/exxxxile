@@ -246,7 +246,7 @@ class Command(BaseCommand):
                         for singleshot in range(shot[0]):
                             #if not len(possible_targets[ship_key]):
                             #    continue
-                            #print(ship_key,'SHOOT')
+                            print(ship_key,'SHOOT')
                             targetk = 0
                             ttk = 0
                             for deg,tks in possible_targets[ship_key].items():
@@ -266,11 +266,11 @@ class Command(BaseCommand):
                                         if ind not in tks.keys():
                                             continue
                                         tk = tks[ind]
-                                        #print(tk)
-                                        #if tk in ship_stack.keys():
-                                        #    print('len stack',len(ship_stack[tk]))
-                                        #else:
-                                        #    print('len stack 0')
+                                        print(tk)
+                                        if tk in ship_stack.keys():
+                                            print('len stack',len(ship_stack[tk]))
+                                        else:
+                                            print('len stack 0')
                                         if tk in ship_stack.keys() and len(ship_stack[tk]) > 0:
                                             targetk = ship_stack[tk][ list(ship_stack[tk].keys())[-1] ]
                                             ttk = tk
