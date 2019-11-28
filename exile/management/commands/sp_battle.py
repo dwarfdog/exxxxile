@@ -246,7 +246,7 @@ class Command(BaseCommand):
                         for singleshot in range(shot[0]):
                             #if not len(possible_targets[ship_key]):
                             #    continue
-                            targetk = 0
+                            targetk = -1
                             ttk = 0
                             for deg,tks in possible_targets[ship_key].items():
                                 while True:
@@ -273,19 +273,22 @@ class Command(BaseCommand):
                                         if tk in ship_stack.keys() and len(ship_stack[tk]) > 0:
                                             targetk = ship_stack[tk][ list(ship_stack[tk].keys())[-1] ]
                                             ttk = tk
+                                            print('target',targetk)
                                         else:
                                             if tk in ship_stack.keys() and len(ship_stack[tk]) == 0:
                                                 del ship_stack[tk]
+                                                print('del stack',tk)
                                             del possible_targets[ship_key][deg][ind]
+                                            print('del possible_targets',ship_key,deg,ind)
                                         break
-                                    if targetk == 0:
+                                    if targetk == -1:
                                         if len(possible_targets[ship_key][deg]) == 0:
                                             break
                                     else:
                                         break
-                                if targetk != 0:
+                                if targetk != -1:
                                     break
-                            if targetk == 0:
+                            if targetk == -1:
                                 continue
                             #pship_key = ship_key+'|'+str(ship[16])
                             #target = False
