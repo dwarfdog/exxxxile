@@ -141,6 +141,7 @@ class Command(BaseCommand):
                             degats = shot[0]*(shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100)
                             #degats_without_mod = shot[0]*(shot[2]*(min(100,100-target[6]))/100 + shot[3]*(min(100,100-target[7]))/100 + shot[4]*(min(100,100-target[8]))/100 + shot[5]*(min(100,100-target[9]))/100)
                             degats_without_mod = degats
+                            degats /= shot[0]
                             if degats > target[3] + target[4]:
                                 degats = target[3] + target[4]
                             if degats_without_mod > target[3] + target[4]/target[11]*100:
@@ -182,38 +183,6 @@ class Command(BaseCommand):
                         pto[k[1]] = {}
                     pto[k[1]][len(pto[k[1]])] = k[0]
                 possible_targets[ship_key] = pto.copy()
-                    #for kk in k[2]:
-                    #    pto[k[1]].append(kk)
-                #print(pto)
-                #for k in pto.keys():
-                #    random.shuffle(pto[k])
-                #print(pto)
-                #listOfStr = []
-                #possible_targets[ship_key] = []
-                #for k in pto.keys():
-                #    possible_targets[ship_key].extend(ship_stack[pto[k]])
-                    #listOfStr.extend(pto[k])
-                #for k in possible_targets_order[ship_key]:
-                #    listOfStr.extend(k[2])
-                #possible_targets[ship_key] = { i : listOfStr[i] for i in range(0, len(listOfStr) ) }
-                #print(len(possible_targets[ship_key]))
-                #possible_targets[ship[0]] = [k for k,x in enumerate(ships) if x[0] in players[ship[0]]['enemies']]#list(filter(lambda x: x[0] in players[ship[0]]['enemies'], ships))
-                #for k,pt in possible_targets[ship_key].items():
-                #    if pt not in reverse_possible_targets.keys():
-                #        reverse_possible_targets[pt] = {}
-                #    if ship_key not in reverse_possible_targets[pt].keys():
-                #        reverse_possible_targets[pt][ship_key] = []
-                #    reverse_possible_targets[pt][ship_key].append(k)
-                    # TODO
-                    # shuffle(possible_targets) then sort them by possible_targets_stats[ship_key][target_key]['avg_degats']
-                    # QUESTION: this is an targeting optimization, how can a ship know others ships mods, from ship type ok but from other mods sources ?
-                    # Maybe degats base should be = shot[2] + shot[3] + shot[4] + shot[5] to simulate this lack of knowledge
-                    # it suppose to compute the real degats too, for algo optimization (like now)
-                    #
-                    # le ciblage est trop gourmand en temps
-                    #
-            #for r in range(Rounds):
-            #print(possible_targets_stats)
             r = 0
             for ship in ships:
                 counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['before'] += 1
@@ -230,22 +199,15 @@ class Command(BaseCommand):
             rounds = {}
             while r<50:
                 rounds[r] = {}
-                #if r%100 == 0:
                 print('round',r+1,str(r),str(time.time()))
                 targets = 0
-                #cpt = 0
                 for ship in ships:
-                    #cpt += 1
-                    #if cpt %(len(ships)/100) == 0:
-                    #    print('.')
                     if not ship:
                         continue
                     shot = ship[10]
                     if shot[0]: # ship can shot
                         ship_key = str(ship[0])+':'+str(ship[1])+':'+str(ship[2])
                         for singleshot in range(shot[0]):
-                            #if not len(possible_targets[ship_key]):
-                            #    continue
                             targetk = -1
                             ttk = 0
                             for deg,tks in possible_targets[ship_key].items():
@@ -260,26 +222,16 @@ class Command(BaseCommand):
                                     else:
                                         break
                                     for ind in keys:
-                                        #print('control',ind)
-                                        #print('control',tks)
                                         if ind not in tks.keys():
                                             continue
                                         tk = tks[ind]
-                                        #print(ship_key,'SHOOT',tk)
-                                        #if tk in ship_stack.keys():
-                                        #    print('len stack',len(ship_stack[tk]))
-                                        #else:
-                                        #    print('len stack 0')
                                         if tk in ship_stack.keys() and len(ship_stack[tk]) > 0:
                                             targetk = ship_stack[tk][ list(ship_stack[tk].keys())[-1] ]
                                             ttk = tk
-                                            #print('target',targetk)
                                         else:
                                             if tk in ship_stack.keys() and len(ship_stack[tk]) == 0:
                                                 del ship_stack[tk]
-                                                #print('del stack',tk)
                                             del possible_targets[ship_key][deg][ind]
-                                            #print('del possible_targets',ship_key,deg,ind)
                                         break
                                     if targetk == -1:
                                         if len(possible_targets[ship_key][deg]) == 0:
@@ -290,45 +242,16 @@ class Command(BaseCommand):
                                     break
                             if targetk == -1:
                                 continue
-                            #pship_key = ship_key+'|'+str(ship[16])
-                            #target = False
-                            #if pship_key in selected_targets.keys():
-                            #    #target_index = False
-                            #    #prioritary_target_avg_degats = True
-                            #    targetk = selected_targets[pship_key]
-                            #if not target:
-                            #    len_possible_targets = len(possible_targets[ship[0]])
-                            #    if not len_possible_targets:
-                            #        continue
-                            #    #prioritary_target_key = False
-                            #    #prioritary_target_avg_degats = 0
-                            #    #for k,p_target in possible_targets_stats[ship_key].items():
-                            #    #    if p_target['avg_degats'] > prioritary_target_avg_degats and len(p_target['back_link']):
-                            #    #        prioritary_target_key = k
-                            #    #        prioritary_target_avg_degats = p_target['avg_degats']
-                            #    #        len_possible_targets = len(p_target['back_link'])
-                            #
-                            #    # on tente d'accélérer en targetant le premier de la pile plutot que random
-                            #    target_index = ind_tar % len_possible_targets
-                            #    #target_index = random.randint(0,len_possible_targets-1)
-                            #
-                            #    #if prioritary_target_avg_degats:
-                            #    #    targetk = possible_targets_stats[ship_key][prioritary_target_key]['back_link'][target_index]
-                            #    #    target = ships[targetk]
-                            #    #else: # bizarre mais bon au cas ou
-                            #    targetk = possible_targets[ship[0]][target_index]
-                            #targetk = possible_targets[ship_key][ list(possible_targets[ship_key].keys())[0] ]
-                            #print('targetpos is',targetk)
                             target = ships[targetk]
-                            #print(target)
-                            #ind_tar += 1
                             targets += 1
                             target_key = str(target[0])+':'+str(target[1])+':'+str(target[2])
                             #selected_targets[pship_key] = targetk
                             chance_to_hit = possible_targets_stats[ship_key][target_key]['chance_to_hit']
                             if chance_to_hit < 1 and random.random() > chance_to_hit:
                                 continue
-                            degats = possible_targets_stats[ship_key][target_key]['degats']/shot[0]
+                            degats = possible_targets_stats[ship_key][target_key]['degats']
+                            if degats < 0:
+                                degats = 0
                             counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['damages'] += degats
                             if degats > target[4]:
                                 degats -= target[4]
@@ -337,16 +260,6 @@ class Command(BaseCommand):
                             else:
                                 target[4] -= degats
                                 continue
-                            #if target[4] > 0:
-                            #    shield = target[4]
-                            #    deg = degats
-                            #    degats -= shield
-                            #    target[4] -= deg
-                            #if target[4] > 0:
-                            #    counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['damages'] += deg
-                            #    continue
-                            #target[3] -= degats
-                            #counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['damages'] += degats
                             if target[3] <= 0:
                                 if not target[2] in counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'].keys():
                                     counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]] = 0
@@ -355,70 +268,12 @@ class Command(BaseCommand):
                                   'target':target[2],
                                   'killed':counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['killed'][target[2]]
                                 }
-                                #print('avant destruction')
-                                #print(len(possible_targets_stats[ship_key][prioritary_target_key]['back_link']))
-                                #print(len(possible_targets[ship[0]]))
-                                #print(len([x for x in ships if x]))
-                                #print('targetk '+str(targetk)+' destroyed')
 
                                 ships[targetk] = False
-                                #print('destroy',ttk)
-                                #print('before',len(ship_stack[ttk].keys()))
                                 if len(ship_stack[ttk].keys()) == 1:
-                                    #print('del ship_stack[',ttk,']')
                                     del ship_stack[ttk]
                                 else:
-                                    #print('del',list(ship_stack[ttk].keys())[-1])
                                     del ship_stack[ttk][ list(ship_stack[ttk].keys())[-1] ]
-                                #if ttk in ship_stack.keys():
-                                #    print('after',len(ship_stack[ttk].keys()))
-                                #else:
-                                #    print('after 0')
-                                #print('killed',targetk)
-                                #for sh,k in reverse_possible_targets[targetk].items():
-                                    #print('del in',sh)
-                                    #for kk in k:
-                                        #del possible_targets[sh][kk]
-                                #del target
-                                #del selected_targets[pship_key]
-                                #if prioritary_target_avg_degats:
-                                #for k1,t in possible_targets_stats.items():
-                                #    for k2,p_target in t.items():
-                                #        try:
-                                #            #print('possible_targets_stats['+str(k1)+']['+str(k2)+']')
-                                #            #print(possible_targets_stats[k1][k2]['back_link'])
-                                #            del possible_targets_stats[k1][k2]['back_link'][ possible_targets_stats[k1][k2]['back_link'].index(targetk) ]
-                                #            #print('del in possible_targets_stats['+str(k1)+']['+str(k2)+'][\'back_link\']')
-                                #        except (KeyError,Exception):
-                                #            pass
-                                #del possible_targets_stats[ship_key][prioritary_target_key]['back_link'][ possible_targets_stats[ship_key][prioritary_target_key]['back_link'].index(targetk) ]
-                                #for k,t in enumerate(possible_targets_stats[ship_key][prioritary_target_key]['back_link']):
-                                #    if t == targetk:
-                                #        del possible_targets_stats[ship_key][prioritary_target_key]['back_link'][k]
-                                #        break
-                                #for k1,t1 in possible_targets.items():
-                                #    indices = [i for i, x in enumerate(t1) if x == targetk]
-                                #    for indice in indices:
-                                #        try:
-                                #            del possible_targets[k1][ indice ]
-                                #        except (KeyError,Exception):
-                                #            pass
-                                #del possible_targets[ship[0]][ possible_targets[ship[0]].index(targetk) ]
-                                #for k,t in enumerate(possible_targets[ship[0]]):
-                                #    if t == targetk:
-                                #        del possible_targets[ship[0]][k]
-                                #        break
-                                #else:
-                                #    del possible_targets[ship[0]][target_index]
-                                #print('apres destruction')
-                                #print(len(possible_targets_stats[ship_key][prioritary_target_key]['back_link']))
-                                #print(len(possible_targets[ship[0]]))
-                                #print(len([x for x in ships if x]))
-                                #exit()
-                #for ship in ships:
-                #    if ship[4] > 0:
-                #        ship[4] = ship[4] + (counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['shield']-ship[4])/2 # les shields se rechargent de la moitié de leurs pertes si ils n'ont pas été détruits
-                #print(counter)
                 if not targets: # battle finished ?!
                     r -= 1
                     break
