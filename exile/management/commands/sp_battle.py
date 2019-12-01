@@ -231,7 +231,7 @@ class Command(BaseCommand):
             while r<50:
                 rounds[r] = {}
                 #if r%100 == 0:
-                print('round',str(r),str(time.time()))
+                print('round',r+1,str(r),str(time.time()))
                 targets = 0
                 #cpt = 0
                 for ship in ships:
@@ -265,21 +265,21 @@ class Command(BaseCommand):
                                         if ind not in tks.keys():
                                             continue
                                         tk = tks[ind]
-                                        print(ship_key,'SHOOT',tk)
-                                        if tk in ship_stack.keys():
-                                            print('len stack',len(ship_stack[tk]))
-                                        else:
-                                            print('len stack 0')
+                                        #print(ship_key,'SHOOT',tk)
+                                        #if tk in ship_stack.keys():
+                                        #    print('len stack',len(ship_stack[tk]))
+                                        #else:
+                                        #    print('len stack 0')
                                         if tk in ship_stack.keys() and len(ship_stack[tk]) > 0:
                                             targetk = ship_stack[tk][ list(ship_stack[tk].keys())[-1] ]
                                             ttk = tk
-                                            print('target',targetk)
+                                            #print('target',targetk)
                                         else:
                                             if tk in ship_stack.keys() and len(ship_stack[tk]) == 0:
                                                 del ship_stack[tk]
-                                                print('del stack',tk)
+                                                #print('del stack',tk)
                                             del possible_targets[ship_key][deg][ind]
-                                            print('del possible_targets',ship_key,deg,ind)
+                                            #print('del possible_targets',ship_key,deg,ind)
                                         break
                                     if targetk == -1:
                                         if len(possible_targets[ship_key][deg]) == 0:
@@ -328,7 +328,7 @@ class Command(BaseCommand):
                             chance_to_hit = possible_targets_stats[ship_key][target_key]['chance_to_hit']
                             if chance_to_hit < 1 and random.random() > chance_to_hit:
                                 continue
-                            degats = possible_targets_stats[ship_key][target_key]['degats']
+                            degats = possible_targets_stats[ship_key][target_key]['degats']/shot[0]
                             counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['damages'] += degats
                             if degats > target[4]:
                                 degats -= target[4]
@@ -418,6 +418,7 @@ class Command(BaseCommand):
                 #for ship in ships:
                 #    if ship[4] > 0:
                 #        ship[4] = ship[4] + (counter[str(ship[0])+':'+str(ship[1])+':'+str(ship[2])]['shield']-ship[4])/2 # les shields se rechargent de la moitié de leurs pertes si ils n'ont pas été détruits
+                #print(counter)
                 if not targets: # battle finished ?!
                     r -= 1
                     break
