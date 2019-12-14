@@ -7731,6 +7731,7 @@ def production(request):
                             break
                     manage['buildings'][re[0]] = building.copy()
             gcontext['manage'] = manage
+    @transaction.atomic
     def displayReceiveSendEnergy(action):
         with connection.cursor() as cursor:
             cursor.execute('SELECT energy_receive_antennas, energy_send_antennas FROM nav_planet WHERE id=%s', [gcontext['CurrentPlanet']])
@@ -7769,8 +7770,11 @@ def production(request):
                         else:
                             query += "enabled=false"
                     if query != "":
-                        cursor.execute('UPDATE planet_energy_transfer SET ' + query + ' WHERE planetid=%s AND target_planetid=%s', [gcontext['CurrentPlanet'], re[0]])
-                        update_planet = True
+                        try:
+                            cursor.execute('UPDATE planet_energy_transfer SET ' + query + ' WHERE planetid=%s AND target_planetid=%s', [gcontext['CurrentPlanet'], re[0]])
+                            update_planet = True
+                        except (KeyError,Exception):
+                            transaction.set_rollback(True)
                 to_g = request.POST.getlist("to_g",'0')
                 to_s = request.POST.getlist("to_s",'0')
                 to_p = request.POST.getlist("to_p",'0')
@@ -7794,8 +7798,11 @@ def production(request):
                         except(KeyError,Exception):
                             continue
                         if g != 0 and s != 0 and p != 0 and energy > 0:
-                            cursor.execute('INSERT INTO planet_energy_transfer(planetid, target_planetid, energy) VALUES(%s, sp_planet(%s, %s, %s), %s)', [gcontext['CurrentPlanet'], g, s, p, energy])
-                            update_planet = True
+                            try:
+                                cursor.execute('INSERT INTO planet_energy_transfer(planetid, target_planetid, energy) VALUES(%s, sp_planet(%s, %s, %s), %s)', [gcontext['CurrentPlanet'], g, s, p, energy])
+                                update_planet = True
+                            except (KeyError,Exception):
+                                transaction.set_rollback(True)
             if update_planet:
                 try:
                     cursor.execute('SELECT sp_update_planet(%s)', [gcontext['CurrentPlanet']])
@@ -11462,7 +11469,16 @@ def help(request):
                 ind = int(sh.split(':')[2])
                 lines[getShipLabel(ind)] = []
                 for k,tar in pt.items():
-                    lines[getShipLabel(ind)].append(getShipLabel(ships[tar][2]))
+                    deg = 0
+                    for k in possible_targets_order[sh]:
+                        ind2 = int(k[0].split(':')[2])
+                        if ships[tar][2]==ind2:
+                            deg = max(0,round(k[1],2))
+                            if deg:
+                                nbrnd = round((ships[tar][3]+ships[tar][4])/deg,2)
+                            else:
+                                nbrnd = 'inf'
+                    lines[getShipLabel(ind)].append((getShipLabel(ships[tar][2]),deg,nbrnd))
             gcontext['lines'] = lines
         gcontext['tabnav'] = {'cat': cat}
     gcontext = request.session.get('gcontext',{})
