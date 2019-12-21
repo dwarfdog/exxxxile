@@ -7348,7 +7348,7 @@ def rankingplayers(request):
         if reversed:
             orderby = orderby + " DESC"
         orderby += ", upper(login)"
-        orderby = 'score_visibility desc,' + orderby
+        orderby = 'CASE WHEN score_visibility=0 THEN score_visibility desc END,' + orderby
         gcontext["sort_column"] = col
         # get the score of the tenth user to only show the avatars of the first 10 players
         with connection.cursor() as cursor:
