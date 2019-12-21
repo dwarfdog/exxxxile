@@ -7332,7 +7332,7 @@ def rankingplayers(request):
         if col < 1 or col > 4:
             col = 3
         if col == 1:
-            orderby = "CASE WHEN score_visibility=2 OR v.id=%(user_id)s THEN upper(login) ELSE '' END, upper(login)"
+            orderby = "CASE WHEN score_visibility=2 OR v.id=%(user_id)s THEN upper(login) ELSE '' END"
         elif col == 2:
             orderby = "upper(alliances.name)"
         elif col == 3:
