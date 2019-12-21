@@ -7487,6 +7487,10 @@ def rankingplayers(request):
                 else:
                     gcontext["player"][i] = player.copy()
                 i += 1
+            tmp = {}
+            for i in sorted(gcontext["player"].keys()) :
+                tmp[i] = gcontext["player"][i]
+            gcontext["player"] = tmp
     gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'ranking_players'
     #if gcontext['exile_user'].privilege < 100:
