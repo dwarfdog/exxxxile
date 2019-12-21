@@ -7332,7 +7332,7 @@ def rankingplayers(request):
         if col < 1 or col > 4:
             col = 3
         if col == 1:
-            orderby = "CASE WHEN score_visibility=2 OR v.id=%(user_id)s THEN upper(login) ELSE '' END"
+            orderby = "CASE WHEN score_visibility=2 OR v.id=%(user_id)s THEN upper(login) ELSE '' END, upper(login)"
         elif col == 2:
             orderby = "upper(alliances.name)"
         elif col == 3:
@@ -7348,7 +7348,7 @@ def rankingplayers(request):
         if reversed:
             orderby = orderby + " DESC"
         orderby += ", upper(login)"
-        orderby = 'CASE WHEN score_visibility=0 THEN score_visibility ELSE '+ orderby +' END,' + orderby
+        orderby = 'CASE WHEN score_visibility=0 THEN score_visibility END,' + orderby
         gcontext["sort_column"] = col
         # get the score of the tenth user to only show the avatars of the first 10 players
         with connection.cursor() as cursor:
