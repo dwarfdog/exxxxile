@@ -11437,6 +11437,7 @@ def help(request):
                             degats = shot[0]*(shot[2]*(100-target[6])/100 + shot[3]*(100-target[7])/100 + shot[4]*(100-target[8])/100 + shot[5]*(100-target[9])/100)
                             #degats_without_mod = shot[0]*(shot[2]*(min(100,100-target[6]))/100 + shot[3]*(min(100,100-target[7]))/100 + shot[4]*(min(100,100-target[8]))/100 + shot[5]*(min(100,100-target[9]))/100)
                             degats_without_mod = degats
+                            degats /= shot[0]
                             if target[3] + target[4]:
                                 if degats > target[3] + target[4]:
                                     degats = target[3] + target[4]
@@ -11450,7 +11451,7 @@ def help(request):
                             elif ship[15] == 2:
                                 avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             elif ship[15] == 3:
-                                avg_degats_without_mod = degats_without_mod * chance_to_hit * 0.9**tech_diff + (ship[2] - target[2])/100
+                                avg_degats_without_mod = degats_without_mod * chance_to_hit * 0.85**tech_diff + (ship[2] - target[2])/100
                             elif ship[15] == 4:
                                 avg_degats_without_mod = degats_without_mod * chance_to_hit + (ship[2] - target[2])/100
                             else:
@@ -11458,6 +11459,10 @@ def help(request):
                             if not target[10][0]:
                                 avg_degats /= 10000
                                 avg_degats_without_mod /= 10000
+                            if avg_degats < 0:
+                                avg_degats = 0.01
+                            if avg_degats_without_mod < 0:
+                                avg_degats_without_mod = 0.01
                             possible_targets_stats[ship_key][target_key] = {
                                 'degats':degats,
                                 'avg_degats':avg_degats,
