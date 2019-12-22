@@ -525,7 +525,7 @@
 							<td style="padding: 10px 6px;border:1px solid #444;font-weight:bold;">{{ sh }}</td>
 							<td>&nbsp;</td>
 							{% for target in line %}
-								<td style="padding: 10px 6px;border:1px solid #444;text-shadow: 1px 1px 2px #444;">{{ target }}</td>
+								<td style="padding: 10px 6px;border:1px solid #444;text-shadow: 1px 1px 2px #444;">{{ target.0 }}{% if iszurg %}<br/><br/>dégats : <em style="color:red">{{ target.1 }}</em><br/>nb tir pour détruire :<br/>{{ target.2 }}{% endif %}</td>
 							{% endfor %}
 						</tr>
 					{% endfor %}

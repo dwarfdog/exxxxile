@@ -6876,7 +6876,7 @@ def map(request):
             re =cursor.fetchone()
             radarstrength = re[0]
             if gcontext['iszurg'] and not radarstrength:
-                radarstrength = 1
+                radarstrength = 20
             if not gcontext['exile_user'].alliance_id:
                 aid = -1
             else:
