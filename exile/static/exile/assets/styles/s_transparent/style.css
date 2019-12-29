@@ -593,7 +593,7 @@ ul.vtabs a { display: block; text-decoration: none; padding: 4px 30px 4px 4px; }
 #mapuniverseview .galtext { position:relative; margin-top:-15px; }
 
 #mapgalaxy { visibility: hidden; display:none; }
-#mapgalaxyview { width:410px; }
+#mapgalaxyview { width:420px; }
 #mapgalaxyview div.sector {
 	position:relative; float:left;
 	background:#000; border:solid 1px #222;
