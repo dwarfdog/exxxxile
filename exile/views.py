@@ -861,7 +861,7 @@ def logged(function):
 #               gcontext["creditswarning"]["days"] = True
         isImpersonating = False
         if isImpersonating:
-            gcontext["impersonating"] = True
+            gcontext["impersonating"] = {}
             gcontext["impersonating"]["login"] = gcontext['exile_user'].login
         # Assign number of logged players
         with connection.cursor() as cursor:
@@ -874,12 +874,12 @@ def logged(function):
                 cursor.execute("SELECT start_time, min_end_time, end_time FROM users_holidays WHERE userid=%s", [gcontext['exile_user'].id])
                 row = cursor.fetchone()
                 if row:
-                    gcontext["onholidays"] = True
+                    gcontext["onholidays"] = {}
                     gcontext["onholidays"]["start_datetime"] = row[0]
                     gcontext["onholidays"]["min_end_datetime"] = row[1]
                     gcontext["onholidays"]["end_datetime"] = row[2]
             if gcontext['exile_user'].privilege == -1:
-                gcontext["banned"] = True
+                gcontext["banned"] = {}
                 gcontext["banned"]["ban_datetime"] = gcontext['exile_user'].ban_datetime
                 gcontext["banned"]["ban_reason"] = gcontext['exile_user'].ban_reason
                 gcontext["banned"]["ban_reason_public"] = gcontext['exile_user'].ban_reason_public
