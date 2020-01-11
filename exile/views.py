@@ -212,7 +212,7 @@ def checkVWPlanetListCache(request, force=False):
     if force or not request.session.get("vwplanetlist", {}):
         # retrieve Research info
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied, ceiling(ore/1000), ore/ore_capacity*100, ceiling(hydrocarbon/1000), hydrocarbon/hydrocarbon_capacity*100 FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
+            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied, ceiling(ore::decimal/1000), ceiling(ore::decimal/ore_capacity*100), ceiling(hydrocarbon::decimal/1000), ceiling(hydrocarbon::decimal/hydrocarbon_capacity*100) FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
             res = cursor.fetchall()
             if res:
                 tmp = []
