@@ -1120,6 +1120,7 @@ def holidays(request):
             return HttpResponseRedirect(reverse('exile:index'))
         # if remaining time is negative, return to overview page
         if row[2] <= 0:
+            cursor.execute("SELECT sp_stop_holidays(%s)", [gcontext['exile_user'].id])
             return HttpResponseRedirect(reverse('exile:index'))
         gcontext["login"] = row[0]
         gcontext["remaining_time"] = row[2]
