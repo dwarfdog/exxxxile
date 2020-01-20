@@ -7703,7 +7703,7 @@ def production(request):
                     ' WHERE can_be_disabled AND planetid=%s', [gcontext['CurrentPlanet']])
                 res = cursor.fetchall()
                 for re in res:
-                    quantity = re[1] - int(request.POST.get('enabled' + str(re[0])), request.GET.get('enabled' + str(re[0]), '0'))
+                    quantity = re[1] - int(request.POST.get('enabled' + str(re[0]), request.GET.get('enabled' + str(re[0]), '0')))
                     cursor.execute('UPDATE planet_buildings SET ' +
                         ' disabled=LEAST(quantity - CASE WHEN destroy_datetime IS NULL THEN 0 ELSE 1 END, %s) ' +
                         ' WHERE planetid=%s AND buildingid = %s', [quantity, gcontext['CurrentPlanet'], re[0]])
