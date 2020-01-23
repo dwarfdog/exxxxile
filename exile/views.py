@@ -3315,7 +3315,7 @@ def fleetshandler(request):
                     gcontext['category'] = True
         elif isValidName(name):
             with connection.cursor() as cursor:
-                cursor.execute('SELECT sp_fleets_categories_rename(%s, %s, %s)")', [gcontext['exile_user'].id, catid, name])
+                cursor.execute('SELECT sp_fleets_categories_rename(%s, %s, %s)', [gcontext['exile_user'].id, catid, name])
                 res = cursor.fetchone()
                 if res:
                     gcontext['id'] = catid
