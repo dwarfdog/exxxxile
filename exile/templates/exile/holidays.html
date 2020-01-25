@@ -44,7 +44,7 @@
 				{% endif %}
 				{% if cant_unlock %}
 					Temps restant avant déblocage: <script type="text/javascript">putcountdown1({{ remaining_time_before_unlock }},"", "");</script><br/>
-					<script type="text/javascript">putcountdown2({{ remaining_time_before_unlock }},"", "<br/><form method='post' action='?'>{% csrf_token|escapejs %}<input onclick='return alertAbort()' type='submit' name='unlock' value='Débloquer'></form>");</script>
+					<script type="text/javascript">putcountdown2({{ remaining_time_before_unlock }},"", "<br/><form method='post' action='?'>{{ csrf_token|escapejs }}<input onclick='return alertAbort()' type='submit' name='unlock' value='Débloquer'></form>");</script>
 				{% endif %}
 				</div>
 

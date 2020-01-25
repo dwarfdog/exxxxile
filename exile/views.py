@@ -888,16 +888,16 @@ def logged(function):
                     gcontext["banned"]["ban_expire_datetime"] = gcontext['exile_user'].ban_expire
         if IsPlayerAccount(request):
             # Redirect to locked page
-            if gcontext['exile_user'].privilege == -1:
+            if gcontext['exile_user'].privilege == -1 and request.path!=reverse('exile:locked'):
                 return HttpResponseRedirect(reverse('exile:locked'))
             # Redirect to holidays page
-            if gcontext['exile_user'].privilege == -2:
+            if gcontext['exile_user'].privilege == -2 and request.path!=reverse('exile:holidays'):
                 return HttpResponseRedirect(reverse('exile:holidays'))
             # Redirect to wait page
-            if gcontext['exile_user'].privilege == -3:
+            if gcontext['exile_user'].privilege == -3 and request.path!=reverse('exile:wait'):
                 return HttpResponseRedirect(reverse('exile:wait'))
             # Redirect to game-over page
-            if gcontext['exile_user'].credits_bankruptcy <= 0:
+            if gcontext['exile_user'].credits_bankruptcy <= 0 and request.path!=reverse('exile:gameover'):
                 return HttpResponseRedirect(reverse('exile:gameover'))
         gcontext['hasRight'] = None
         if gcontext['exile_user'].alliance_id:
@@ -982,15 +982,15 @@ def connect(request):
     request.session['sPrivilege'] = res[2]
     request.session['sUser'] = res[0]
     request.session['sLogonUserID'] = res[0]
-    if res[2] < 100 and res[3] == 0:
+    if res[2] < 100 and res[3] == 0 and request.path!=reverse('exile:start'):
         response = HttpResponseRedirect(reverse('exile:start'))
-    elif res[2] == -3:
+    elif res[2] == -3 and request.path!=reverse('exile:wait'):
         response = HttpResponseRedirect(reverse('exile:wait'))
-    elif res[2] == -100:
+    elif res[2] == -100 and request.path!=reverse('exile:logout'):
         response = HttpResponseRedirect(reverse('exile:logout'))
-    elif res[2] == -2:
+    elif res[2] == -2 and request.path!=reverse('exile:holidays'):
         response = HttpResponseRedirect(reverse('exile:holidays'))
-    else:
+    elif request.path!=reverse('exile:overview'):
         response = HttpResponseRedirect(reverse('exile:overview'))
     #response.set_cookies('id',browserid)
     return response
