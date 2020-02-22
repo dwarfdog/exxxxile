@@ -1496,6 +1496,9 @@ def overview(request):
                         fleet['id'] = re[3]
                         fleet['name'] = re[5]
                         fleet['hostile'] = True
+                else:
+                    if re[3] > 100:
+                        continue;
                 fleets[re[0]] = fleet.copy()
             return fleets
 
