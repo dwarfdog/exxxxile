@@ -10082,7 +10082,7 @@ def chat(request):
             cursor.execute("SELECT chat_lines.id, datetime, allianceid, chat_lines.login, message, avatar_url" +
                 " FROM chat_lines" +
                 " LEFT JOIN users ON users.login=chat_lines.login"
-                " WHERE chatid=%s AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid=%s ORDER BY datetime DESC OFFSET 100 LIMIT 1), %s)" +
+                " WHERE chatid=%s AND chat_lines.id > GREATEST((SELECT id FROM chat_lines WHERE chatid=%s ORDER BY datetime DESC OFFSET 500 LIMIT 1), %s)" +
                 " ORDER BY chat_lines.id", [chatid, chatid, lastmsgid])
             res = cursor.fetchall()
             if not res and not refresh_userlist:
