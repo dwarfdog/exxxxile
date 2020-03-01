@@ -9719,6 +9719,7 @@ def spyreport(request):
             gcontext["nation"]["spotted"] = True
         print(gcontext['nation'])
     def DisplayFleets(request,id):
+        return false
         if gcontext['level'] > 1:
             cursor.execute(" SELECT fleet_name, galaxy, sector, planet, signature, size, dest_galaxy, dest_sector, dest_planet, fleet_id " +
                     " FROM spy_fleet " +
@@ -10414,6 +10415,7 @@ def mercenaryintelligence(request):
 
     # Retrieve info about a nation's fleets
     def SpyFleets(request,level):
+        return False
         typ = 2
         nation = request.POST.get("nation_name","")
         with connection.cursor() as cursor:
