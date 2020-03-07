@@ -6360,6 +6360,28 @@ def alliancecreate(request):
 
 @construct
 @logged
+def allianceresas(request):
+    gcontext = request.session.get('gcontext',{})
+    gcontext['selectedmenu'] = 'alliance_resas'
+    context = gcontext
+    gcontext['menu'] = menu(request)
+    t = loader.get_template('exile/alliance-resas.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
+def alliancemanageresas(request):
+    gcontext = request.session.get('gcontext',{})
+    gcontext['selectedmenu'] = 'alliance_manageresas'
+    context = gcontext
+    gcontext['menu'] = menu(request)
+    t = loader.get_template('exile/alliance-manageresas.html')
+    context['content'] = t.render(gcontext, request)
+    return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
 def radars(request):
     def displayRadar(planetid, planame, radarstrength, galaxy, sector):
         with connection.cursor() as cursor:
@@ -12031,3 +12053,12 @@ def stats(request):
     t = loader.get_template('exile/helpstatistics.html')
     context['content'] = t.render(gcontext, request)
     return render(request, 'exile/layout.html', context)
+
+@construct
+@logged
+def refreshcounter(request):
+    global config
+    gcontext = request.session.get('gcontext',{})
+    print(gcontext)
+    context = gcontext
+    return render(request, 'exile/refreshcounter.html', context)

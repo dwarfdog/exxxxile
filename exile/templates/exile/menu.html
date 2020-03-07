@@ -115,6 +115,10 @@ function setReportsCount(nb)
 		o.innerHTML = '';
 }
 
+function refreshCounter(){
+	openURL("{% url 'exile:refreshcounter' %}", evalResponse);
+}
+
 setSelectedMenu('{{ selectedmenu }}');
 </script>
 
@@ -166,7 +170,10 @@ putMenu("{% url 'exile:research' %}","research","Recherche",2);
 		{% if show_alliance.show_reports %}
 			putMenu("{% url 'exile:alliancereports' %}","alliance_reports","Rapports",3);
 		{% endif %}
-		putMenu("{% url 'exile:allianceinvitations' %}","alliance_invitations","Invitations",3);
+		putMenu("{% url 'exile:allianceresas' %}","alliance_resas","Résas Pla",3);
+		{% if show_alliance.show_management %}
+			putMenu("{% url 'exile:alliancemanageresas' %}","alliance_manageresas","Gestion résas",3);
+		{% endif %}
 {% else %}
 	putMenu("{% url 'exile:alliance' %}","alliance","Alliance",2);
 		putMenu("{% url 'exile:alliancecreate' %}","noalliance_create","Création",3);
@@ -269,4 +276,6 @@ putMenu("","","",0);
 {% if new_report %}
 	setReportsCount({{ new_report }});
 {% endif %}
+
+setInterval(refreshCounter,30000);
 </script>

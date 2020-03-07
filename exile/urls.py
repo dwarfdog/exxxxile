@@ -44,6 +44,8 @@ urlpatterns = [
     path('alliance-invitations', views.allianceinvitations, name='allianceinvitations'),
     path('alliance-create', views.alliancecreate, name='alliancecreate'),
     path('alliance', views.alliance, name='alliance'),
+    path('allianceresas', views.allianceresas, name='allianceresas'),
+    path('alliancemanageresas', views.alliancemanageresas, name='alliancemanageresas'),
     path('map', views.map, name='map'),
     path('heatmap', views.heatmap, name='heatmap'),
     path('ranking-alliances', views.rankingalliances, name='rankingalliances'),
@@ -79,4 +81,5 @@ urlpatterns = [
     path('statistics', views.stats, name='statistics'),
     path('options', views.options, name='options'),
     path('logout', views.logout, name='logout'),
+    path('refreshcounter', views.refreshcounter, name='refreshcounter'),
 ]
