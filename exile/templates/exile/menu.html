@@ -115,6 +115,10 @@ function setReportsCount(nb)
 		o.innerHTML = '';
 }
 
+function refreshCounter(){
+	openURL("{% url 'exile:refreshcounter' %}", evalResponse);
+}
+
 setSelectedMenu('{{ selectedmenu }}');
 </script>
 
@@ -131,7 +135,7 @@ putMenu("{% url 'exile:fleets' %}","fleets_fleets","Flottes",3);
 putMenu("{% url 'exile:fleetsorbiting' %}","fleets_orbiting","Flottes en orbite",3);
 putMenu("{% url 'exile:fleetsstandby' %}","fleets_standby","Vaisseaux au sol",3);
 putMenu("{% url 'exile:fleetsshipsstats' %}","fleets_ships_stats","Détruits / perdus",3);
-putMenu("{% url 'exile:fleetsroutes' %}","fleets_routes","Routes ",3);
+//putMenu("{% url 'exile:fleetsroutes' %}","fleets_routes","Routes ",3);
 
 putMenu("{% url 'exile:planets' %}","planets","Planètes",2);
 putMenu("{% url 'exile:radars' %}","radars","Radars",2);
@@ -166,7 +170,10 @@ putMenu("{% url 'exile:research' %}","research","Recherche",2);
 		{% if show_alliance.show_reports %}
 			putMenu("{% url 'exile:alliancereports' %}","alliance_reports","Rapports",3);
 		{% endif %}
-		putMenu("{% url 'exile:allianceinvitations' %}","alliance_invitations","Invitations",3);
+		putMenu("{% url 'exile:allianceresas' %}","alliance_resas","Résas Pla",3);
+		{% if show_alliance.show_management %}
+			putMenu("{% url 'exile:alliancemanageresas' %}","alliance_manageresas","Gestion résas",3);
+		{% endif %}
 {% else %}
 	putMenu("{% url 'exile:alliance' %}","alliance","Alliance",2);
 		putMenu("{% url 'exile:alliancecreate' %}","noalliance_create","Création",3);
@@ -220,7 +227,8 @@ putMenu("{% url 'exile:mails' %}?a=ignorelist","mails_ignorelist","Nations ignor
 
 putMenu("{% url 'exile:reports' %}","reports","Rapports <span id=reportscount></span>",2);
 putMenu("{% url 'exile:chat' %}","chat","Chat",2);
-putMenu("https://discord.gg/{% settings_value 'DISCORD' %}","Discord","Discord",2);
+putMenu("https://discord.gg/{% settings_value 'DISCORD' %}","Discord","Discord",2,false,true);
+putMenu("https://forum.exxxxile.ovh","forum","Forum",2,false,true);
 putMenu("{% url 'exile:notes' %}","notes","Notes",2);
 
 {% if comment %}<!-- mercenary services -->{% endif %}
@@ -269,4 +277,6 @@ putMenu("","","",0);
 {% if new_report %}
 	setReportsCount({{ new_report }});
 {% endif %}
+
+setInterval(refreshCounter,30000);
 </script>
