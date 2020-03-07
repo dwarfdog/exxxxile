@@ -105,7 +105,7 @@ function setTravelTime(seconds)
 	}
 	else
 	{
-		var s = formattime(seconds);
+		var s = formattime(seconds)+', arrivé le '+new Date(new Date().getTime()+seconds*1000).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
 		if(traveltime_obj.innerHTML != s) traveltime_obj.innerHTML = s;
 
 	{% if dev %}
