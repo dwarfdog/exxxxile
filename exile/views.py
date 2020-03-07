@@ -12059,6 +12059,5 @@ def stats(request):
 def refreshcounter(request):
     global config
     gcontext = request.session.get('gcontext',{})
-    print(gcontext)
     context = gcontext
     return render(request, 'exile/refreshcounter.html', context)
