@@ -29,10 +29,10 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedTitle
 				if(this.endContent != '')
 					this.obj.innerHTML = this.endContent;
 				else{
-					if(even)
+					//if(even)
 						this.obj.innerHTML = formatRemainingTime(0);
-					else
-						this.obj.innerHTML = new Date(s2).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+					//else
+					//	this.obj.innerHTML = new Date(s2).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
 					even = !even;
 				}
 
@@ -52,10 +52,10 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedTitle
 				return false;
 			} else
 			if(s > 0 && (this.display == null) && timers_enabled){
-					if(even)
+					//if(even)
 						this.obj.innerHTML = formatRemainingTime(s);
-					else
-						this.obj.innerHTML = new Date(s2).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+					//else
+					//	this.obj.innerHTML = new Date(s2).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
 					even = !even;
 			}
 			return true;
@@ -85,7 +85,7 @@ function updateCounters(){
 			if(!counters[x].update()) counters[x] = null;
 	}
 
-	window.setTimeout("updateCounters()", 3000);
+	window.setTimeout("updateCounters()", 1000);
 }
 
 updateCounters();
