@@ -85,7 +85,7 @@ function updateCounters(){
 			if(!counters[x].update()) counters[x] = null;
 	}
 
-	window.setTimeout("updateCounters()", 1000);
+	window.setTimeout("updateCounters()", 3000);
 }
 
 updateCounters();
