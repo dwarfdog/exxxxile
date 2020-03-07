@@ -13,6 +13,7 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedTitle
 	// return remaining time in seconds
 	this.remainingTime = function(){ return Math.ceil((this.endTime - new Date().getTime())/1000); };
 
+	var even = false;
 	// update counter
 	this.update = function(){
 		// init the object, return false if could not find the element after 20 seconds
@@ -22,12 +23,18 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedTitle
 
 		try{
 			var s = this.remainingTime();
+			var s2 = this.endTime;
 
 			if(s <= 0){
 				if(this.endContent != '')
 					this.obj.innerHTML = this.endContent;
-				else
-					this.obj.innerHTML = formatRemainingTime(0);
+				else{
+					if(even)
+						this.obj.innerHTML = formatRemainingTime(0);
+					else
+						this.obj.innerHTML = new Date(s2).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+					even = !even;
+				}
 
 				if(this.onFinishedTitle){
 					if(this.onFinishedIcon){
@@ -44,9 +51,13 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedTitle
 
 				return false;
 			} else
-			if(s > 0 && (this.display == null) && timers_enabled)
-				this.obj.innerHTML = formatRemainingTime(s);
-
+			if(s > 0 && (this.display == null) && timers_enabled){
+					if(even)
+						this.obj.innerHTML = formatRemainingTime(s);
+					else
+						this.obj.innerHTML = new Date(s2).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+					even = !even;
+			}
 			return true;
 		}catch(e){
 			return false;
@@ -55,6 +66,7 @@ function Counter(name, seconds, display, endContent, onFinished, onFinishedTitle
 
 	this.toString = function(){
 		var s = this.remainingTime();
+		var s2 = this.endTime;
 		var toDisplay = this.display;
 		if(!toDisplay) toDisplay = (s<=0 && this.endContent != '')?this.endContent:formatRemainingTime(s);
 		return '<span id="' + this.name + '">' + toDisplay + '</span>';
