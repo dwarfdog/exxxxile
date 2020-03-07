@@ -1,5 +1,5 @@
 {% load static %}
-<div class="card {% if planet.11 > 90 and planet.14 > 10 %}warning{% elif planet.13 > 90 and planet.14 > 10 %}warning{% endif %} {% if CurrentPlanet == planet.0 %}current{% endif %}" onclick="document.location.href='{{ plaurl }}?planet={{ planet.0 }}';" style="position:relative;">
+<div class="card {% if planet.11 > 90 and planet.14 > 10 %}warning{% elif planet.13 > 90 and planet.15 > 10 %}warning{% endif %} {% if CurrentPlanet == planet.0 %}current{% endif %}" onclick="document.location.href='{{ plaurl }}?planet={{ planet.0 }}';" style="position:relative;">
   <div class="infos">
     <img src="{% static 'exile/assets/planets/p' %}{{ planet.14 }}.gif" alt="Planet" class="pla">
     {% if planet.5 %} <img style="position: absolute;top:8px;left:6px;" src="{% static 'exile/assets/interface/commander.gif' %}" class="smallicon" width=16 height=16 title="Commandant">{% endif %}
