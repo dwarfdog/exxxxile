@@ -172,7 +172,7 @@ tiptext = $("hinttext");
 	<tr class="smallitem"><td class="error" colspan="3">Impossible de recevoir quand de l'énergie est envoyée.</td></tr>
 	{% endif %}
 	{% for key,rec in sendreceive.received.items %}
-	<tr class="smallitem"><td align="center" nowrap><script>putplanet({{ rec.planetid }},'{{ rec.name }}',{{ g }},{{ s }},{{ p }},{{ rel }});</script></td><td align="center">{{ rec.energy }}</td><td align="center">{{ rec.effective_energy }} (perte: {{ rec.loss }}%) <a href="?cat={{ cat }}&a=cancel&from={{ rec.planetid }}">rompre</a></td></tr>
+	<tr class="smallitem"><td align="center" nowrap><script>putplanet({{ rec.planetid }},'{{ rec.name }}',{{ rec.g }},{{ rec.s }},{{ rec.p }},{{ rec.rel }});</script></td><td align="center">{{ rec.energy }}</td><td align="center">{{ rec.effective_energy }} (perte: {{ rec.loss }}%) <a href="?cat={{ cat }}&a=cancel&from={{ rec.planetid }}">rompre</a></td></tr>
 	{% endfor %}
 	<tr class="clear"><td colspan="3">&nbsp;</td></tr>
 	<tr class="title"><td colspan="3">Energie envoyée ({{ sendreceive.antennas_send_used }}/{{ sendreceive.antennas_send_total }})</td></tr>
