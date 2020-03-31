@@ -21,6 +21,8 @@ from exile.models import *
 
 config = apps.get_app_config('exile')
 
+trucbidon = True
+
 def retrieveAllianceChat(id,force=False):
     if force or not cache.get('alliances_chat') or not id in cache.get('alliances_chat').keys():
         with connection.cursor() as cursor:
@@ -212,7 +214,7 @@ def checkVWPlanetListCache(request, force=False):
     if force or not request.session.get("vwplanetlist", {}):
         # retrieve Research info
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied, ceiling(ore::decimal/1000), ceiling(ore::decimal/ore_capacity*100), ceiling(hydrocarbon::decimal/1000), ceiling(hydrocarbon::decimal/hydrocarbon_capacity*100) FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
+            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied, ceiling(ore::decimal/1000), ceiling(ore::decimal/ore_capacity*100), ceiling(hydrocarbon::decimal/1000), ceiling(hydrocarbon::decimal/hydrocarbon_capacity*100), ceiling(ore_production::decimal/1000), ceiling(hydrocarbon_production::decimal/1000) FROM vw_planets WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
             res = cursor.fetchall()
             if res:
                 tmp = []
@@ -229,7 +231,7 @@ def checkPlanetListCache(request, force=False):
     if force or not request.session.get("planetlist", {}):
         # retrieve Research info
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied, ceiling(ore/1000), ore/ore_capacity*100, ceiling(hydrocarbon/1000), hydrocarbon/hydrocarbon_capacity*100 FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
+            cursor.execute('SELECT id, name, galaxy, sector, planet, commanderid, floor, floor_occupied, space, space_occupied, ceiling(ore/1000), ore/ore_capacity*100, ceiling(hydrocarbon/1000), hydrocarbon/hydrocarbon_capacity*100, ore_production/1000, hydrocarbon_production/1000 FROM nav_planet WHERE planet_floor > 0 AND planet_space > 0 AND ownerid=%s ORDER BY id', [gcontext['exile_user'].id])
             res = cursor.fetchall()
             if res:
                 tmp = []
@@ -897,8 +899,9 @@ def logged(function):
             if gcontext['exile_user'].privilege == -3 and request.path!=reverse('exile:wait'):
                 return HttpResponseRedirect(reverse('exile:wait'))
             # Redirect to game-over page
-            if gcontext['exile_user'].credits_bankruptcy <= 0 and request.path!=reverse('exile:gameover'):
-                return HttpResponseRedirect(reverse('exile:gameover'))
+            if gcontext['exile_user'].credits_bankruptcy <= 0 or not gcontext['planet_list']:
+                if request.path!=reverse('exile:gameover'):
+                    return HttpResponseRedirect(reverse('exile:gameover'))
         gcontext['hasRight'] = None
         if gcontext['exile_user'].alliance_id:
             with connection.cursor() as cursor:
@@ -2160,7 +2163,16 @@ def fleetsplit(request):
             return HttpResponseRedirect(reverse('exile:fleet')+"?id="+str(newfleetid))
     def ExecuteOrder(fleetid):
         if request.POST.get("split","") == "1":
-            return SplitFleet(fleetid)
+            try:
+                repeat = int(request.POST.get("repeat","1"))
+            except (KeyError, Exception):
+                repeat = 0
+            if repeat == 1:
+                return SplitFleet(fleetid)
+            else:
+                for k in range(repeat):
+                    if not SplitFleet(fleetid):
+                        break
     gcontext = request.session.get('gcontext',{})
     gcontext['selectedmenu'] = 'fleets'
     gcontext['e_no_error'] = 0

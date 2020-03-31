@@ -1,7 +1,7 @@
 {% load static %}
-<div class="card {% if planet.11 > 90 and planet.14 > 10 %}warning{% elif planet.13 > 90 and planet.15 > 10 %}warning{% endif %} {% if CurrentPlanet == planet.0 %}current{% endif %}" onclick="document.location.href='{{ plaurl }}?planet={{ planet.0 }}';" style="position:relative;">
+<div data-ore="{{planet.14}}" data-hydro="{{planet.15}}" class="card {% if planet.11 > 90 and planet.14 > 10 %}warning{% elif planet.13 > 90 and planet.15 > 10 %}warning{% endif %} {% if CurrentPlanet == planet.0 %}current{% endif %}" onclick="document.location.href='{{ plaurl }}?planet={{ planet.0 }}';" style="position:relative;">
   <div class="infos">
-    <img src="{% static 'exile/assets/planets/p' %}{{ planet.14 }}.gif" alt="Planet" class="pla">
+    <img src="{% static 'exile/assets/planets/p' %}{{ planet.16 }}.gif" alt="Planet" class="pla">
     {% if planet.5 %} <img style="position: absolute;top:8px;left:6px;" src="{% static 'exile/assets/interface/commander.gif' %}" class="smallicon" width=16 height=16 title="Commandant">{% endif %}
     <p style="position: absolute;top:62px;left:-6px;font-size:0.9em;">{{ planet.2 }}.{{ planet.3 }}.{{ planet.4 }}</p>
     {{ planet.7 }}/{{ planet.6 }}&nbsp;<img src="{% static 'exile/assets/interface/floor.gif' %}" title="Terrain" width=16 height=16 style="vertical-align: middle;"><br/>

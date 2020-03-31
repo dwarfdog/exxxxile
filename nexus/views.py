@@ -130,7 +130,8 @@ def register(request):
                 error = register_disabled
         if error == '':
             try:
-                validate_email(email)
+                pass
+                #validate_email(email)
             except (KeyError, ValidationError):
                 error = email_invalid
             else:
