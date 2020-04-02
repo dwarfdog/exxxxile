@@ -6575,10 +6575,13 @@ def radars(request):
             ' WHERE ownerid=%(UserID)s' +
             ' ORDER BY id', {'UserID': gcontext['exile_user'].id,})
         res = cursor.fetchall()
+        radars = {}
         for re in res:
             # Display fleets movements according to player radar strength
             if re[2] > 0:
-                displayRadar(re[0], re[1], re[2], re[3], re[4])
+                if str(re[3])+'_'+str(re[4]) not in radars:
+                    displayRadar(re[0], re[1], re[2], re[3], re[4])
+                    radars[str(re[3])+'_'+str(re[4])] = True
     context = gcontext
     t = loader.get_template('exile/radars.html')
     context['content'] = t.render(gcontext, request)
