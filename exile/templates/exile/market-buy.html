@@ -32,13 +32,15 @@
 {% if totalprice %}
 	function computetotal()
 	{
-		var total={{ total }};
+		var total=0;//{{ total }};
 
 		for(var i=1; i<planets.length; i++)
 		{
 			var planet=planets[i];
 			var obj = $("totalprice"+planet[0]);
-			total += parseInt(obj.innerHTML.replace(" ",""));
+			if(obj){
+				total += parseInt(obj.innerHTML.replace(" ",""));
+			}
 		}
 		var obj = $("total");
 		obj.innerHTML = formatnumber(total);
@@ -100,7 +102,7 @@
 					</table>
 					{% endif %}
 					</td>
-				<td align=right nowrap><img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Credits" width=16 height=16><span id="totalprice{{ pla.planet_id }}">{{ pla.buying_price }}</span></td>
+					<td align=right nowrap>{% if pla.can_buy %}{% if pla.can_buy.buy %}<img src="{% static 'exile/assets/interface/credits.gif' %}" class=res title="Credits" width=16 height=16><span id="totalprice{{ pla.planet_id }}">{{ pla.buying_price }}</span>{% endif %}{% endif %}</td>
 			</tr>
 		{% endfor %}
 		{% if totalprice %}

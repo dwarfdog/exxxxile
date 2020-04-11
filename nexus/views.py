@@ -40,10 +40,6 @@ def index(request):
         xmldoc = minidom.parseString(new.xml)
         readbitlist = xmldoc.getElementsByTagName('item')
         for s in readbitlist:
-            print(s.getElementsByTagName('title')[0].childNodes[0].data)
-            print(s.getElementsByTagName('description')[0].childNodes[0].data)
-            print(s.getElementsByTagName('author')[0].childNodes[0].data)
-            print(s.getElementsByTagName('pubDate')[0].childNodes[0].data)
             values = {
                 'title': s.getElementsByTagName('title')[0].childNodes[0].data,
                 'description': s.getElementsByTagName('description')[0].childNodes[0].data.replace('jcolliez', 'Exile').replace('http://forum.exil.pw/img/smilies','/exile/static/exile/assets/smileys'),
@@ -416,7 +412,6 @@ def lostpassword(request):
         try:
             validate_email(email)
         except (KeyError, ValidationError):
-            print(ValidationError)
             error = 'email_invalid'
         else:
             try:

@@ -1164,7 +1164,6 @@ def locked(request):
         gcontext["remaining_time_before_unlock"] = re[1]
         #content.AssignValue "admin_email", re[3]
         gcontext["admin_email"] = 'exxxxile@exxxxile.ovh';
-        gcontext["universe"] = Universe
         if re[2] and re[2]:
             gcontext["reason"] = re[2]
         if re[1]:

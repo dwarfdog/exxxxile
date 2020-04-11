@@ -10,6 +10,7 @@ urlpatterns = [
     path('start', views.start, name='start'),
     path('holidays', views.holidays, name='holidays'),
     path('gameover', views.gameover, name='gameover'),
+    path('locked', views.locked, name='locked'),
     path('overview', views.overview, name='overview'),
     path('upkeep', views.upkeep, name='upkeep'),
     path('commanders', views.commanders, name='commanders'),
