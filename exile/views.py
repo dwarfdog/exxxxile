@@ -21,7 +21,7 @@ from exile.models import *
 
 config = apps.get_app_config('exile')
 
-trucbidon = True
+trucbidon2 = True
 
 def retrieveAllianceChat(id,force=False):
     if force or not cache.get('alliances_chat') or not id in cache.get('alliances_chat').keys():
@@ -4768,7 +4768,7 @@ def alliancefleets(request):
                 ' cargo_capacity, cargo_ore, cargo_hydrocarbon, cargo_scientists, cargo_soldiers, cargo_workers,' + # 26 27 28 29 30 31
                 ' recycler_output, orbit_ore > 0 OR orbit_hydrocarbon > 0, action,' + # 32 33 34
                 '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.planet_galaxy AND nav_planet.sector = f.planet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %s)) AS from_radarstrength, ' + # 35
-                '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %s)) AS to_radarstrength' +
+                '( SELECT int4(COALESCE(max(nav_planet.radar_strength), 0)) FROM nav_planet WHERE nav_planet.galaxy = f.destplanet_galaxy AND nav_planet.sector = f.destplanet_sector AND nav_planet.ownerid IS NOT NULL AND EXISTS ( SELECT 1 FROM vw_friends_radars WHERE vw_friends_radars.friend = nav_planet.ownerid AND vw_friends_radars.userid = %s)) AS to_radarstrength, owner_name' +
                 " FROM vw_fleets as f" +
                 " WHERE shared AND owner_alliance_id=%s", [gcontext['exile_user'].id, gcontext['exile_user'].id, gcontext['exile_user'].alliance_id])
             res = cursor.fetchall()
@@ -4782,6 +4782,7 @@ def alliancefleets(request):
                     fleet['resource'] = {1:{},2:{},3:{},4:{},5:{}}
                     fleet['id'] = re[0]
                     fleet['name'] = re[1]
+                    fleet['owner_name'] = re[37]
                     fleet['size'] = re[4]
                     fleet['signature'] = re[5]
                     fleet['cargo_load'] = re[27]+re[28]+re[29]+re[30]+re[31]

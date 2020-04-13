@@ -50,9 +50,10 @@ function Ship(id, quantity) {
 	this.quantity = quantity;
 }
 
-function Fleet(id, name, category, stance, size, signature, cargoload, cargocapacity, action, timeremaining, commandername, position, destination, ships, resources) {
+function Fleet(id, name, ownername, category, stance, size, signature, cargoload, cargocapacity, action, timeremaining, commandername, position, destination, ships, resources) {
 	this.id = id;
 	this.name = name;
+	this.ownername = ownername;
 	this.category = category;
 	this.stance = stance;
 	this.size = size;
@@ -125,6 +126,16 @@ function sortName(a,b) {
 	return a.id - b.id;
 }
 
+function sortOwner(a,b) {
+	var x = a.name.toUpperCase();
+	var y = b.name.toUpperCase();
+
+	if(x < y) return -1;
+	if(x > y) return 1;
+
+	return a.id - b.id;
+}
+
 function sortSize(a,b) {
 	if(a.size < b.size) return -1;
 	if(a.size > b.size) return 1;
@@ -169,6 +180,9 @@ function sortCommander(a,b) {
 
 function sortList(list) {
 	switch(sortColumn){
+		case -1: // owner
+			list.sort(sortOwner);
+		break;
 		case 0:	// name
 			list.sort(sortName);
 		break;
@@ -223,7 +237,7 @@ function displayFleetList(list) {
 	var signature = 0;
 	var cargoload = 0;
 	var s = '<table class="default" width="100%">'+
-			'<tr class="header">' + column(0,'Nom') + column(1,'Vaisseaux') + column(2,'Signature') + column(3,'Cargaison') + column(4,'Position') + column(5,'Action') + column(6,'Commandant') + '</tr>';
+			'<tr class="header">' + column(-1,'Proprio') + column(0,'Nom') + column(1,'Vaisseaux') + column(2,'Signature') + column(3,'Cargaison') + column(4,'Position') + column(5,'Action') + column(6,'Commandant') + '</tr>';
 
 	for(var i=0;i<list.length;i++){
 		var fleet = list[i];
@@ -232,7 +246,7 @@ function displayFleetList(list) {
 		signature += fleet.signature;
 		cargoload += fleet.cargoload;
 
-		var z = '<tr class="' + (i%2==0?'even':'odd') + '"><td>';
+		var z = '<tr class="' + (i%2==0?'even':'odd') + '"><td>'+fleet.ownername+'</td><td>';
 
 		if(fleet.stance == 1)
 			z+= '<img src="{% static 'exile/assets/interface/stance_attack.gif' %}" class="stance" alt="Attaque" width="10" height="10">';
@@ -276,7 +290,7 @@ function displayFleetList(list) {
 		s+= z;
 	}
 
-	s+= '<tr class="smallitem"><td nowrap>Total: <b>' + list.length.n() + '</b></td><td nowrap align="right"><b>' + ships.n() + '</b></td><td nowrap align="right"><b>' + signature.n() + '</b></td><td nowrap align="right"><b>' + cargoload.n() + '</b></td><td colspan="3" class="justhidden">&nbsp;</td></tr>'+
+	s+= '<tr class="smallitem"><td colspan="2" nowrap>Total: <b>' + list.length.n() + '</b></td><td nowrap align="right"><b>' + ships.n() + '</b></td><td nowrap align="right"><b>' + signature.n() + '</b></td><td nowrap align="right"><b>' + cargoload.n() + '</b></td><td colspan="3" class="justhidden">&nbsp;</td></tr>'+
 		'</table>';
 
 	$('fleet_list').innerHTML = s;
@@ -297,7 +311,7 @@ function displayFleetList(list) {
 		fleetList = [];
 		{% for ind,fleet in list.fleet.items %}
 			fleetList.push(
-				new Fleet({{ fleet.id }},'{{ fleet.name }}','',{{ fleet.stance }},{{ fleet.size }},{{ fleet.signature }},{{ fleet.cargo_load }},
+				new Fleet({{ fleet.id }},'{{ fleet.name }}','{{ fleet.owner_name }}','',{{ fleet.stance }},{{ fleet.size }},{{ fleet.signature }},{{ fleet.cargo_load }},
 						{{ fleet.cargo_capacity }},'{{ fleet.action }}',{{ fleet.time }},'{% if fleet.commandername %}{{ fleet.commandername }}{% endif %}',
 						new Planet({{ fleet.planetid }},'{% if fleet.planetname %}{{ fleet.planetname }}{% else %}{% endif %}',{{ fleet.relation }},"{{ fleet.g }}","{{ fleet.s }}","{{ fleet.p }}"),
 						new Planet({{ fleet.t_planetid }},'{{ fleet.t_planetname }}',{{ fleet.t_relation }},"{{ fleet.t_g }}","{{ fleet.t_s }}","{{ fleet.t_p }}"),
