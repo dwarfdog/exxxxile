@@ -15,7 +15,7 @@ from django.db import connection, connections
 from .apps import ExileConfig
 from django.apps import apps
 from django.db import transaction
-import bfa
+import hashlib
 
 from exile.models import *
 
@@ -947,56 +947,82 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
+def generate_fingerprint(request):
+    """
+    Génère une empreinte unique basée sur l'adresse IP, le User-Agent, et d'autres métadonnées.
+    """
+    address = request.META.get('REMOTE_ADDR', '')
+    user_agent = request.headers.get('User-Agent', '')
+    forwarded_address = request.META.get('HTTP_X_FORWARDED_FOR', '')
+
+    raw_data = f"{address}|{user_agent}|{forwarded_address}"
+    fingerprint = hashlib.sha256(raw_data.encode('utf-8')).hexdigest()
+
+    return fingerprint
+
 @construct
 def connect(request):
-    """
-    def get_browserid(request):
-        try:
-            browserid = int(request.COOKIES.get("id", "0"))
-        except (KeyError, Exception):
-            browserid = 0
-        if not browserid:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT nextval('stats_requests')")
-                re = cursor.fetchone()
-                browserid = re[0]
-        return browserid
-    """
-    def sp_account_connect(request,context,browserid):
-        address = get_client_ip(request)
-        addressForwarded = request.get_host()
-        userAgent = request.headers.get('User-Agent','')
+    def sp_account_connect(request, context, browserid):
+        address = request.META.get('REMOTE_ADDR', '')  # Adresse IP de l'utilisateur
+        addressForwarded = request.get_host()  # Adresse forwardée
+        userAgent = request.headers.get('User-Agent', '')  # User-Agent
+
+        # Vérifier si une empreinte existe, sinon la générer
         if not context['user'].fingerprint:
             try:
-                fingerprint = bfa.fingerprint.get(request)
-            except (KeyError, Exception):
+                fingerprint = generate_fingerprint(request)
+            except Exception:
                 fingerprint = ''
-                return -100
+                return -100  # Code d'erreur spécifique
             context['user'].fingerprint = fingerprint
+
+        # Appeler la procédure stockée pour mettre à jour les informations
         with connection.cursor() as cursor:
-            cursor.execute('SELECT id, lastplanetid, privilege, resets FROM sp_account_connect2(%s, %s, %s, %s, %s, %s, %s)', [context['user'].id, context['user'].lcid, address, addressForwarded, userAgent, browserid, context['user'].fingerprint])
+            cursor.execute(
+                '''
+                SELECT id, lastplanetid, privilege, resets
+                FROM sp_account_connect2(%s, %s, %s, %s, %s, %s, %s)
+                ''',
+                [
+                    context['user'].id,
+                    context['user'].lcid,
+                    address,
+                    addressForwarded,
+                    userAgent,
+                    browserid,
+                    context['user'].fingerprint
+                ]
+            )
             return cursor.fetchone()
-    gcontext = request.session.get('gcontext',{})
+
+    # Initialiser le contexte global
+    gcontext = request.session.get('gcontext', {})
     context = gcontext
-    #browserid = get_browserid(request)
+
+    # Initialiser l'identifiant du navigateur
     browserid = 0
-    res = sp_account_connect(request,context,browserid)
+    res = sp_account_connect(request, context, browserid)
+
+    # Stocker les informations dans la session utilisateur
     request.session['sPlanet'] = res[1]
     request.session['sPrivilege'] = res[2]
     request.session['sUser'] = res[0]
     request.session['sLogonUserID'] = res[0]
-    if res[2] < 100 and res[3] == 0 and request.path!=reverse('exile:start'):
+
+    # Rediriger l'utilisateur selon ses privilèges ou états
+    if res[2] < 100 and res[3] == 0 and request.path != reverse('exile:start'):
         response = HttpResponseRedirect(reverse('exile:start'))
-    elif res[2] == -3 and request.path!=reverse('exile:wait'):
+    elif res[2] == -3 and request.path != reverse('exile:wait'):
         response = HttpResponseRedirect(reverse('exile:wait'))
-    elif res[2] == -100 and request.path!=reverse('exile:logout'):
+    elif res[2] == -100 and request.path != reverse('exile:logout'):
         response = HttpResponseRedirect(reverse('exile:logout'))
-    elif res[2] == -2 and request.path!=reverse('exile:holidays'):
+    elif res[2] == -2 and request.path != reverse('exile:holidays'):
         response = HttpResponseRedirect(reverse('exile:holidays'))
-    elif request.path!=reverse('exile:overview'):
+    elif request.path != reverse('exile:overview'):
         response = HttpResponseRedirect(reverse('exile:overview'))
-    #response.set_cookies('id',browserid)
+
     return response
+
 
 @construct
 @logged

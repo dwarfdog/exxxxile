@@ -9,8 +9,8 @@ from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.db import connection, connections
-import bfa
 from xml.dom import minidom
+import hashlib
 
 from nexus.models import *
 
@@ -337,37 +337,68 @@ def about(request):
     }
     return render(request, 'nexus/master.html', context)
 
+def generate_fingerprint(request):
+    """
+    Génère une empreinte unique basée sur l'adresse IP, le User-Agent, et d'autres métadonnées.
+    """
+    address = request.META.get('REMOTE_ADDR', '')
+    user_agent = request.headers.get('User-Agent', '')
+    forwarded_address = request.META.get('HTTP_X_FORWARDED_FOR', '')
+
+    raw_data = f"{address}|{user_agent}|{forwarded_address}"
+    fingerprint = hashlib.sha256(raw_data.encode('utf-8')).hexdigest()
+
+    return fingerprint
+
 def login(request):
-    username = request.POST['username']
-    password = password=request.POST['password']
-    if username == '' or password == '':
+    username = request.POST.get('username', '').strip()
+    password = request.POST.get('password', '').strip()
+
+    if not username or not password:
+        # Credentials vides
         request.session['lastloginerror'] = 'credentials_invalid'
         return HttpResponseRedirect(reverse('nexus:index'))
-    else:
-        address = request.META['REMOTE_ADDR']
-        addressForwarded = request.get_host()
-        userAgent = request.headers.get('User-Agent','')
+
+    # Informations utilisateur
+    address = request.META.get('REMOTE_ADDR', '')
+    addressForwarded = request.get_host()
+    userAgent = request.headers.get('User-Agent', '')
+
+    try:
+        # Générer une empreinte unique si possible
         try:
-            fingerprint = bfa.fingerprint.get(request)
-        except (KeyError, Exception):
-            fingerprint = address
-        #    request.session['lastloginerror'] = 'credentials_invalid'
-        #    return HttpResponseRedirect(reverse('nexus:index'))
+            fingerprint = generate_fingerprint(request)
+        except Exception:
+            fingerprint = address  # Valeur de secours
         request.session['fingerprint'] = fingerprint
-        #print(fingerprint)
-        # try to log on
-        try:
-            user = NexusUsers.objects.raw('SELECT id, username, last_visit, last_universeid, privilege_see_hidden_universes FROM sp_account_login(%s, %s, %s, %s, %s) LIMIT 1',[username, password, address, addressForwarded, userAgent])[0]
-        except (KeyError, IndexError):
-            request.session['lastloginerror'] = 'credentials_invalid'
-            return HttpResponseRedirect(reverse('nexus:index'))
-        else:
-            request.session['user_id'] = user.id
-            request.session['logged'] = True
-            with connections['exile_nexus'].cursor() as cursor:
-                #cursor.execute('SET search_path TO exile_nexus,public')
-                cursor.execute('UPDATE nusers SET fingerprint=%s WHERE id=%s', [fingerprint, user.id])
+
+        # Tenter de se connecter en appelant une fonction stockée
+        user = NexusUsers.objects.raw(
+            '''
+            SELECT id, username, last_visit, last_universeid, privilege_see_hidden_universes
+            FROM sp_account_login(%s, %s, %s, %s, %s)
+            LIMIT 1
+            ''',
+            [username, password, address, addressForwarded, userAgent]
+        )[0]
+    except (KeyError, IndexError):
+        # Si les identifiants sont incorrects ou l'utilisateur inexistant
+        request.session['lastloginerror'] = 'credentials_invalid'
+        return HttpResponseRedirect(reverse('nexus:index'))
+
+    # Connexion réussie, mettre à jour les données utilisateur
+    request.session['user_id'] = user.id
+    request.session['logged'] = True
+
+    # Mise à jour de l'empreinte dans la base de données
+    with connections['exile_nexus'].cursor() as cursor:
+        cursor.execute(
+            'UPDATE nusers SET fingerprint = %s WHERE id = %s',
+            [fingerprint, user.id]
+        )
+
     return HttpResponseRedirect(reverse('nexus:servers'))
+
 
 def logout(request):
     request.session.flush()

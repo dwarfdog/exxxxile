@@ -27,7 +27,7 @@ pip3.7 list
 
 2/ INSTALL DJANGO AND OTHERS
 
-pip3.7 install django psycopg2-binary django-precise-bbcode bfa
+pip3.7 install django psycopg2-binary django-precise-bbcode
 
 3/ INSTALL EXXXXILE
 

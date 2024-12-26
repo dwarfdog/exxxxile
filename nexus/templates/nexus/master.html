@@ -110,8 +110,7 @@
 				<div class="form-login">
 				<form action="{% url 'nexus:login' %}" method="post">
 					{% csrf_token %}
-					{% load bfa %}
-    				{% fingerprint_input %}
+					{% fingerprint_input %}
 					<input type="hidden" name="login" value="1">
 					<table>
 						<b:t>
