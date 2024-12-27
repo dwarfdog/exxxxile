@@ -180,3 +180,24 @@ EMAIL_USE_SSL = False
 
 # remove on prod
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+        },
+        'myapp': {  # Remplacez "myapp" par le nom de votre application
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
