@@ -51,15 +51,14 @@ Edit pyxile/settings.py.example to set correct values (secret key, db access, et
 
 8/ RUNSERVER (FOR DEV) OR WSGI
 
-python3.7 manage.py runserver
+sudo python3 manage.py runserver 0.0.0.0:8000
 
 9/ INFINITE LOOP RUN COMMANDS (nohup, screen OR ADD A PYTHON SCHEDULER MODULE):
 
-python3.7 manage.py sp_process_all
+sudo python3 manage.py sp_process_all
 
-python3.7 manage.py update_player
+sudo python3 manage.py sp_battle
 
-python3.7 manage.py sp_battle
+sudo python3 manage.py sp_events
 
-python3.7 manage.py sp_events
-
+sudo python3 update_player.py
