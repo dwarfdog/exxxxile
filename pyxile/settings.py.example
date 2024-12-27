@@ -16,7 +16,7 @@ SECRET_KEY = 's3cr3t_k3y_f0r_pr0j3ct'
 
 # Sécurité des sessions et cookies
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 SESSION_COOKIE_DOMAIN = None
 SESSION_COOKIE_PATH = '/'
 SESSION_COOKIE_SECURE = None
@@ -30,7 +30,7 @@ DEBUG = True
 TEST = False
 ADMINS =  [('Admin', 'admin@example.com')]
 
-ALLOWED_HOSTS = ['localhost', '0.0.0.0', DOMAIN]
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', '192.168.1.43', DOMAIN]
 
 # Applications :
 INSTALLED_APPS = [
