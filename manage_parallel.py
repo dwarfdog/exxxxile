@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # Commandes à exécuter
     commands = [
         "sudo python3 manage.py runserver 0.0.0.0:8000",
-        "sudo python3 manage.py runserver sp_process_all",
+        "sudo python3 manage.py sp_process_all",
         "sudo python3 manage.py sp_battle",
         "sudo python3 manage.py sp_events",
     ]
