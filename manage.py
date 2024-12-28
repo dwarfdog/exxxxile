@@ -1,3 +1,4 @@
+# /manage.py
 #!/usr/bin/env python3
 """
 Gestionnaire principal pour les commandes administratives de Django.
@@ -8,6 +9,10 @@ optimisation et des messages d'erreur explicites.
 import os
 import sys
 import logging
+from dotenv import load_dotenv
+
+# Chargement des variables d'environnement depuis le fichier .env
+load_dotenv()
 
 # Initialisation du logger pour capturer les erreurs 
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')

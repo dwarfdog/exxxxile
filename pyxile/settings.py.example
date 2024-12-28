@@ -1,38 +1,44 @@
-import os
+# /pyxile/settings.py.example
+"""
+Fichier de configuration pour le projet Django.
+Ce fichier contient tous les paramètres globaux, y compris la sécurité, la base de données,
+les applications installées et d'autres options cruciales pour assurer la stabilité et la performance.
+"""
 
-DOMAIN = 'example.com'
-DISCORD = "https://discord.gg/example"
+import os
+from pathlib import Path
+
+# Chemin de base du projet
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Domaine principal
+DOMAIN = 'exile-game.fr'
+
+# Discord pour support et communications
+DISCORD = "S7bfEN7q"
+
+# Mode maintenance et inscription
 MAINTENANCE = False
 REGISTER_DISABLED = False
 
-# Chemin de base
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Media
-MEDIA_ROOT = BASE_DIR
-MEDIA_URL = '/'
+# Média
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
 
-# Clé sécrète et sécurité
-SECRET_KEY = 's3cr3t_k3y_f0r_pr0j3ct'
+# Clé secrète (IMPORTANT : ne pas versionner en clair en production)
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 's3cr3t_k3y_f0r_pr0j3ct')
 
-# Sécurité des sessions et cookies
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
-SESSION_COOKIE_DOMAIN = None
-SESSION_COOKIE_PATH = '/'
-SESSION_COOKIE_SECURE = None
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_AGE = 1209600  # 2 semaines (en secondes)
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Mode debug (Désactiver en production pour la sécurité)
+DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 TEST = False
-ADMINS =  [('Admin', 'admin@example.com')]
 
-ALLOWED_HOSTS = ['localhost', '0.0.0.0', '192.168.1.43', DOMAIN]
+# Administrateurs du projet
+ADMINS = [('Admin', 'admin@exile-game.fr')]
 
-# Applications :
+# Hôtes autorisés
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# Applications installées
 INSTALLED_APPS = [
     'exile.apps.ExileConfig',
     'nexus.apps.NexusConfig',
@@ -42,7 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # other apps
+    # Modules tiers
     'precise_bbcode',
 ]
 
@@ -57,14 +63,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# URL racine
 ROOT_URLCONF = 'pyxile.urls'
 
+# Configuration des templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'nexus/static/nexus/localization/')
-        ],
+        'DIRS': [BASE_DIR / 'nexus/static/nexus/localization'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,35 +83,37 @@ TEMPLATES = [
     },
 ]
 
+# WSGI
 WSGI_APPLICATION = 'pyxile.wsgi.application'
 
+# Bases de données
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'exxxxile',
-        'USER': 'exile',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
+        'NAME': os.getenv('DB_NAME', 'exxxxile'),
+        'USER': os.getenv('DB_USER', 'exile'),
+        'PASSWORD': os.getenv('DB_PASSWORD', '123456'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
         'OPTIONS': {
             'options': '-c search_path=exile_s03,public'
         },
     },
     'exile_s03': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'exxxxile',
-        'USER': 'exile',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
+        'NAME': os.getenv('DB_NAME', 'exxxxile'),
+        'USER': os.getenv('DB_USER', 'exile'),
+        'PASSWORD': os.getenv('DB_PASSWORD', '123456'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
         'OPTIONS': {
             'options': '-c search_path=exile_s03,public'
         },
     },
     'exile_nexus': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'exxxxile',
-        'USER': 'exile',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
+        'NAME': os.getenv('DB_NAME', 'exxxxile'),
+        'USER': os.getenv('DB_USER', 'exile'),
+        'PASSWORD': os.getenv('DB_PASSWORD', '123456'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
         'OPTIONS': {
             'options': '-c search_path=exile_nexus,public'
         },
@@ -114,12 +122,14 @@ DATABASES = {
 
 DATABASE_ROUTERS = ['exile.dbrouter.MyDBRouter', 'nexus.dbrouter.MyDBRouter']
 
+# Validation des mots de passe
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 6},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -129,22 +139,36 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Langue et fuseau horaire
 LANGUAGE_CODE = 'fr-FR'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = False
 USE_TZ = True
 
+# Gestion des fichiers statiques
 STATIC_URL = '/static/'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = '25'
-EMAIL_HOST_USER = None
-EMAIL_HOST_PASSWORD = None
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = False
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Gestion des sessions et des cookies
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+SESSION_COOKIE_DOMAIN = os.getenv('SESSION_COOKIE_DOMAIN', None)
+SESSION_COOKIE_PATH = '/'
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_AGE = int(os.getenv('SESSION_COOKIE_AGE', 1209600))
+
+# Configuration e-mail
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
+EMAIL_PORT = os.getenv('EMAIL_PORT', 25)
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
 
+# Configuration du logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -156,11 +180,13 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),  # DEBUG, INFO, WARNING, ERROR, CRITICAL
         },
         'myapp': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': os.getenv('MYAPP_LOG_LEVEL', 'DEBUG'), # DEBUG, INFO, WARNING, ERROR, CRITICAL
         },
     },
 }
+
+# Autres configurations personnalisées
