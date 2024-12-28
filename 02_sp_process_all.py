@@ -20,4 +20,4 @@ if __name__ == "__main__":
     command = "sudo python3 manage.py sp_process_all"
 
     # Lancement de sp_process_all
-    sp_process_all(command)
+    run_sp_process_all(command)

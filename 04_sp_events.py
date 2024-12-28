@@ -20,4 +20,4 @@ if __name__ == "__main__":
     command = "sudo python3 manage.py sp_events"
 
     # Lancement de sp_events
-    sp_events(command)
+    run_sp_events(command)

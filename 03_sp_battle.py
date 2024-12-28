@@ -20,4 +20,4 @@ if __name__ == "__main__":
     command = "sudo python3 manage.py sp_battle"
 
     # Lancement de sp_battle
-    sp_battle(command)
+    run_sp_battle(command)
