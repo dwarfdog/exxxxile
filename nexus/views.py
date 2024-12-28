@@ -19,7 +19,7 @@ def page404(request):
     context = {
         'content': t.render({}, request),
         'logged': request.session.get('logged', False),
-        'user': user
+        'user': NexusUsers.objects.get(pk=request.session.get('user_id', 0))
     }
     return render(request, 'nexus/master.html', context)
 

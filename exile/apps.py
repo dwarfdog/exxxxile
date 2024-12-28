@@ -1,3 +1,4 @@
+# /exile/apps.py
 from django.apps import AppConfig
 
 
@@ -15,8 +16,8 @@ class ExileConfig(AppConfig):
     hasAdmins = False # allow to send messages to administrators or not
     maintenance = False # enable/disable maintenance
     maintenance_msg = "Maintenance serveur ..." #"Mise à jour logiciel ..." #"Maintenance serveur" #"Migration de la base de donnée"
-    supportMail = "support@exxxxile.ovh"
-    senderMail = "exile.s03<noreply@exxxxile.ovh>"
+    supportMail = "support@exile-game.fr"
+    senderMail = "noreply@exile-game.fr>"
     adExecuteNoRecords = 128
 
     # Players relationships constants (pas touche !)
