@@ -64,6 +64,16 @@ def index(request):
     }
     return render(request, 'nexus/master.html', context)
 
+def intro(request):
+    user = get_user_from_session(request)
+    context = {
+        'universes': get_visible_universes(user),
+        'content': render(request, 'nexus/intro.html', {}).content,
+        'logged': bool(user),
+        'user': user
+    }
+    return render(request, 'nexus/master.html', context)
+
 def faq(request):
     user = get_user_from_session(request)
     context = {
