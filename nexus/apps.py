@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # /nexus/apps.py
 
 from django.apps import AppConfig

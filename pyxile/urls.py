@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # /pyxile/urls.py
 """
 Fichier de configuration des URLs pour le projet Pyxile.

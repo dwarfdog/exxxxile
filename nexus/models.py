@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # /nexus/models.py
 # Module contenant les modèles Django pour l'application "nexus".
 

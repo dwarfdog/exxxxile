@@ -3,3 +3,4 @@
 *.py[cod]
 *$py.class
 pyxile/settings.py
+/.vscode

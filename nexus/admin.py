@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # /nexus/admin.py
 
 from django.apps import apps

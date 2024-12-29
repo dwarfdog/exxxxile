@@ -1,500 +1,184 @@
-import sys, string, random
+#!/usr/bin/env python3
+# /nexus/views.py
+
+import hashlib
+import random
+import string
+from xml.dom import minidom
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
-from django.template import loader
-from django.core.validators import validate_email
-from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
-from django.db import connection, connections
-from xml.dom import minidom
-import hashlib
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
+from django.urls import reverse
+from utils.decorators import login_required
+from utils.email import send_registration_email
+from utils.errors import error_messages
+from utils.fingerprint import generate_fingerprint
+from utils.session import get_user_from_session, flush_session
+from utils.validation import validate_username, is_email_banned, is_username_banned
+from utils.universes import get_visible_universes, set_last_universe
+from utils.news import parse_news
+from utils.auth import authenticate_user
 
-from nexus.models import *
 
 def page404(request):
-    t = loader.get_template('nexus/404.html')
+    """
+    Gère la page 404 avec un contexte utilisateur.
+    """
+    user = get_user_from_session(request)
     context = {
-        'content': t.render({}, request),
-        'logged': request.session.get('logged', False),
-        'user': NexusUsers.objects.get(pk=request.session.get('user_id', 0))
+        'content': render(request, 'nexus/404.html', {}).content,
+        'logged': bool(user),
+        'user': user
     }
     return render(request, 'nexus/master.html', context)
 
-# Create your views here.
+
 def index(request):
-    t = loader.get_template('nexus/index.html')
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        user = None
-    context = {
-        'news1': {},
-        'news2': {}
-    }
-    cpt=0
-    bcpt=0
-    for new in News.objects.all():
+    """
+    Page d'accueil de l'application.
+    """
+    user = get_user_from_session(request)
+    news1 = {}
+    news2 = {}
+    cpt = 0
+    bcpt = 0
+    for new in parse_news():
         xmldoc = minidom.parseString(new.xml)
         readbitlist = xmldoc.getElementsByTagName('item')
         for s in readbitlist:
             values = {
                 'title': s.getElementsByTagName('title')[0].childNodes[0].data,
-                'description': s.getElementsByTagName('description')[0].childNodes[0].data.replace('jcolliez', 'Exile').replace('http://forum.exil.pw/img/smilies','/exile/static/exile/assets/smileys'),
+                'description': s.getElementsByTagName('description')[0].childNodes[0].data,
                 'author': s.getElementsByTagName('author')[0].childNodes[0].data,
                 'pubDate': s.getElementsByTagName('pubDate')[0].childNodes[0].data,
             }
-            if bcpt==0:
-                context['news1'][cpt] = values.copy()
+            if bcpt == 0:
+                news1[cpt] = values.copy()
             else:
-                context['news2'][cpt] = values.copy()
-            cpt+=1
-        bcpt+=1
+                news2[cpt] = values.copy()
+            cpt += 1
+        bcpt += 1
+
     context = {
-        'universes': Universes.objects.all(),
-        'content': t.render(context, request),
-        'logged': request.session.get('logged', False),
+        'universes': get_visible_universes(user),
+        'news1': news1,
+        'news2': news2,
+        'logged': bool(user),
         'user': user,
         'lastloginerror': request.session.get('lastloginerror', '')
     }
     return render(request, 'nexus/master.html', context)
+
 
 def intro(request):
-    t = loader.get_template('nexus/intro.html')
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        user = None
+    """
+    Page d'introduction.
+    """
+    user = get_user_from_session(request)
     context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request),
-        'logged': request.session.get('logged', False),
+        'universes': get_visible_universes(user),
+        'content': render(request, 'nexus/intro.html', {}).content,
+        'logged': bool(user),
         'user': user
     }
     return render(request, 'nexus/master.html', context)
+
 
 def register(request):
-    def isUsernameBanned(username):
-        with connection.cursor() as cursor:
-            cursor.execute('SET search_path TO exile_nexus,public')
-            cursor.execute('SELECT 1 FROM exile_s03.banned_logins WHERE %s ~* login LIMIT 1', [username])
-            return cursor.fetchone()
-    def isEmailBanned(email):
-        with connection.cursor() as cursor:
-            cursor.execute('SET search_path TO exile_nexus,public')
-            cursor.execute('SELECT 1 FROM exile_nexus.banned_domains WHERE %s ~* domain LIMIT 1', [email])
-            return cursor.fetchone()
-    def validateUserName(myName):
-        if len(myName) < 2 or len(myName) > 12:
-            return False
-        return myName.isalnum()
-    def makePassword(length):
-        lettersAndDigits = string.ascii_letters + string.digits
-        return ''.join(random.choice(lettersAndDigits) for i in range(length))
-    def useridswitch(i):
-        switcher = {
-            -1: 'Ce nom d\'utilisateur existe déjà, choisissez un nouveau nom',
-            -2: 'Cette adresse e-mail est déjà utilisée pour un autre compte, le multi compte est interdit !',
-            -3: 'Cette adresse IP est déjà utilisée pour un autre compte, le multi compte est interdit !',
-            -4: 'Une erreur est survenue',
-        }
-        return switcher.get(i,"Une erreur est survenue")
+    """
+    Gère l'inscription utilisateur avec validation.
+    """
+    if settings.MAINTENANCE or settings.REGISTER_DISABLED:
+        error = error_messages['register_disabled']
+        return render(request, 'nexus/register.html', {'error': error})
 
-    email_banned = 'Les emails provenant de ce nom de domaine ne sont pas autorisés'
-    email_exists = 'Cette adresse e-mail est déjà utilisée pour un autre compte, le multi compte est interdit !'
-    email_invalid = 'Veuillez vérifier votre adresse e-mail'
-    username_banned = 'Ce nom d\'utilisateur est réservé, choisissez un nouveau nom'
-    username_exists = 'Ce nom d\'utilisateur existe déjà, choisissez un nouveau nom'
-    username_invalid = 'Votre nom d\'utilisateur doit être composé de 2 à 12 caractères, lettres et chiffres acceptés, vérifiez votre entrée'
-    accept_conditions = 'Vous devez accepter les conditions générales pour vous inscrire'
-    unknown = 'Une erreur est survenue'
-    register_disabled = 'Les inscriptions sont temporairement désactivées'
-    register_disabled_maintenance = 'Les inscriptions sont temporairement désactivées pour maintenance'
-
-    username = request.POST.get('username', '')
-    email = request.POST.get('email', '')
-    conditions = request.POST.get('conditions', None)
+    username = request.POST.get('username', '').strip()
+    email = request.POST.get('email', '').strip()
+    conditions = request.POST.get('conditions')
 
     error = ''
-    if request.POST.get('create', False):
-        if settings.MAINTENANCE or settings.REGISTER_DISABLED:
-            if settings.MAINTENANCE:
-                error = register_disabled_maintenance
+    if request.method == 'POST':
+        if not validate_username(username):
+            error = error_messages['username_invalid']
+        elif not email or not is_email_banned(email):
+            error = error_messages['email_invalid']
+        elif not conditions:
+            error = error_messages['accept_conditions']
+        elif is_username_banned(username):
+            error = error_messages['username_banned']
+        else:
+            password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+            user_created = send_registration_email(username, email, password, request)
+            if user_created:
+                return HttpResponseRedirect(reverse('nexus:registered'))
             else:
-                error = register_disabled
-        if error == '':
-            try:
-                pass
-                #validate_email(email)
-            except (KeyError, ValidationError):
-                error = email_invalid
-            else:
-                if not validateUserName(username):
-                    error = username_invalid
-                elif conditions is None:
-                    error = accept_conditions
-                elif isEmailBanned(email):
-                    error = email_banned
-                elif isUsernameBanned(username):
-                    error = username_banned
-                else:
-                    password = makePassword(8)
-                    userid = -4
-                    with connection.cursor() as cursor:
-                        cursor.execute('SET search_path TO exile_nexus,public')
-                        cursor.execute('SELECT exile_nexus.sp_account_create(%s, %s, %s, 1036, %s)', [username, password, email, request.META['REMOTE_ADDR']])
-                        res = cursor.fetchone()  
-                    try:
-                        userid = res[0]
-                    except (KeyError, IndexError):
-                        error = unknown
-                    else:
-                        if userid > 0:
-                            t = loader.get_template('1036/email_register.txt')
-                            context = {
-                                'username': username,
-                                'password': password
-                            }
-                            send_mail(
-                                'Exile: registration',
-                                t.render(context, request),
-                                'contact@' + settings.DOMAIN,
-                                [email],
-                                fail_silently=False,
-                            )
-                            return HttpResponseRedirect(reverse('nexus:registered'))
-                        else:
-                            error = useridswitch(userid)
-    t = loader.get_template('nexus/register.html')
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        user = None
-    else:
-        return HttpResponseRedirect(reverse('nexus:servers'))
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({'username': username, 'email': email, 'conditions': conditions, 'error': error}, request),
-        'logged': request.session.get('logged', False),
-        'user': user,
-    }
-    return render(request, 'nexus/master.html', context)
+                error = error_messages['unknown']
 
-def faq(request):
-    t = loader.get_template('nexus/faq.html')
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        user = None
+    user = get_user_from_session(request)
     context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request),
-        'logged': request.session.get('logged', False),
+        'universes': get_visible_universes(user),
+        'error': error,
+        'username': username,
+        'logged': bool(user),
         'user': user
     }
     return render(request, 'nexus/master.html', context)
 
-def banners(request):
-    t = loader.get_template('nexus/banners.html')
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        user = None
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request),
-        'logged': request.session.get('logged', False),
-        'user': user
-    }
-    return render(request, 'nexus/master.html', context)
 
+@login_required
 def servers(request):
-    if not request.session.get('logged', False):
-        return HttpResponseRedirect(reverse('nexus:index'))
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        request.session.flush()
-        return HttpResponseRedirect(reverse('nexus:index'))
-    getstats = str(request.GET.get('getstats', ''))
+    """
+    Gère la sélection et l'affichage des serveurs visibles.
+    """
+    user = get_user_from_session(request)
+    getstats = request.GET.get('getstats', '')
     if getstats:
-        try:
-            universe = Universes.objects.get(pk=getstats)
-        except (KeyError, Universes.DoesNotExist):
-            return JsonResponse({'result':''})
-        # universe.url + '/statistics'
-        return JsonResponse({'result':''})
-    setsrv = int(request.GET.get('setsrv', 0))
+        universe = get_visible_universes(user, pk=getstats)
+        return JsonResponse({'result': universe.url + '/statistics'})
+
+    setsrv = request.GET.get('setsrv', 0)
     if setsrv:
-        user.last_universeid = setsrv
-        user.save()
+        set_last_universe(user, setsrv)
         return HttpResponse()
-    """
-    var getstats = Number(Request.QueryString('getstats').item);
-    if(!isNaN(getstats)) {
-        var rs = SQLConn.execute('SELECT url FROM universes WHERE id=' + getstats);
-        
-        var url = rs(0).value + '/statistics.asp';
-        var xml = Server.CreateObject("MSXML2.ServerXMLHTTP");
-        var resultData = '';
-        try {
-            xml.open("GET", url, true); // True specifies an asynchronous request
-            xml.send();
-            // Wait for up to 3 seconds if we've not gotten the data yet
-            if(xml.readyState != 4)
-                xml.waitForResponse(3);
-            if(xml.readyState == 4 && xml.status == 200) {
-                setExpiration(2);
-                resultData = xml.responseText;
-            }
-            else {
-                // Abort the XMLHttp request
-                xml.abort();
-                throw 0;
-            }
-        } catch(e) {
-            resultData = '{error:"Problem communicating with remote server..."}';
-        }
-        Response.write(resultData);
-        Response.end();
-    }
-    var setsrv = Number(Request.QueryString('setsrv').item);
-    if(!isNaN(setsrv)) {
-        SQLConn.execute('SELECT sp_account_universes_set(' + [User.id, setsrv].toSQL() + ')');
-        User.setLastUniverseID(setsrv);
-        Response.end();
-    }
-    """
-    visible = 'WHERE visible'
-    if user.privilege_see_hidden_universes:
-        visible = ''
-    universes = Universes.objects.raw('SELECT id, name, description, created, url, login_enabled, players_limit, start_time, stop_time FROM universes ' + visible + ' ORDER BY name')
-    t = loader.get_template('nexus/servers.html')
+
+    universes = get_visible_universes(user)
     context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({'servers': universes}, request),
-        'logged': request.session.get('logged', False),
+        'universes': universes,
+        'logged': True,
         'user': user,
-        'lastloginerror': request.session.get('lastloginerror', '')
+        'content': render(request, 'nexus/servers.html', {'servers': universes}).content,
     }
     return render(request, 'nexus/master.html', context)
 
-def accountawards(request):
-    t = loader.get_template('nexus/account-awards.html')
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        user = None
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request),
-        'logged': request.session.get('logged', False),
-        'user': user
-    }
-    return render(request, 'nexus/master.html', context)
-
-def accountoptions(request):
-    t = loader.get_template('nexus/account-options.html')
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        user = None
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request),
-        'logged': request.session.get('logged', False),
-        'user': user
-    }
-    return render(request, 'nexus/master.html', context)
-
-def conditions(request):
-    t = loader.get_template('nexus/conditions.html')
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        user = None
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request),
-        'logged': request.session.get('logged', False),
-        'user': user
-    }
-    return render(request, 'nexus/master.html', context)
-
-def about(request):
-    t = loader.get_template('nexus/about.html')
-    try:
-        user = NexusUsers.objects.get(pk=request.session.get('user_id', 0))
-    except (KeyError, NexusUsers.DoesNotExist):
-        user = None
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request),
-        'logged': request.session.get('logged', False),
-        'user': user
-    }
-    return render(request, 'nexus/master.html', context)
-
-def generate_fingerprint(request):
-    """
-    Génère une empreinte unique basée sur l'adresse IP, le User-Agent, et d'autres métadonnées.
-    """
-    address = request.META.get('REMOTE_ADDR', '')
-    user_agent = request.headers.get('User-Agent', '')
-    forwarded_address = request.META.get('HTTP_X_FORWARDED_FOR', '')
-
-    raw_data = f"{address}|{user_agent}|{forwarded_address}"
-    fingerprint = hashlib.sha256(raw_data.encode('utf-8')).hexdigest()
-
-    return fingerprint
 
 def login(request):
-    username = request.POST.get('username', '').strip()
-    password = request.POST.get('password', '').strip()
+    """
+    Gère la connexion utilisateur.
+    """
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
 
-    if not username or not password:
-        # Credentials vides
-        request.session['lastloginerror'] = 'credentials_invalid'
-        return HttpResponseRedirect(reverse('nexus:index'))
+        if not username or not password:
+            request.session['lastloginerror'] = 'credentials_invalid'
+            return HttpResponseRedirect(reverse('nexus:index'))
 
-    # Informations utilisateur
-    address = request.META.get('REMOTE_ADDR', '')
-    addressForwarded = request.get_host()
-    userAgent = request.headers.get('User-Agent', '')
+        user = authenticate_user(username, password, request)
+        if user:
+            request.session['user_id'] = user.id
+            request.session['logged'] = True
+            return HttpResponseRedirect(reverse('nexus:servers'))
+        else:
+            request.session['lastloginerror'] = 'credentials_invalid'
 
-    try:
-        # Générer une empreinte unique si possible
-        try:
-            fingerprint = generate_fingerprint(request)
-        except Exception:
-            fingerprint = address  # Valeur de secours
-        request.session['fingerprint'] = fingerprint
-
-        # Tenter de se connecter en appelant une fonction stockée
-        user = NexusUsers.objects.raw(
-            '''
-            SELECT id, username, last_visit, last_universeid, privilege_see_hidden_universes
-            FROM sp_account_login(%s, %s, %s, %s, %s)
-            LIMIT 1
-            ''',
-            [username, password, address, addressForwarded, userAgent]
-        )[0]
-    except (KeyError, IndexError):
-        # Si les identifiants sont incorrects ou l'utilisateur inexistant
-        request.session['lastloginerror'] = 'credentials_invalid'
-        return HttpResponseRedirect(reverse('nexus:index'))
-
-    # Connexion réussie, mettre à jour les données utilisateur
-    request.session['user_id'] = user.id
-    request.session['logged'] = True
-
-    # Mise à jour de l'empreinte dans la base de données
-    with connections['exile_nexus'].cursor() as cursor:
-        cursor.execute(
-            'UPDATE nusers SET fingerprint = %s WHERE id = %s',
-            [fingerprint, user.id]
-        )
-
-    return HttpResponseRedirect(reverse('nexus:servers'))
+    return HttpResponseRedirect(reverse('nexus:index'))
 
 
 def logout(request):
-    request.session.flush()
+    """
+    Gère la déconnexion utilisateur.
+    """
+    flush_session(request)
     return HttpResponseRedirect(reverse('nexus:index'))
-
-def lostpassword(request):
-    def newpassword(password):
-        hash = make_password(password, 'change_password')
-        s = ''
-        for i in range(22 ,60 ,3):
-            s += hash[i]
-        return s
-    def passwordkey(password):
-        hash = make_password(password, 'salt_for_key')
-        s = ''
-        for i in range(22 ,60 ,3):
-            s += hash[i]
-        return s
-    def passwordhash(password):
-        return hashlib.md5('seed'+hashlib.md5(password))
-    error = ''
-    email = request.POST.get('email', False)
-    userid = int(request.GET.get('id', 0))
-    key = str(request.GET.get('key', False))
-    if key and userid != 0:
-        try:
-            user = NexusUsers.objects.raw('SELECT id, username, password, LCID FROM nusers WHERE id=%s', [userid])[0]
-        except (KeyError, IndexError):
-            error = 'password_not_changed1'
-        else:
-            if(key == passwordkey(user.password)):
-                try:
-                    with connections['exile_nexus'].cursor() as cursor:
-                        cursor.execute('SELECT sp_account_password_set(%s, %s)', [userid, newpassword(user.password)])
-                except (KeyError, Exception):
-                    error = 'password_not_changed2'
-                else:
-                    return HttpResponseRedirect(reverse('nexus:passwordreset'))
-            else:
-                error = 'password_mismatch'
-    if email:
-        try:
-            validate_email(email)
-        except (KeyError, ValidationError):
-            error = 'email_invalid'
-        else:
-            try:
-                user = NexusUsers.objects.raw('SELECT id, username, password, lcid FROM nusers WHERE lower(email)=lower(%s)', [email])[0]
-            except (KeyError, IndexError):
-                error = 'email_not_found'
-            else:
-                t = loader.get_template(str(user.lcid) + '/email_newpassword.txt')
-                context = {
-                    'user': user,
-                    'password': newpassword(user.password),
-                    'passwordkey': passwordkey(user.password)
-                }
-                try:
-                    send_mail(
-                        'Exile: lostpassword',
-                        t.render(context, request),
-                        'contact@' + settings.DOMAIN,
-                        [email],
-                        fail_silently=False,
-                    )
-                except (KeyError, IndexError):
-                    error = 'can\'t send email';
-                else:
-                    return HttpResponseRedirect(reverse('nexus:passwordsent'))
-    t = loader.get_template('nexus/lostpassword.html')
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({'error': error}, request)
-    }
-    return render(request, 'nexus/master.html', context)
-
-def passwordsent(request):
-    t = loader.get_template('nexus/passwordsent.html')
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request)
-    }
-    return render(request, 'nexus/master.html', context)
-
-def passwordreset(request):
-    t = loader.get_template('nexus/passwordreset.html')
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request)
-    }
-    return render(request, 'nexus/master.html', context)
-
-def registered(request):
-    t = loader.get_template('nexus/registered.html')
-    context = {
-        'universes': Universes.objects.all(),
-        'content': t.render({}, request)
-    }
-    return render(request, 'nexus/master.html', context)

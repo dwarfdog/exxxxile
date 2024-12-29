@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # /nexus/urls.py
 """
 Configuration des URL pour l'application Nexus.

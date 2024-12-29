@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # /nexus/dbrouter.py
 """
 Gestionnaire de routage pour les bases de données du projet Django.
