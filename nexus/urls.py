@@ -38,6 +38,6 @@ urlpatterns = [
 
     # Pages spécifiques
     path('banners/', views.banners, name='banners'),
+    path('page404/', views.page404, name='page404'),
     # path('statistics/', views.statistics, name='statistics'), Actuellement non utilisé
-    # path('page404/', views.page404, name='page404'), Actuellement non mis à jour
 ]

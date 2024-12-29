@@ -23,9 +23,6 @@ from nexus.utils.auth import authenticate_user, newpassword, passwordkey
 
 
 def page404(request):
-    """
-    Gère la page 404 avec un contexte utilisateur.
-    """
     user = get_user_from_session(request)
     context = {
         'content': render(request, 'nexus/404.html', {}).content,
@@ -35,9 +32,6 @@ def page404(request):
     return render(request, 'nexus/master.html', context)
 
 def index(request):
-    """
-    Page d'accueil de l'application.
-    """
     user = get_user_from_session(request)
     news1 = {}
     news2 = {}
@@ -67,6 +61,106 @@ def index(request):
         'logged': bool(user),
         'user': user,
         'lastloginerror': request.session.get('lastloginerror', '')
+    }
+    return render(request, 'nexus/master.html', context)
+
+def faq(request):
+    user = get_user_from_session(request)
+    context = {
+        'universes': get_visible_universes(user),
+        'content': render(request, 'nexus/faq.html', {}).content,
+        'logged': bool(user),
+        'user': user
+    }
+    return render(request, 'nexus/master.html', context)
+
+def conditions(request):
+    user = get_user_from_session(request)
+    context = {
+        'universes': get_visible_universes(user),
+        'content': render(request, 'nexus/conditions.html', {}).content,
+        'logged': bool(user),
+        'user': user
+    }
+    return render(request, 'nexus/master.html', context)
+
+def about(request):
+    user = get_user_from_session(request)
+    context = {
+        'universes': get_visible_universes(user),
+        'content': render(request, 'nexus/about.html', {}).content,
+        'logged': bool(user),
+        'user': user
+    }
+    return render(request, 'nexus/master.html', context)
+
+def banners(request):
+    user = get_user_from_session(request)
+    context = {
+        'universes': get_visible_universes(user),
+        'content': render(request, 'nexus/banners.html', {}).content,
+        'logged': bool(user),
+        'user': user
+    }
+    return render(request, 'nexus/master.html', context)
+
+def registered(request):
+    context = {
+        'content': render(request, 'nexus/registered.html', {}).content,
+    }
+    return render(request, 'nexus/master.html', context)
+
+def lostpassword(request):
+    user = get_user_from_session(request)
+    error = ''
+    email = request.POST.get('email', '').strip()
+    if email:
+        try:
+            user = NexusUsers.objects.get(email=email)
+            password = newpassword(user.password)
+            key = passwordkey(user.password)
+            # Logique pour envoyer un e-mail de réinitialisation ici
+            return HttpResponseRedirect(reverse('nexus:passwordsent'))
+        except NexusUsers.DoesNotExist:
+            error = error_messages['email_invalid']
+
+    context = {
+        'universes': get_visible_universes(user),
+        'content': render(request, 'nexus/lostpassword.html', {'error': error}).content,
+        'logged': bool(user),
+        'user': user
+    }
+    return render(request, 'nexus/master.html', context)
+
+def passwordsent(request):
+    context = {
+        'content': render(request, 'nexus/passwordsent.html', {}).content,
+    }
+    return render(request, 'nexus/master.html', context)
+
+def passwordreset(request):
+    context = {
+        'content': render(request, 'nexus/passwordreset.html', {}).content,
+    }
+    return render(request, 'nexus/master.html', context)
+
+def accountawards(request):
+    user = get_user_from_session(request)
+    context = {
+        'universes': get_visible_universes(user),
+        'content': render(request, 'nexus/account-awards.html', {}).content,
+        'logged': bool(user),
+        'user': user
+    }
+    return render(request, 'nexus/master.html', context)
+
+def accountoptions(request):
+    user = get_user_from_session(request)
+    context = {
+        'universes': get_visible_universes(user),
+        'content': render(request, 'nexus/account-options.html', {}).content,
+        'logged': bool(user),
+        'user': user
     }
     return render(request, 'nexus/master.html', context)
 
@@ -111,9 +205,6 @@ def register(request):
     return render(request, 'nexus/master.html', context)
 
 def servers(request):
-    """
-    Gère la sélection et l'affichage des serveurs visibles.
-    """
     try:
         user = get_user_from_session(request)
         if not user:
@@ -148,9 +239,6 @@ def servers(request):
         return JsonResponse({'error': 'An unexpected error occurred', 'details': str(e)}, status=500)
 
 def login(request):
-    """
-    Gère la connexion utilisateur.
-    """
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
@@ -170,8 +258,5 @@ def login(request):
     return HttpResponseRedirect(reverse('nexus:index'))
 
 def logout(request):
-    """
-    Gère la déconnexion utilisateur.
-    """
     flush_session(request)
     return HttpResponseRedirect(reverse('nexus:index'))
