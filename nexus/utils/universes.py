@@ -2,6 +2,7 @@
 # /nexus/utils/universes.py
 
 from nexus.models import Universes
+from django.db import connection
 
 def get_visible_universes(user=None):
     """
@@ -12,11 +13,14 @@ def get_visible_universes(user=None):
                                 Peut inclure des permissions spéciales.
 
     Returns:
-        QuerySet: Une liste des univers visibles.
+        QuerySet ou list: Une liste des univers visibles.
     """
     if user and user.get('privilege_see_hidden_universes', False):
         return Universes.objects.all().order_by('name')
-    return Universes.objects.filter(visible=True).order_by('name')
+
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT id, name, description FROM universes WHERE visible = TRUE ORDER BY name')
+        return [dict(zip([col[0] for col in cursor.description], row)) for row in cursor.fetchall()]
 
 def set_last_universe(user, universe_id):
     """

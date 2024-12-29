@@ -4,6 +4,7 @@
 import re
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email as django_validate_email
+from django.db import connection
 
 def validate_username(username: str) -> bool:
     """
@@ -31,9 +32,9 @@ def is_email_banned(email: str) -> bool:
     Returns:
         bool: True si le domaine est banni, False sinon.
     """
-    banned_domains = ["example.com", "baddomain.com"]  # Liste des domaines interdits
-    domain = email.split('@')[-1].lower()
-    return domain in banned_domains
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT 1 FROM exile_nexus.banned_domains WHERE %s ~* domain LIMIT 1', [email])
+        return cursor.fetchone() is not None
 
 def validate_email(email: str) -> bool:
     """
@@ -50,3 +51,17 @@ def validate_email(email: str) -> bool:
         return True
     except ValidationError:
         return False
+
+def is_username_banned(username: str) -> bool:
+    """
+    Vérifie si un nom d'utilisateur est banni en interrogeant la base de données.
+
+    Args:
+        username (str): Le nom d'utilisateur à vérifier.
+
+    Returns:
+        bool: True si le nom est banni, False sinon.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT 1 FROM exile_s03.banned_logins WHERE %s ~* login LIMIT 1', [username])
+        return cursor.fetchone() is not None

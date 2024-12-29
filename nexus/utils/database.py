@@ -3,7 +3,6 @@
 
 from django.db import connections, transaction
 
-
 def execute_query(query: str, params: list = None, db_alias: str = 'default'):
     """
     Exécute une requête SQL brute sur la base de données spécifiée.
@@ -21,7 +20,6 @@ def execute_query(query: str, params: list = None, db_alias: str = 'default'):
         columns = [col[0] for col in cursor.description] if cursor.description else []
         return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-
 def execute_stored_procedure(proc_name: str, params: list = None, db_alias: str = 'default'):
     """
     Exécute une procédure stockée sur la base de données spécifiée.
@@ -36,7 +34,6 @@ def execute_stored_procedure(proc_name: str, params: list = None, db_alias: str 
     """
     query = f"CALL {proc_name}({', '.join(['%s'] * len(params)) if params else ''})"
     return execute_query(query, params, db_alias)
-
 
 def manage_transaction(queries_with_params: list, db_alias: str = 'default'):
     """

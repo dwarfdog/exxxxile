@@ -11,15 +11,15 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-from utils.decorators import login_required
-from utils.email import send_registration_email
-from utils.errors import error_messages
-from utils.fingerprint import generate_fingerprint
-from utils.session import get_user_from_session, flush_session
-from utils.validation import validate_username, is_email_banned, is_username_banned
-from utils.universes import get_visible_universes, set_last_universe
-from utils.news import parse_news
-from utils.auth import authenticate_user
+from nexus.models import Universes
+from nexus.utils.decorators import login_required
+from nexus.utils.email import send_registration_email
+from nexus.utils.errors import error_messages
+from nexus.utils.session import get_user_from_session, flush_session
+from nexus.utils.validation import validate_username, is_email_banned, is_username_banned
+from nexus.utils.universes import get_visible_universes, set_last_universe
+from nexus.utils.news import parse_news
+from nexus.utils.auth import authenticate_user, newpassword, passwordkey
 
 
 def page404(request):
@@ -33,7 +33,6 @@ def page404(request):
         'user': user
     }
     return render(request, 'nexus/master.html', context)
-
 
 def index(request):
     """
@@ -71,21 +70,6 @@ def index(request):
     }
     return render(request, 'nexus/master.html', context)
 
-
-def intro(request):
-    """
-    Page d'introduction.
-    """
-    user = get_user_from_session(request)
-    context = {
-        'universes': get_visible_universes(user),
-        'content': render(request, 'nexus/intro.html', {}).content,
-        'logged': bool(user),
-        'user': user
-    }
-    return render(request, 'nexus/master.html', context)
-
-
 def register(request):
     """
     Gère l'inscription utilisateur avec validation.
@@ -102,14 +86,14 @@ def register(request):
     if request.method == 'POST':
         if not validate_username(username):
             error = error_messages['username_invalid']
-        elif not email or not is_email_banned(email):
-            error = error_messages['email_invalid']
+        elif is_email_banned(email):
+            error = error_messages['email_banned']
         elif not conditions:
             error = error_messages['accept_conditions']
         elif is_username_banned(username):
             error = error_messages['username_banned']
         else:
-            password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+            password = newpassword(''.join(random.choices(string.ascii_letters + string.digits, k=8)))
             user_created = send_registration_email(username, email, password, request)
             if user_created:
                 return HttpResponseRedirect(reverse('nexus:registered'))
@@ -126,32 +110,42 @@ def register(request):
     }
     return render(request, 'nexus/master.html', context)
 
-
-@login_required
 def servers(request):
     """
     Gère la sélection et l'affichage des serveurs visibles.
     """
-    user = get_user_from_session(request)
-    getstats = request.GET.get('getstats', '')
-    if getstats:
-        universe = get_visible_universes(user, pk=getstats)
-        return JsonResponse({'result': universe.url + '/statistics'})
+    try:
+        user = get_user_from_session(request)
+        if not user:
+            return HttpResponseRedirect(reverse('nexus:index'))
 
-    setsrv = request.GET.get('setsrv', 0)
-    if setsrv:
-        set_last_universe(user, setsrv)
-        return HttpResponse()
+        getstats = request.GET.get('getstats', '')
+        if getstats:
+            try:
+                universe = Universes.objects.get(pk=getstats)
+                return JsonResponse({'result': universe.url + '/statistics'})
+            except Universes.DoesNotExist:
+                return JsonResponse({'error': 'Universe not found'}, status=404)
 
-    universes = get_visible_universes(user)
-    context = {
-        'universes': universes,
-        'logged': True,
-        'user': user,
-        'content': render(request, 'nexus/servers.html', {'servers': universes}).content,
-    }
-    return render(request, 'nexus/master.html', context)
+        setsrv = request.GET.get('setsrv', 0)
+        if setsrv:
+            try:
+                set_last_universe(user, setsrv)
+                return HttpResponse()
+            except ValueError as e:
+                return JsonResponse({'error': str(e)}, status=400)
 
+        universes = get_visible_universes(user)
+        context = {
+            'universes': universes,
+            'logged': True,
+            'user': user,
+            'content': render(request, 'nexus/servers.html', {'servers': universes}).content,
+        }
+        return render(request, 'nexus/master.html', context)
+
+    except Exception as e:
+        return JsonResponse({'error': 'An unexpected error occurred', 'details': str(e)}, status=500)
 
 def login(request):
     """
@@ -174,7 +168,6 @@ def login(request):
             request.session['lastloginerror'] = 'credentials_invalid'
 
     return HttpResponseRedirect(reverse('nexus:index'))
-
 
 def logout(request):
     """

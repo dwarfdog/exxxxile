@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # /nexus/utils/session.py
 
+from django.db import connection
+
 def get_user_from_session(request):
     """
     Récupère l'utilisateur à partir de la session actuelle.
@@ -18,10 +20,15 @@ def get_user_from_session(request):
     username = request.session.get('username')
 
     if user_id and username:
-        return {
-            'id': user_id,
-            'username': username,
-        }
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT id, username, is_admin FROM nusers WHERE id = %s', [user_id])
+            user_data = cursor.fetchone()
+            if user_data:
+                return {
+                    'id': user_data[0],
+                    'username': user_data[1],
+                    'is_admin': user_data[2],
+                }
 
     return None
 

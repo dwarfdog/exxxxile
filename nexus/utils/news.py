@@ -2,7 +2,7 @@
 # /nexus/utils/news.py
 
 from xml.dom import minidom
-from nexus.models import News
+from django.db import connection
 
 def parse_news():
     """
@@ -13,22 +13,25 @@ def parse_news():
     """
     news_list = []
 
-    for news_item in News.objects.all():
-        try:
-            xmldoc = minidom.parseString(news_item.xml)
-            readbitlist = xmldoc.getElementsByTagName('item')
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT id, xml FROM news')
+        for news_id, xml_content in cursor.fetchall():
+            try:
+                xmldoc = minidom.parseString(xml_content)
+                readbitlist = xmldoc.getElementsByTagName('item')
 
-            for item in readbitlist:
-                parsed_item = {
-                    'title': item.getElementsByTagName('title')[0].childNodes[0].data,
-                    'description': item.getElementsByTagName('description')[0].childNodes[0].data,
-                    'author': item.getElementsByTagName('author')[0].childNodes[0].data,
-                    'pubDate': item.getElementsByTagName('pubDate')[0].childNodes[0].data,
-                }
-                news_list.append(parsed_item)
+                for item in readbitlist:
+                    parsed_item = {
+                        'title': item.getElementsByTagName('title')[0].childNodes[0].data,
+                        'description': item.getElementsByTagName('description')[0].childNodes[0].data,
+                        'author': item.getElementsByTagName('author')[0].childNodes[0].data,
+                        'pubDate': item.getElementsByTagName('pubDate')[0].childNodes[0].data,
+                    }
+                    news_list.append(parsed_item)
 
-        except Exception as e:
-            # Gestion d'erreur en cas de problème avec le parsing XML
-            continue
+            except Exception as e:
+                # Gestion d'erreur en cas de problème avec le parsing XML
+                continue
 
     return news_list
+
