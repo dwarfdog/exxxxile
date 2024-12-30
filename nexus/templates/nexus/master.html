@@ -1,187 +1,124 @@
-﻿{% load static %}{% load nexus_extras %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-	<head>
-		<title>Exile - MMORPG, jeu web virtuel gratuit en ligne de simulation stratégique spatiale jouable avec un navigateur</title>
+{% load static %}{% load nexus_extras %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exile - MMORPG, jeu web virtuel gratuit en ligne de simulation stratégique spatiale jouable avec un navigateur</title>
 
-		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-		<meta http-equiv="Cache-control" content="no-cache" />
-		<meta http-equiv="Expires" content="0" />
-		<meta http-equiv="Pragma" content="no-cache" />
-		<meta http-equiv="Window-target" content="_top" />
+    <!-- Métadonnées pour les moteurs de recherche -->
+    <meta name="robots" content="all">
+    <meta name="revisit-after" content="1 days">
+    <meta name="category" content="Game">
+    <meta name="description" content="Exile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs">
+    <meta name="keywords" content="Exile, jeu en ligne, conquête spatiale, jeu gratuit, jeu web, jeu browser, multijoueur, combat spatial, ogame, 4X, jeu navigateur">
 
-		<meta name="Identifier-URL" content="https://www.{% settings_value 'DOMAIN' %}" />
-		<meta name="Robots" content="all" />
-		<meta name="Revisit-after" content="1 days" />
-		<meta name="Category" content="Game" />
+    <!-- Métadonnées Schema.org pour le partage -->
+    <meta itemprop="name" content="Exile">
+    <meta itemprop="description" content="Exile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs">
+    <meta itemprop="image" content="https://www.{% settings_value 'DOMAIN' %}/static/nexus/assets/site/ss1.jpg">
 
-		<meta name="Description" content="Exile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs" />
-		<meta name="Keywords" content="Exxxxile, Exile, jeu en ligne, conquete spatiale, jeu gratuit, jeu web, jeu browser, multijoueur, combat spatial, ogame, 4X, jeu navigateur" />
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'nexus/assets/favicon.ico' %}" type="image/x-icon">
 
-		<!-- Schema.org meta for Google+ -->
-		<meta itemprop="name" content="Exxxxile">
-		<meta itemprop="description" content="xile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs">
-		<meta itemprop="image" content="https://www.{% settings_value 'DOMAIN' %}/static/nexus/assets/site/ss1.jpg">
+    <!-- Feuilles de style -->
+    <link rel="stylesheet" href="{% static 'nexus/styles/exile/exile.css' %}?v=1">
 
-		<!-- Twitter Card meta -->
-		<meta name="twitter:card" content="summary_large_image">
-		<meta name="twitter:site" content="@exxxxile1">
-		<meta name="twitter:title" content="Exxxxile">
-		<meta name="twitter:description" content="Exile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs">
-		<meta name="twitter:creator" content="@exxxxile1">
-		<meta name="twitter:url" content="https://www.{% settings_value 'DOMAIN' %}" />
-		<meta name="twitter:domain" content="{% settings_value 'DOMAIN' %}" />
-		<!-- Twitter summary card with large image must be at least 280x150px -->
-		<meta name="twitter:image:src" content="https://www.{% settings_value 'DOMAIN' %}/static/nexus/assets/site/ss1.jpg">
+    <!-- Scripts JavaScript -->
+    <script src="{% static 'nexus/scripts/lib/prototype.js' %}?0" defer></script>
+    <script src="{% static 'nexus/scripts/common.js' %}?0" defer></script>
+    <script src="{% static 'nexus/scripts/lang.js' %}?0" defer></script>
+    <script src="{% static 'nexus/scripts/lang-fr.js' %}?0" defer></script>
+</head>
+<body>
+    <div id="page">
+        <!-- En-tête du site -->
+        <header id="header">
+            <nav class="topmenu">
+                <!-- Menu principal -->
+                <a href="{% url 'nexus:index' %}" title="Exile">Accueil</a> .
+                <a href="{% url 'nexus:intro' %}" title="Présentation">Présentation</a> .
+                <a href="{% url 'nexus:register' %}" title="Inscription à Exile">Inscription</a> .
+                <a href="{% url 'nexus:faq' %}" title="Questions fréquemment posées">F.A.Q.</a> .
+                <a href="{% url 'nexus:banners' %}" title="Bannières et barres">Bannières</a> .
+                <a href="#" title="Forum du jeu">Forum</a> .
+                <a href="#" title="Wikipedia d'Exile">Wiki</a>
+            </nav>
 
-		<!-- Open Graph meta -->
-		<meta property="og:title" content="Exxxxile" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://www.{% settings_value 'DOMAIN' %}" />
-		<meta property="og:image" content="https://www.{% settings_value 'DOMAIN' %}/static/nexus/assets/site/ss1.jpg" />
-		<meta property="og:description" content="Exile est un jeu web gratuit en ligne de simulation spatiale stratégique où s'affrontent de nombreux joueurs simultanément. MMORPG, massivement multijoueurs" />
-		<meta property="og:site_name" content="Exxxxile.ovh" />
+            <!-- Bloc utilisateur -->
+            {% if logged %}
+            <div class="form-logged">
+                <p>Connecté en tant que <span class="username">{{ user.username }}</span>,</p>
+                <p>Dernière connexion : {{ user.last_visit }}</p>
+                <ul>
+                    <li><a href="{% url 'nexus:servers' %}">Liste des serveurs</a></li>
+                    <li><a href="{% url 'nexus:accountawards' %}">Voir mes récompenses</a></li>
+                    <li><a href="{% url 'nexus:accountoptions' %}">Modifier mes préférences</a></li>
+                    <li><a href="{% url 'nexus:logout' %}">Déconnexion</a></li>
+                </ul>
+            </div>
+            {% else %}
+            <div class="form-login">
+                <form action="{% url 'nexus:login' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="login" value="1">
+                    <div>
+                        <label for="universe">Univers :</label>
+                        <select id="universe" name="universe" onchange="changeUniverse(this)">
+                            {% for universe in universes %}
+                            <option value="{{ universe.id }}">{{ universe.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="username">Nom d'utilisateur :</label>
+                        <input type="text" id="username" name="username" maxlength="32">
+                    </div>
+                    <div>
+                        <label for="password">Mot de passe :</label>
+                        <input type="password" id="password" name="password" maxlength="32">
+                    </div>
+                    <div>
+                        <a href="{% url 'nexus:lostpassword' %}" class="lostpassword">Mot de passe oublié ?</a>
+                    </div>
+                    {% if lastloginerror %}
+                    <div class="error">{{ lastloginerror }}</div>
+                    {% endif %}
+                    <div>
+                        <button type="submit">Connexion</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
 
-		<link href="{% static 'nexus/assets/favicon.ico' %}" rel="shortcut icon" />
-		<link href="{% static 'nexus/styles/exile/exile.css' %}?v=1" type="text/css" rel="stylesheet" media="all" />
+            <!-- Message pour les utilisateurs sans JavaScript -->
+            <noscript>
+                <div class="error">Les fonctionnalités JavaScript de votre navigateur sont désactivées. Certaines actions pourraient ne pas fonctionner correctement.</div>
+            </noscript>
+        </header>
 
-	    <link href="https://forum{% settings_value 'DOMAIN' %}/extern.php?action=new&amp;fid=5,4&amp;type=rss" rel="alternate" type="application/rss+xml" title="Actualité d'Exile" />
+        <!-- Contenu principal -->
+        <main id="content">
+            <div class="main">
+                {{ content }}
+            </div>
+        </main>
 
-		<script type="text/javascript" src='{% static "nexus/scripts/lib/prototype.js" %}?0'></script>
-		<script type="text/javascript" src='{% static "nexus/scripts/common.js" %}?0'></script>
-		<script type="text/javascript" src='{% static "nexus/scripts/lang.js" %}?0'></script>
-		<script type="text/javascript" src='{% static "nexus/scripts/lang-fr.js" %}?0'></script>
-        <script data-ad-client="ca-pub-8299925713800038" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-	</head>
-	<body>
-		<div id="page">
-			<div id="header">
-				<div class="topmenu">
-					<a href="{% url 'nexus:index' %}" title="Exile">accueil</a> . 
-					<a href="{% url 'nexus:intro' %}" title="Présentation">présentation</a> . 
-					<a href="{% url 'nexus:register' %}" title="Inscription à Exile">inscription</a> . 
-					<a href="{% url 'nexus:faq' %}" title="Questions fréquemment posées">f.a.q.</a> . 
-					<a href="{% url 'nexus:banners' %}" title="Bannières et barres">bannières</a> . 
-					<a href="#" title="Forum du jeu">Forum</a> .
-					<a href="#" title="Wikipedia d'Exile">wiki</a>
-				</div>
-				{% if logged %}				
-				<b>
-				<div class="form-logged">
-					<table>
-						<tr>
-							<td>
-								Connecté en tant que <span class="username">{{ user.username }}</span>,
-							</td>
-						</tr>
-						<tr>
-							<td>
-								Dernière connexion: {{ user.last_visit }}
-							</td>
-						</tr>
-						<tr>
-							<td>&nbsp;</td>
-						</tr>
-						<tr>
-							<td>
-								<a href="{% url 'nexus:servers' %}">Liste des serveurs</a>
-							</td>
-						</tr><b:t>
-						<!--<tr>
-							<td>
-								<a href="{% url 'nexus:accountawards' %}">Voir mes récompenses</a>
-							</td>
-						</tr></b:t>
-						<tr>
-							<td>
-								<a href="{% url 'nexus:accountoptions' %}">Modifier mes préférences</a>
-							</td>
-						</tr>-->
-						<tr>
-							<td>
-								<a href="{% url 'nexus:logout' %}">Déconnexion</a>
-							</td>
-						</tr>
-					</table>
-				</div>
-				</b>
-				{% else %}
-				<b>
-				<div class="form-login">
-				<form action="{% url 'nexus:login' %}" method="post">
-					{% csrf_token %}
-					<input type="hidden" name="login" value="1">
-					<table>
-						<b:t>
-						<tr>
-							<td align="right"><label for="universe">Univers: </label></td>
-							<td><select id="universe" name="universe" onchange="changeUniverse(this)" tabindex="1">
-								{% for universe in universes %}
-								<option value="{{ universe.id }}">{{ universe.name }}</option>
-								{% endfor %}
-								</select>
-							</td>
-							<td></td>
-						</tr>
-						</b:t>
-						<tr>
-							<td><label for="username">Nom d'utilisateur: </label></td>
-							<td><input type="text" class="logininput" id="username" name="username" value="" tabindex="2" maxlength="32"></td>
-						</tr>
-						<tr>
-							<td><label for="password">Mot de passe: </label></td>
-							<td><input type="password" class="logininput" id="password" name="password" value="" tabindex="3" maxlength="32"></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td><a class="lostpassword" href="{% url 'nexus:lostpassword' %}" title="Mot de passe oublié ?">mot de passe oublié ?</a></td>
-						</tr>
-						<tr>
-							<td colspan="2" class="error">&nbsp;{% if lastloginerror %}<b>{{ lastloginerror }}</b>{% endif %}</td>
-						</tr>
-						<tr>
-							<td colspan="2" align="center"><input type="submit" class="button" value="Connexion" tabindex="4"></td>
-						</tr>
-					</table>
-				</form>
-				</div>
-				</b>
-				{% endif %}
-
-				<noscript>
-				<div class="hz-ad">
-					<div class="error" id="noscript">Les fonctionnalités de script de votre navigateur internet sont désactivés.<br/> Il se peut que vous ne puissiez pas vous connecter au jeu.</div>
-				</div>
-				</noscript>
-								
-			</div>
-			<div id="content">
-				<div class="rightad">
-				</div>
-
-				<div class="main">
-					{{content}}
-				</div>
-
-				<div class="clearer"></div>
-			</div>
-
-			<div id="footer">
-				<b>
-				<a class="button" href="{% url 'nexus:register' %}" title="Inscription à Exile">INSCRIPTION</a>
-				</b>
-				<!--<b>
-				<a class="button" href="{% url 'nexus:intro' %}" title="Présentation d'Exile">PRÉSENTATION</a>
-				</b>-->
-				<div class="copyright">
-					<a href="http://www.github.com/gaylord-roger/exile" title="Sources">Exile</a>
-				</div>
-
-				<div class="links">
-					<a href="mailto:info@{% settings_value 'DOMAIN' %}" title="Contacter un administrateur">contact</a> . <a href="{% url 'nexus:conditions' %}" title="Règles du jeu">conditions</a> . <a href="{% url 'nexus:about' %}" title="À propos">à propos</a>
-				</div>
-			</div>
-		</div>
-
-	</body>
+        <!-- Pied de page -->
+        <footer id="footer">
+            <div>
+                <a href="{% url 'nexus:register' %}" class="button">Inscription</a>
+                <a href="{% url 'nexus:intro' %}" class="button">Présentation</a>
+            </div>
+            <div class="copyright">
+                <a href="http://www.github.com/gaylord-roger/exile">Exile</a>
+            </div>
+            <div class="links">
+                <a href="mailto:info@{% settings_value 'DOMAIN' %}">Contact</a> .
+                <a href="{% url 'nexus:conditions' %}">Conditions</a> .
+                <a href="{% url 'nexus:about' %}">À propos</a>
+            </div>
+        </footer>
+    </div>
+</body>
 </html>
