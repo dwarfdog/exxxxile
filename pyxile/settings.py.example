@@ -37,7 +37,7 @@ TEST = False
 ADMINS = [('Admin', 'admin@exile-game.fr')]
 
 # Hôtes autorisés
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
 # Applications installées
 INSTALLED_APPS = [
