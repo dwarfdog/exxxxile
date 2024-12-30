@@ -29,6 +29,7 @@
     <script src="{% static 'nexus/scripts/common.js' %}?0" defer></script>
     <script src="{% static 'nexus/scripts/lang.js' %}?0" defer></script>
     <script src="{% static 'nexus/scripts/lang-fr.js' %}?0" defer></script>
+    <script src="{% static 'nexus/scripts/toastr.min.js' %}" defer></script>
 </head>
 <body>
     <div id="page">
@@ -49,7 +50,7 @@
             {% if logged %}
             <div class="form-logged">
                 <p>Connecté en tant que <span class="username">{{ user.username }}</span>,</p>
-                <p>Dernière connexion : {{ user.last_visit }}</p>
+                <p>Dernière connexion : {{ user.last_visit|date:"j F Y à H\hi" }}</p>
                 <ul>
                     <li><a href="{% url 'nexus:servers' %}">Liste des serveurs</a></li>
                     <li><a href="{% url 'nexus:accountawards' %}">Voir mes récompenses</a></li>
@@ -129,5 +130,6 @@
             </div>
         </footer>
     </div>
+    {% include "toastr.html" %}
 </body>
 </html>

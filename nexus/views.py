@@ -11,6 +11,7 @@ from django.core.validators import validate_email
 from django.db import connection, connections
 from xml.etree import ElementTree as ET
 from django.core.mail import send_mail
+from django.contrib import messages
 from django.template import loader
 from django.conf import settings
 from django.urls import reverse
@@ -508,7 +509,7 @@ def login(request):
     password = request.POST.get('password', '').strip()
 
     if not username or not password:
-        request.session['lastloginerror'] = 'credentials_invalid'
+        request.session['lastloginerror'] = 'Champs requis.'
         return HttpResponseRedirect(reverse('nexus:index'))
 
     logger.debug("Tentative de connexion pour l'utilisateur : %s", username)
@@ -532,7 +533,7 @@ def login(request):
             raise ValueError("Utilisateur introuvable ou identifiants invalides.")
     except Exception as e:
         logger.error("Erreur d'authentification : %s", str(e))
-        request.session['lastloginerror'] = 'credentials_invalid'
+        request.session['lastloginerror'] = 'Identifiants invalides.'
         return HttpResponseRedirect(reverse('nexus:index'))
 
     # Mettre à jour la session utilisateur
@@ -542,6 +543,7 @@ def login(request):
     update_fingerprint_in_db(user.id, fingerprint)
 
     logger.info("Utilisateur connecté avec succès : %s", username)
+    messages.success(request, "Connexion réussie !")
     return HttpResponseRedirect(reverse('nexus:servers'))
 
 
@@ -698,6 +700,100 @@ def registered(request):
     context = {
         'universes': universes,
         'content': content
+    }
+
+    return render(request, 'nexus/master.html', context)
+
+
+################################################ Fonction du changement d'email ################################################
+################################################      Il faut être connecté     ################################################
+def update_email(request):
+    # Vérification de la session et récupération de l'utilisateur
+    user_id = request.session.get('user_id')
+    if not user_id:
+        # Redirige si l'utilisateur n'est pas connecté
+        return redirect('nexus:index') # Redirige vers la page d'accueil
+
+    user = get_object_or_404(NexusUsers, pk=user_id)
+    error = ""
+    if request.method == "POST":
+        old_password = request.POST["old_password"]
+        email = request.POST["email"]
+
+        if not request.user.check_password(old_password):
+            error = "Mot de passe incorrect."
+            return HttpResponseRedirect(reverse('nexus:account_options'))
+
+        # Validation et mise à jour de l'email
+        try:
+            with connections['exile_nexus'].cursor() as cursor:
+                cursor.execute(
+                    'SELECT sp_account_email_change(%s, %s, %s)',
+                    [user.id, old_password, email]
+                )
+        except Exception as e:
+            error = f'email_not_changed: {str(e)}'
+        else:
+            return HttpResponseRedirect(reverse('nexus:account_options'))
+
+    # Préparation du contexte
+    context = {
+        'universes': Universes.objects.all(),
+        'content': render(request, 'nexus/account-options.html', {}).content.decode('utf-8'),
+        'logged': request.session.get('logged', False),
+        'user': user,
+        'error': error,
+    }
+
+    return render(request, 'nexus/master.html', context)
+
+################################################ Fonction du changement de mot de passe ################################################
+################################################          Il faut être connecté         ################################################
+def update_password(request):
+    # Vérification de la session et récupération de l'utilisateur
+    user_id = request.session.get('user_id')
+    if not user_id:
+        # Redirige si l'utilisateur n'est pas connecté
+        return redirect('nexus:index') # Redirige vers la page d'accueil
+
+    user = get_object_or_404(NexusUsers, pk=user_id)
+    error = ""
+    if request.method == "POST":
+        old_password = request.POST["old_password"]
+        new_password = request.POST["new_password"]
+        new_password2 = request.POST["new_password2"]
+
+        if not request.user.check_password(old_password):
+            error = "Mot de passe incorrect."
+            return HttpResponseRedirect(reverse('nexus:account_options'))
+
+        if new_password != new_password2:
+            error = "Les mots de passe ne correspondent pas."
+            return HttpResponseRedirect(reverse('nexus:account_options'))
+
+        if len(new_password) < 6 :
+            error = "Le mot de passe doit contenir au moins 6 caractères."
+            return HttpResponseRedirect(reverse('nexus:account_options'))
+
+        # Mise à jour du mot de passe
+        try:
+            with connections['exile_nexus'].cursor() as cursor:
+                cursor.execute(
+                    'SELECT sp_account_password_change(%s, %s, %s)',
+                    [user.id, old_password, new_password]
+                )
+        except Exception as e:
+            error = f'password_not_changed: {str(e)}'
+        else:
+            return HttpResponseRedirect(reverse('nexus:account_options'))
+
+    # Préparation du contexte
+    context = {
+        'universes': Universes.objects.all(),
+        'content': render(request, 'nexus/account-options.html', {}).content.decode('utf-8'),
+        'logged': request.session.get('logged', False),
+        'user': user,
+        'error': error,
     }
 
     return render(request, 'nexus/master.html', context)

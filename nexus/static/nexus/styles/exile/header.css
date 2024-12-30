@@ -25,6 +25,14 @@
 	padding:2px;
 }
 
+#header ul {
+    list-style: none;
+}
+
+#header li {
+
+}
+
 #header .lostpassword {
 	font-size:9px;
 }

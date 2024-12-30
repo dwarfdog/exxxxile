@@ -3,6 +3,7 @@
 @import 'header.css';
 @import 'footer.css';
 @import 'form.css';
+@import 'toastr.min.css';
 
 body {
 	background: url("../../assets/space_bk.jpg") #4D4D57;
