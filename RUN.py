@@ -13,20 +13,10 @@ commands = [
 
 # Commande pour le script périodique
 periodic_command = "sudo python3 ./manage.py update_player"
-periodic_interval = 60  # Intervalle en secondes
+periodic_interval = 30  # Intervalle en secondes
 
-# Liste pour stocker les processus
-processes = []
-
-# Gestionnaire de signaux pour terminer tous les processus
-def terminate_processes(signal_received, frame):
-    print("Signal d'interruption reçu, fermeture des processus...")
-    for process in processes:
-        try:
-            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-        except Exception as e:
-            print(f"Erreur lors de la fermeture du processus : {e}")
-    exit(0)
+# Liste pour stocker les PIDs des processus de `launch_scripts()`
+script_pids = []
 
 def launch_scripts():
     for command in commands:
@@ -37,13 +27,24 @@ def launch_scripts():
             else:  # Unix/Linux/MacOS
                 process = subprocess.Popen(
                     ["gnome-terminal", "--", "bash", "-c", f"{command}"],
-                    start_new_session=True, preexec_fn=os.setsid
+                    start_new_session=True
                 )
-                processes.append(process)
-
-            time.sleep(2)  # Attendre 2 secondes avant de lancer le prochain script
+                script_pids.append(process.pid)  # Stocker le PID du processus
+            time.sleep(0.5)  # Attendre 0,5 secondes avant de lancer le prochain script
         except Exception as e:
             print(f"Erreur lors du lancement de la commande : {command}\n{e}")
+
+def terminate_scripts():
+    print("Arrêt des processus lancés par `launch_scripts()`...")
+    for pid in script_pids:
+        try:
+            print(f"Arrêt du processus avec PID : {pid}")
+            os.kill(pid, signal.SIGTERM)  # Envoyer le signal de terminaison
+        except ProcessLookupError:
+            print(f"Le processus avec PID {pid} n'existe pas ou est déjà terminé.")
+        except Exception as e:
+            print(f"Erreur lors de l'arrêt du processus {pid} : {e}")
+    print("Tous les processus de `launch_scripts()` ont été arrêtés.")
 
 def launch_periodic_script():
     try:
@@ -52,15 +53,13 @@ def launch_periodic_script():
             if os.name == 'nt':  # Windows
                 raise EnvironmentError("Ce script est conçu pour être utilisé sous Linux avec GNOME Terminal.")
             else:  # Unix/Linux/MacOS
-                process = subprocess.Popen(
+                subprocess.Popen(
                     ["gnome-terminal", "--", "bash", "-c", f"{periodic_command}"],
-                    start_new_session=True, preexec_fn=os.setsid
+                    start_new_session=True
                 )
-                processes.append(process)
-
             time.sleep(periodic_interval)
     except KeyboardInterrupt:
-        print("Arrêt de l'exécution périodique.")
+        print("Arrêt manuel de l'exécution périodique.")
 
 if __name__ == "__main__":
     # Vérification des privilèges administrateurs (Linux uniquement)
@@ -68,12 +67,12 @@ if __name__ == "__main__":
         print("Ce script doit être exécuté avec les droits administrateur.")
         exit(1)
 
-    # Attacher le gestionnaire de signaux
-    signal.signal(signal.SIGINT, terminate_processes)
-    signal.signal(signal.SIGTERM, terminate_processes)
+    try:
+        # Lancer les scripts exécutés une seule fois
+        launch_scripts()
 
-    # Lancer les scripts exécutés une seule fois
-    launch_scripts()
-
-    # Lancer le script périodique
-    launch_periodic_script()
+        # Lancer le script périodique
+        launch_periodic_script()
+    except KeyboardInterrupt:
+        print("Interruption détectée. Arrêt des processus.")
+        terminate_scripts()  # Ne termine que les processus de `launch_scripts()`
