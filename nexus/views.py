@@ -118,7 +118,7 @@ def generate_fingerprint(request) -> str:
 
 
 ################################################ Page d'erreur 404 ################################################
-def page404(request):
+def page_404(request):
     # Récupérer l'ID utilisateur depuis la session
     user_id = request.session.get('user_id')
     user = None
@@ -410,7 +410,7 @@ def servers(request):
 
 
 ################################################ Page des récompenses ################################################
-def accountawards(request):
+def account_awards(request):
     user_id = request.session.get('user_id', 0)
     user = NexusUsers.objects.filter(pk=user_id).first()  # Renvoie None si l'utilisateur n'existe pas
     context = {
@@ -555,7 +555,7 @@ def logout(request):
 
 
 ################################################ Page de mot de passe perdu ################################################
-def lostpassword(request):
+def lost_password(request):
     def generate_secure_key(password, salt):
         """Generate a secure key using a password and a salt."""
         hashed = make_password(password, salt)

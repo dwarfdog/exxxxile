@@ -28,16 +28,16 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),
     path('servers/', views.servers, name='servers'),
-    path('lostpassword/', views.lostpassword, name='lostpassword'),
-    path('passwordsent/', views.passwordsent, name='passwordsent'),
-    path('passwordreset/', views.passwordreset, name='passwordreset'),
+    path('lostpassword/', views.lost_password, name='lostpassword'),
+    path('passwordsent/', views.password_sent, name='passwordsent'),
+    path('passwordreset/', views.password_reset, name='passwordreset'),
 
     # Options utilisateur
-    path('accountawards/', views.accountawards, name='accountawards'),
-    path('accountoptions/', views.accountoptions, name='accountoptions'),
+    path('accountawards/', views.account_awards, name='accountawards'),
+    path('accountoptions/', views.account_options, name='accountoptions'),
 
     # Pages spécifiques
     path('banners/', views.banners, name='banners'),
-    path('page404/', views.page404, name='page404'),
+    path('page404/', views.page_404, name='page404'),
     # path('statistics/', views.statistics, name='statistics'), Actuellement non utilisé
 ]
