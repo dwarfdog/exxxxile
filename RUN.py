@@ -4,38 +4,45 @@ import subprocess
 
 # Définir les commandes pour chaque script à lancer une seule fois
 single_run_commands = [
-    "sudo python3 manage.py runserver 0.0.0.0:8000",
-    "sudo python3 manage.py sp_process_all",
-    "sudo python3 manage.py sp_events",
-    "sudo python3 manage.py sp_battle"
+    "python3 01_run.py",  # Depuis 01_run.py
+    "python3 02_sp_process_all.py",  # Depuis 02_sp_process_all.py
+    "python3 04_sp_events.py",  # Depuis 04_sp_events.py
+    "python3 03_sp_battle.py"  # Depuis 03_sp_battle.py
 ]
 
 # Commande pour le script à exécuter périodiquement
-periodic_command = "sudo python3 manage.py update_player"
+periodic_command = "python3 05_update_player.py"
 periodic_interval = 60  # Intervalle en secondes
 
 def launch_single_run_scripts():
+    processes = []
     for command in single_run_commands:
         try:
             print(f"Lancement de : {command}")
-            if os.name == 'nt':  # Windows
-                subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", command], shell=True)
-            else:  # Unix/Linux/MacOS
-                subprocess.Popen(["x-terminal-emulator", "-e", command], start_new_session=True)
-
+            process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            processes.append(process)
             time.sleep(2)  # Attendre 2 secondes avant de lancer le prochain script
         except Exception as e:
             print(f"Erreur lors du lancement de la commande : {command}\n{e}")
+
+    # Afficher les sorties des processus
+    for process in processes:
+        stdout, stderr = process.communicate()
+        if stdout:
+            print(stdout.decode())
+        if stderr:
+            print(stderr.decode())
 
 def launch_periodic_script():
     try:
         while True:
             print(f"Exécution périodique de : {periodic_command}")
-            if os.name == 'nt':  # Windows
-                subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", periodic_command], shell=True)
-            else:  # Unix/Linux/MacOS
-                subprocess.Popen(["x-terminal-emulator", "-e", periodic_command], start_new_session=True)
-
+            process = subprocess.Popen(periodic_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if stdout:
+                print(stdout.decode())
+            if stderr:
+                print(stderr.decode())
             time.sleep(periodic_interval)
     except KeyboardInterrupt:
         print("Arrêt de l'exécution périodique.")
