@@ -1,0 +1,44 @@
+
+input {
+    background-color: #393939;
+    border: #556 1px solid;
+    color: #fff;
+}
+
+select {
+    background:#393939;
+    border:#556 1px solid;
+    color:#fff;
+}
+
+
+.checkbox, .radio { 
+	margin:0px 4px 0px 0px; padding:0;
+	border:0;
+	background-color: transparent;	
+}
+
+input.email {
+	width:200px;
+}
+
+input.button {
+	width:100px;
+}
+
+input.registerinput {
+	width:250px;
+}
+
+/* fieldset */
+fieldset {
+	border:1px solid #aaa;
+	margin-top:5px; padding:10px 10px 5px 10px;
+}
+
+.login-label {
+    width: 5em;
+}
+
+.logininput {
+}

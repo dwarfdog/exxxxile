@@ -1,0 +1,37 @@
+#footer {
+	position:relative;
+	background: url("../../assets/footer.jpg") no-repeat #303030;
+	height:128px;
+}
+#footer a.button {
+	position:absolute;
+	display:block;
+	left:308px;
+	top:36px;
+	width:176px;
+	height:20px;
+	color:#ffffff;
+	text-decoration: none;
+	text-align:center;
+	font-weight:bold;
+	padding-top:8px;
+	margin:0;
+}
+
+#footer .links {
+	position:absolute;
+	top:108px;
+	right:6px;
+}
+
+#footer .copyright {
+	position:absolute;
+	color:#777;
+	font-size:9px;
+	top:108px;
+	left:6px;
+}
+#footer .copyright a {
+	color:#777;
+	text-decoration: none;
+}

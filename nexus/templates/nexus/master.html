@@ -36,13 +36,13 @@
         <header id="header">
             <nav class="topmenu">
                 <!-- Menu principal -->
-                <a href="{% url 'nexus:index' %}" title="Exile">Accueil</a> .
-                <a href="{% url 'nexus:intro' %}" title="Présentation">Présentation</a> .
-                <a href="{% url 'nexus:register' %}" title="Inscription à Exile">Inscription</a> .
-                <a href="{% url 'nexus:faq' %}" title="Questions fréquemment posées">F.A.Q.</a> .
-                <a href="{% url 'nexus:banners' %}" title="Bannières et barres">Bannières</a> .
-                <a href="#" title="Forum du jeu">Forum</a> .
-                <a href="#" title="Wikipedia d'Exile">Wiki</a>
+                <a href="{% url 'nexus:index' %}" title="Exile">accueil</a> .
+                <a href="{% url 'nexus:intro' %}" title="Présentation">présentation</a> .
+                <a href="{% url 'nexus:register' %}" title="Inscription à Exile">inscription</a> .
+                <a href="{% url 'nexus:faq' %}" title="Questions fréquemment posées">f.a.q.</a> .
+                <a href="{% url 'nexus:banners' %}" title="Bannières et barres">bannières</a> .
+                <a href="#" title="Forum du jeu">forum</a> .
+                <a href="#" title="Wikipedia d'Exile">wiki</a>
             </nav>
 
             <!-- Bloc utilisateur -->
@@ -63,7 +63,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="login" value="1">
                     <div>
-                        <label for="universe">Univers :</label>
+                        <label for="universe" class="login-label">Univers :</label>
                         <select id="universe" name="universe" onchange="changeUniverse(this)">
                             {% for universe in universes %}
                             <option value="{{ universe.id }}">{{ universe.name }}</option>

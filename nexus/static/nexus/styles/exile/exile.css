@@ -1,6 +1,8 @@
 
 @import 'reset.css';
 @import 'header.css';
+@import 'footer.css';
+@import 'form.css';
 
 body {
 	background: url("../../assets/space_bk.jpg") #4D4D57;
@@ -9,7 +11,6 @@ body {
 	font-family:Verdana,Arial;
 	font-size:11px;
 }
-
 
 /* link color */
 a { color: #ffa500; }
@@ -53,24 +54,6 @@ div.header.first {
 
 table { font-family:Verdana,Arial; font-size:11px; }
 
-input {
-	background-color:#393939;
-	border:#556 1px solid;
-	color:#fff;
-}
-
-select {
-	background:#393939;
-	border:#556 1px solid;
-	color:#fff;
-}
-
-.checkbox, .radio { 
-	margin:0px 4px 0px 0px; padding:0;
-	border:0;
-	background-color: transparent;	
-}
-
 #page {
 	width:798px;
 	margin:6px auto;
@@ -94,62 +77,6 @@ select {
 	width:120px;
 	margin-top:22px;
 	margin-bottom:4px;
-}
-
-#footer {
-	position:relative;
-	background: url("../../assets/footer.jpg") no-repeat #303030;
-	height:128px;
-}
-#footer a.button {
-	position:absolute;
-	display:block;
-	left:308px;
-	top:36px;
-	width:176px;
-	height:20px;
-	color:#ffffff;
-	text-decoration: none;
-	text-align:center;
-	font-weight:bold;
-	padding-top:8px;
-	margin:0;
-}
-
-#footer .links {
-	position:absolute;
-	top:108px;
-	right:6px;
-}
-
-#footer .copyright {
-	position:absolute;
-	color:#777;
-	font-size:9px;
-	top:108px;
-	left:6px;
-}
-#footer .copyright a {
-	color:#777;
-	text-decoration: none;
-}
-
-input.email {
-	width:200px;
-}
-
-input.button {
-	width:100px;
-}
-
-input.registerinput {
-	width:250px;
-}
-
-/* fieldset */
-fieldset {
-	border:1px solid #aaa;
-	margin-top:5px; padding:10px 10px 5px 10px;
 }
 
 legend { color:#FFA500; }
