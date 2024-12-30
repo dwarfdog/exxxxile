@@ -19,6 +19,18 @@ class Awards(models.Model):
         verbose_name = "Award"
         verbose_name_plural = "Awards"
 
+class BannedLogins(models.Model):
+    """
+    Représente un login interdit dans le système.
+    """
+    login = models.CharField(max_length=255, primary_key=True)
+
+    class Meta:
+        db_table = 'banned_logins'
+        verbose_name = "BannedLogin"
+        verbose_name_plural = "BannedLogins"
+
+
 
 class BannedDomains(models.Model):
     """
@@ -28,8 +40,8 @@ class BannedDomains(models.Model):
 
     class Meta:
         db_table = 'banned_domains'
-        verbose_name = "Banned Domain"
-        verbose_name_plural = "Banned Domains"
+        verbose_name = "BannedDomain"
+        verbose_name_plural = "BannedDomains"
 
 
 class LogLogins(models.Model):
@@ -47,8 +59,8 @@ class LogLogins(models.Model):
 
     class Meta:
         db_table = 'log_logins'
-        verbose_name = "Login Log"
-        verbose_name_plural = "Login Logs"
+        verbose_name = "LoginLog"
+        verbose_name_plural = "LoginLogs"
 
 
 class News(models.Model):
@@ -111,8 +123,8 @@ class NexusUsers(models.Model):
 
     class Meta:
         db_table = 'nusers'
-        verbose_name = "Nexus User"
-        verbose_name_plural = "Nexus Users"
+        verbose_name = "NexusUser"
+        verbose_name_plural = "NexusUsers"
 
 
 class UsersSuccesses(models.Model):
@@ -126,5 +138,5 @@ class UsersSuccesses(models.Model):
 
     class Meta:
         db_table = 'users_successes'
-        verbose_name = "User Success"
-        verbose_name_plural = "User Successes"
+        verbose_name = "UserSuccess"
+        verbose_name_plural = "UserSuccesses"
