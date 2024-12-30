@@ -111,8 +111,11 @@
         <!-- Pied de page -->
         <footer id="footer">
             <div>
-                <a href="{% url 'nexus:register' %}" class="button">INSCRIPTION</a>
+                {% if logged %}
                 <a href="{% url 'nexus:intro' %}" class="button">PRÉSENTATION</a>
+                {% else %}
+                <a href="{% url 'nexus:register' %}" class="button">INSCRIPTION</a>
+                {% endif %}
             </div>
             <div class="copyright">
                 &copy; {% annee_en_cours %} - Exile. Tous droits réservés.

@@ -1,0 +1,53 @@
+#header {
+	position:relative;
+	background: url("../../assets/header.jpg") no-repeat #303030;
+	height:280px;
+	border-bottom:#222 1px solid;
+}
+
+#header .form-login {
+	position:absolute;
+	top:50px;
+	left:474px;
+}
+
+#header .form-logged {
+	position:absolute;
+	top:50px;
+	left:468px;
+}
+
+#header .form-logged .username {
+	font-weight:bold;
+}
+
+#header form table tr td ul li {
+	padding:2px;
+}
+
+#header .lostpassword {
+	font-size:9px;
+}
+
+#header .hz-ad {
+	position:absolute;
+	top:187px;
+	left:34px;
+	width:730px;
+}
+
+#header .topmenu {
+	position:absolute;
+	left:96px;
+	top:6px;
+}
+
+#header .toprightmenu {
+	position:absolute;
+	left:700px;
+	top:6px;
+}
+
+#header .logininput {
+	width:175px;
+}

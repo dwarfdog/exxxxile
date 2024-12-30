@@ -1,9 +1,9 @@
 
 @import 'reset.css';
+@import 'header.css';
 
 body {
 	background: url("../../assets/space_bk.jpg") #4D4D57;
-/*	background: #4D4D57;*/
 	color:white;
 
 	font-family:Verdana,Arial;
@@ -20,11 +20,11 @@ a:hover { text-decoration: underline; }
 
 h1, h2, h3 { margin: 1em 0px; }
 h1 {
-	text-align:center; 
+	text-align:center;
 	font-size:14px;
 }
 h2 {
-	font-size:13px; 
+	font-size:13px;
 	margin-top:2em;
 }
 h3 { font-size:12px; }
@@ -76,60 +76,6 @@ select {
 	margin:6px auto;
 	border:#222 1px solid;
 	padding:0;
-}
-
-#header {
-	position:relative;
-	background: url("../../assets/header.jpg") no-repeat #303030;
-	height:280px;
-	border-bottom:#222 1px solid;
-}
-
-#header div.form-login {
-	position:absolute;
-	top:50px;
-	left:474px;
-}
-
-#header div.form-logged {
-	position:absolute;
-	top:50px;
-	left:468px;
-}
-
-#header div.form-logged span.username {
-	font-weight:bold;
-}
-
-#header form table tr td {
-	padding:2px;
-}
-
-#header a.lostpassword {
-	font-size:9px;
-}
-
-#header div.hz-ad {
-	position:absolute;
-	top:187px;
-	left:34px;
-	width:730px;
-}
-
-#header div.topmenu {
-	position:absolute;
-	left:96px;
-	top:6px;
-}
-
-#header div.toprightmenu {
-	position:absolute;
-	left:700px;
-	top:6px;
-}
-
-#header input.logininput {
-	width:175px;
 }
 
 #content {
