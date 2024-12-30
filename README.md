@@ -1,64 +1,45 @@
-# exxxxile
-rewrite exile.fr in python/django
+# Exile
 
-1/ INSTALL PYTHON3.7 (at least)
+Exile est un projet en cours de portage vers **Python 3.11** et **PostgreSQL 15**. Ce jeu web de simulation spatiale stratégique propose aux joueurs de s'affronter simultanément dans un univers intergalactique riche et captivant.
 
-apt-get install build-essential checkinstall
+---
 
-apt-get install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+## 🚀 Description du projet
 
-cd /usr/src/
+### 🎮 Qu'est-ce qu'Exile ?
+Exile est un jeu web gratuit et en ligne permettant aux joueurs de :
 
-wget https://www.python.org/ftp/python/3.7.3/Python-3.7.3.tgz
+- **🌍 Coloniser des planètes** : En tant que commandant d'un vaisseau colonisateur, les joueurs commencent leur aventure sur une planète vierge qu'ils devront développer.
+- **🌌 Explorer l'univers** : Découvrir de nouvelles technologies et ressources.
+- **🏗️ Développer et gérer** : Construire des flottes, lancer des recherches pour améliorer leur colonie, et négocier avec d'autres empires.
+- **⚔️ Combattre et conquérir** : Défendre leurs territoires, attaquer d'autres colonies, et étendre leur domination galactique.
+- **🤝 Collaborer** : Créer des alliances et commercer avec d'autres joueurs.
 
-tar xzf Python-3.7.3.tgz
+Aucune installation spécifique n'est requise pour jouer — un simple navigateur web suffit.
 
-cd Python-3.7.3
+---
 
-./configure --enable-optimizations
+## 🎯 Objectifs du portage
 
-make altinstall
+Ce portage vise à moderniser le projet pour :
 
-python3.7 --version
+- Profiter des dernières avancées de **Python 3.11** et **PostgreSQL 15**.
+- Garantir une meilleure maintenabilité et évolutivité du code.
+- Améliorer les performances globales et la compatibilité.
 
-pip3.7 -V
+---
 
-pip3.7 list
+## 📌 Statut actuel
 
-2/ INSTALL DJANGO AND OTHERS
+Le projet est en cours de développement. Les fonctionnalités sont en phase de portage et d'amélioration. Ce fichier README sera remplacé par une documentation complète et des instructions de déploiement lorsque la première version stable sera disponible.
 
-pip3.7 install django psycopg2-binary django-precise-bbcode
+---
 
-3/ INSTALL EXXXXILE
+## 📝 Notes importantes
 
-git clone https://github.com/badj62/exxxxile.git
+- Ce jeu reste fidèle à sa version originale tout en intégrant des améliorations modernes.
+- L'accent est mis sur une expérience fluide et immersive pour les joueurs.
 
-cd exxxxile
+---
 
-cp pyxile/settings.py.example pyxile/settings.py
-
-4/ CREATE A DATABASE IN POSTGRESQL AND A USER OWNING IT
-
-5/ EDIT clean_dump.sql TO REPLACE ALL OWNER 'exxxxile' BY YOUR DB USER
-
-6/ IMPORT THE SQL DUMP
-
-psql -d [db_name] -f clean_dump.sql
-
-7/ SET CONFIG
-
-Edit pyxile/settings.py.example to set correct values (secret key, db access, etc.)
-
-8/ RUNSERVER (FOR DEV) OR WSGI
-
-sudo python3 manage.py runserver 0.0.0.0:8000
-
-9/ INFINITE LOOP RUN COMMANDS (nohup, screen OR ADD A PYTHON SCHEDULER MODULE):
-
-sudo python3 manage.py sp_process_all
-
-sudo python3 manage.py sp_battle
-
-sudo python3 manage.py sp_events
-
-sudo python3 update_player.py
+Merci de suivre les mises à jour et de rester informé des futures annonces concernant le déploiement du projet **Exile**.
