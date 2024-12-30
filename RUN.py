@@ -18,6 +18,16 @@ periodic_interval = 60  # Intervalle en secondes
 # Liste pour stocker les processus
 processes = []
 
+# Gestionnaire de signaux pour terminer tous les processus
+def terminate_processes(signal_received, frame):
+    print("Signal d'interruption reçu, fermeture des processus...")
+    for process in processes:
+        try:
+            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+        except Exception as e:
+            print(f"Erreur lors de la fermeture du processus : {e}")
+    exit(0)
+
 def launch_scripts():
     for command in commands:
         try:
@@ -25,7 +35,10 @@ def launch_scripts():
             if os.name == 'nt':  # Windows
                 raise EnvironmentError("Ce script est conçu pour être utilisé sous Linux avec GNOME Terminal.")
             else:  # Unix/Linux/MacOS
-                process = subprocess.Popen(["gnome-terminal", "--", "bash", "-c", f"{command}"], start_new_session=True)
+                process = subprocess.Popen(
+                    ["gnome-terminal", "--", "bash", "-c", f"{command}"],
+                    start_new_session=True, preexec_fn=os.setsid
+                )
                 processes.append(process)
 
             time.sleep(2)  # Attendre 2 secondes avant de lancer le prochain script
@@ -39,22 +52,15 @@ def launch_periodic_script():
             if os.name == 'nt':  # Windows
                 raise EnvironmentError("Ce script est conçu pour être utilisé sous Linux avec GNOME Terminal.")
             else:  # Unix/Linux/MacOS
-                process = subprocess.Popen(["gnome-terminal", "--", "bash", "-c", f"{periodic_command}"], start_new_session=True)
+                process = subprocess.Popen(
+                    ["gnome-terminal", "--", "bash", "-c", f"{periodic_command}"],
+                    start_new_session=True, preexec_fn=os.setsid
+                )
                 processes.append(process)
 
             time.sleep(periodic_interval)
     except KeyboardInterrupt:
         print("Arrêt de l'exécution périodique.")
-
-# Gestionnaire de signaux pour terminer tous les processus
-def terminate_processes(signal_received, frame):
-    print("Signal d'interruption reçu, fermeture des processus...")
-    for process in processes:
-        try:
-            process.terminate()
-        except Exception as e:
-            print(f"Erreur lors de la fermeture du processus : {e}")
-    exit(0)
 
 if __name__ == "__main__":
     # Vérification des privilèges administrateurs (Linux uniquement)
