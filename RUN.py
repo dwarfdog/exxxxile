@@ -35,22 +35,34 @@ def launch_scripts():
         except Exception as e:
             print(f"Erreur lors du lancement de la commande : {command}\n{e}")
 
-def launch_periodic_script():
-    try:
-        while True:
-            print(f"Exécution périodique de : {periodic_command}")
-            if os.name == 'nt':  # Windows
-                raise EnvironmentError("Ce script est conçu pour être utilisé sous Linux avec GNOME Terminal.")
-            else:  # Unix/Linux/MacOS
-                process = subprocess.Popen(
-                    ["gnome-terminal", "--", "bash", "-c", f"{periodic_command}"],
-                    start_new_session=True
-                )
-                processes.append(process)
+def run_periodic_command(command, interval):
+    """
+    Exécute une commande périodiquement à un intervalle donné.
+    :param command: La commande shell à exécuter.
+    :param interval: Intervalle en secondes entre chaque exécution.
+    """
+    while True:
+        try:
+            print(f"Exécution de la commande : {command}")
+            subprocess.run(command, shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Erreur lors de l'exécution de la commande : {command}\n{e}")
+        except Exception as e:
+            print(f"Erreur inattendue : {e}")
+        finally:
+            print(f"Attente de {interval} secondes avant la prochaine exécution.")
+            time.sleep(interval)
 
-            time.sleep(periodic_interval)
-    except KeyboardInterrupt:
-        print("Arrêt de l'exécution périodique.")
+# Gestionnaire de signaux pour terminer tous les processus
+def terminate_processes(signal_received, frame):
+    print("Signal d'interruption reçu, fermeture des processus...")
+    for process in processes:
+        try:
+            process.terminate()
+            process.wait()
+        except Exception as e:
+            print(f"Erreur lors de la fermeture du processus : {e}")
+    exit(0)
 
 if __name__ == "__main__":
     # Vérification des privilèges administrateurs (Linux uniquement)
@@ -58,8 +70,12 @@ if __name__ == "__main__":
         print("Ce script doit être exécuté avec les droits administrateur.")
         exit(1)
 
+    # Attacher le gestionnaire de signaux
+    signal.signal(signal.SIGINT, terminate_processes)
+    signal.signal(signal.SIGTERM, terminate_processes)
+
     # Lancer les scripts exécutés une seule fois
     launch_scripts()
 
-    # Lancer le script périodique
-    launch_periodic_script()
+    # Lancement de la commande périodique
+    run_periodic_command(periodic_command, periodic_interval)
