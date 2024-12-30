@@ -561,6 +561,7 @@ def logout(request):
 
         # Vidage de la session
         request.session.flush()
+        messages.success(request, "Déconnexion réussie.")
 
         # Redirection après déconnexion
         return HttpResponseRedirect(reverse('nexus:index'))
@@ -568,6 +569,7 @@ def logout(request):
     except Exception as e:
         # Logging de l'erreur
         logger.error(f"Erreur lors de la déconnexion : {e}")
+        messages.error(request, "Une erreur est survenue pendant la déconnexion.")
 
         # Retourner une erreur serveur
         return HttpResponseServerError("Une erreur est survenue pendant la déconnexion.")
