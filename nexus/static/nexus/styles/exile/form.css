@@ -40,19 +40,44 @@ fieldset {
 .form-group {
     display: flex;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.2rem;
+    justify-content: center;
 }
 
 .login-label {
-    width: auto;
-    min-width: max-content;
-    margin-right: 5%;
-    text-align: right;
+    width: 105px;
+    min-width: 105px;
+    max-width: 105px;
+    text-align: left;
 }
 
 .login-input {
     flex: 1;
-    padding: 0.5rem;
+    padding: 0.05rem;
     box-sizing: border-box;
-    max-width: 100%;
+    width: 11.5rem;
+    min-width: 11.5rem;
+    max-width: 11.5rem;
+    margin-left: 0.5rem;
+}
+
+.login-button {
+    margin-top: 0.5rem;
+    padding: 0.1rem 2rem;
+    text-align: center;
+    background-color: #393939;
+    border: #556 1px solid;
+    color: #fff;
+    cursor: pointer;
+}
+
+.lostpass-errors {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.1rem;
+}
+
+.lostpassword {
+    flex: 1;
 }
