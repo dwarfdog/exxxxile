@@ -2,47 +2,40 @@ import os
 import time
 import subprocess
 
-# Définir les commandes pour chaque script à lancer une seule fois
-single_run_commands = [
-    "python3 01_run.py",  # Depuis 01_run.py
-    "python3 02_sp_process_all.py",  # Depuis 02_sp_process_all.py
-    "python3 04_sp_events.py",  # Depuis 04_sp_events.py
-    "python3 03_sp_battle.py"  # Depuis 03_sp_battle.py
+# Commandes pour chaque script directement (fusion des fichiers existants)
+commands = [
+    "sudo python3 manage.py runserver 0.0.0.0:8000",  # Lancement du serveur
+    "sudo python3 manage.py sp_process_all",          # Process all
+    "sudo python3 manage.py sp_events",              # Events
+    "sudo python3 manage.py sp_battle"               # Battle
 ]
 
-# Commande pour le script à exécuter périodiquement
-periodic_command = "python3 05_update_player.py"
+# Commande pour le script périodique
+periodic_command = "sudo python3 manage.py update_player"
 periodic_interval = 60  # Intervalle en secondes
 
-def launch_single_run_scripts():
-    processes = []
-    for command in single_run_commands:
+def launch_scripts():
+    for command in commands:
         try:
             print(f"Lancement de : {command}")
-            process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            processes.append(process)
+            if os.name == 'nt':  # Windows
+                subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", command], shell=True)
+            else:  # Unix/Linux/MacOS
+                subprocess.Popen(["gnome-terminal", "--", "bash", "-c", f"{command}; exec bash"], start_new_session=True)
+
             time.sleep(2)  # Attendre 2 secondes avant de lancer le prochain script
         except Exception as e:
             print(f"Erreur lors du lancement de la commande : {command}\n{e}")
-
-    # Afficher les sorties des processus
-    for process in processes:
-        stdout, stderr = process.communicate()
-        if stdout:
-            print(stdout.decode())
-        if stderr:
-            print(stderr.decode())
 
 def launch_periodic_script():
     try:
         while True:
             print(f"Exécution périodique de : {periodic_command}")
-            process = subprocess.Popen(periodic_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if stdout:
-                print(stdout.decode())
-            if stderr:
-                print(stderr.decode())
+            if os.name == 'nt':  # Windows
+                subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", periodic_command], shell=True)
+            else:  # Unix/Linux/MacOS
+                subprocess.Popen(["gnome-terminal", "--", "bash", "-c", f"{periodic_command}; exec bash"], start_new_session=True)
+
             time.sleep(periodic_interval)
     except KeyboardInterrupt:
         print("Arrêt de l'exécution périodique.")
@@ -54,7 +47,7 @@ if __name__ == "__main__":
         exit(1)
 
     # Lancer les scripts exécutés une seule fois
-    launch_single_run_scripts()
+    launch_scripts()
 
     # Lancer le script périodique
     launch_periodic_script()
