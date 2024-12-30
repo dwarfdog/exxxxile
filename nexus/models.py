@@ -15,7 +15,7 @@ class Awards(models.Model):
 
     class Meta:
         managed = True
-        db_table = 'exile_nexus.awards'
+        db_table = 'awards'
         verbose_name = "Award"
         verbose_name_plural = "Awards"
 
@@ -27,7 +27,7 @@ class BannedDomains(models.Model):
     domain = models.CharField(primary_key=True, max_length=64, unique=True)
 
     class Meta:
-        db_table = 'exile_nexus.banned_domains'
+        db_table = 'banned_domains'
         verbose_name = "Banned Domain"
         verbose_name_plural = "Banned Domains"
 
@@ -46,7 +46,7 @@ class LogLogins(models.Model):
     success = models.BooleanField()
 
     class Meta:
-        db_table = 'exile_nexus.log_logins'
+        db_table = 'log_logins'
         verbose_name = "Login Log"
         verbose_name_plural = "Login Logs"
 
@@ -60,7 +60,7 @@ class News(models.Model):
     xml = models.TextField()
 
     class Meta:
-        db_table = 'exile_nexus.news'
+        db_table = 'news'
         verbose_name = "News"
         verbose_name_plural = "News"
 
@@ -84,7 +84,7 @@ class Universes(models.Model):
     has_fastconnect = models.BooleanField(default=False)
 
     class Meta:
-        db_table = 'exile_nexus.universes'
+        db_table = 'universes'
         verbose_name = "Universe"
         verbose_name_plural = "Universes"
 
@@ -110,7 +110,7 @@ class NexusUsers(models.Model):
     fingerprint = models.CharField(max_length=128)
 
     class Meta:
-        db_table = 'exile_nexus.nusers'
+        db_table = 'nusers'
         verbose_name = "Nexus User"
         verbose_name_plural = "Nexus Users"
 
@@ -125,6 +125,6 @@ class UsersSuccesses(models.Model):
     added = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'exile_nexus.users_successes'
+        db_table = 'users_successes'
         verbose_name = "User Success"
         verbose_name_plural = "User Successes"
