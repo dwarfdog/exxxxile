@@ -72,11 +72,11 @@
                     </div>
                     <div>
                         <label for="username">Nom d'utilisateur :</label>
-                        <input type="text" id="username" name="username" maxlength="32">
+                        <input type="text" class="logininput" id="username" name="username" maxlength="32">
                     </div>
                     <div>
                         <label for="password">Mot de passe :</label>
-                        <input type="password" id="password" name="password" maxlength="32">
+                        <input type="password" class="logininput" id="password" name="password" maxlength="32">
                     </div>
                     <div>
                         <a href="{% url 'nexus:lostpassword' %}" class="lostpassword">Mot de passe oublié ?</a>
@@ -85,7 +85,7 @@
                     <div class="error">{{ lastloginerror }}</div>
                     {% endif %}
                     <div>
-                        <button type="submit">Connexion</button>
+                        <button type="submit" class="button">Connexion</button>
                     </div>
                 </form>
             </div>
@@ -93,25 +93,29 @@
 
             <!-- Message pour les utilisateurs sans JavaScript -->
             <noscript>
-                <div class="error">Les fonctionnalités JavaScript de votre navigateur sont désactivées. Certaines actions pourraient ne pas fonctionner correctement.</div>
+				<div class="hz-ad">
+					<div class="error" id="noscript">Les fonctionnalités JavaScript de votre navigateur sont désactivées. Certaines actions pourraient ne pas fonctionner correctement.</div>
+				</div>
             </noscript>
         </header>
 
         <!-- Contenu principal -->
         <main id="content">
+            <div class="rightad"><!-- --></div>
             <div class="main">
                 {{ content }}
             </div>
+            <div class="clearer"><!-- --></div>
         </main>
 
         <!-- Pied de page -->
         <footer id="footer">
             <div>
-                <a href="{% url 'nexus:register' %}" class="button">Inscription</a>
-                <a href="{% url 'nexus:intro' %}" class="button">Présentation</a>
+                <a href="{% url 'nexus:register' %}" class="button">INSCRIPTION</a>
+                <a href="{% url 'nexus:intro' %}" class="button">PRÉSENTATION</a>
             </div>
             <div class="copyright">
-                <a href="http://www.github.com/gaylord-roger/exile">Exile</a>
+                &copy; {% annee_en_cours %} - Exile. Tous droits réservés.
             </div>
             <div class="links">
                 <a href="mailto:info@{% settings_value 'DOMAIN' %}">Contact</a> .
