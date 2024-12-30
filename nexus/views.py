@@ -54,6 +54,7 @@ def is_email_banned(email):
 def generate_password(length=8):
     characters = string.ascii_letters + string.digits
     return ''.join(secrets.choice(characters) for _ in range(length))
+
 def generate_fingerprint_safe(request, fallback=''):
     try:
         return generate_fingerprint(request)
@@ -266,9 +267,22 @@ def register(request):
 
     else:
         error = None
+        user_id = request.session.get('user_id')
+        user = None
+
+        if user_id:
+            try:
+                user = NexusUsers.objects.get(pk=user_id)
+            except NexusUsers.DoesNotExist:
+                pass
+            else:
+                return HttpResponseRedirect(reverse('nexus:index'))
+        content = render_to_string('nexus/register.html', {}, request)
 
     context = {
+        'logged': request.session.get('logged', False),
         'universes': Universes.objects.all(),
+        'content': content,
         'error': error,
     }
     return render(request, 'nexus/master.html', context)
@@ -601,13 +615,13 @@ def lost_password(request):
         else:
             try:
                 user = NexusUsers.objects.raw(
-                    'SELECT id, username, password, LCID FROM nusers WHERE lower(email) = lower(%s)',
+                    'SELECT id, username, password FROM nusers WHERE lower(email) = lower(%s)',
                     [email]
                 )[0]
             except IndexError:
                 error = 'email_not_found'
             else:
-                template = loader.get_template(f'{user.LCID}/email_newpassword.txt')
+                template = loader.get_template(f'1036/email_newpassword.txt') # Utilise le template 1036 pour l'email en français (à adapter)
                 context = {
                     'user': user,
                     'password': generate_secure_key(user.password, 'change_password'),
