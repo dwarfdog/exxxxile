@@ -1,0 +1,19 @@
+{% if messages %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const notyf = new Notyf({
+                duration: 3000,  // Durée des notifications (3 secondes)
+                dismissible: true  // Permet de fermer les notifications
+            });
+
+            {% for message in messages %}
+                {% if message.tags == "error" %}
+                    notyf.error("{{ message|escapejs }}");
+                {% else %}
+                    notyf.success("{{ message|escapejs }}");
+                {% endif %}
+            {% endfor %}
+        });
+    </script>
+{% endif %}
+
