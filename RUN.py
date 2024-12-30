@@ -18,10 +18,10 @@ def launch_scripts():
     for command in commands:
         try:
             print(f"Lancement de : {command}")
-            if os.name == 'nt':  # Windows
-                subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", command], shell=True)
-            else:  # Unix/Linux/MacOS
-                subprocess.Popen(["gnome-terminal", "--", "bash", "-c", f"{command}; exec bash"], start_new_session=True)
+            if os.name != 'nt':  # Unix/Linux/MacOS
+                subprocess.Popen(["gnome-terminal", "--", "bash", "-c", f"{command}; exec bash"], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            else:
+                raise EnvironmentError("Ce script est conçu pour être utilisé sous Linux avec GNOME Terminal.")
 
             time.sleep(2)  # Attendre 2 secondes avant de lancer le prochain script
         except Exception as e:
@@ -31,10 +31,10 @@ def launch_periodic_script():
     try:
         while True:
             print(f"Exécution périodique de : {periodic_command}")
-            if os.name == 'nt':  # Windows
-                subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", periodic_command], shell=True)
-            else:  # Unix/Linux/MacOS
-                subprocess.Popen(["gnome-terminal", "--", "bash", "-c", f"{periodic_command}; exec bash"], start_new_session=True)
+            if os.name != 'nt':  # Unix/Linux/MacOS
+                subprocess.Popen(["gnome-terminal", "--", "bash", "-c", f"{periodic_command}; exec bash"], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            else:
+                raise EnvironmentError("Ce script est conçu pour être utilisé sous Linux avec GNOME Terminal.")
 
             time.sleep(periodic_interval)
     except KeyboardInterrupt:
