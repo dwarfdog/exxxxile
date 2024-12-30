@@ -451,9 +451,10 @@ def account_options(request: HttpRequest) -> HttpResponse:
     user = get_object_or_404(NexusUsers, pk=user_id)
 
     # Préparation du contexte
+    template = loader.get_template('nexus/account-options.html')
     context = {
         'universes': Universes.objects.all(),
-        'content': render(request, 'nexus/account-options.html', {}).content.decode('utf-8'),
+        'content': template.render({}, request),
         'logged': request.session.get('logged', False),
         'user': user,
     }
