@@ -213,6 +213,11 @@ def intro(request: HttpRequest) -> HttpResponse:
 
 ################################################ Page d'enregistrement ################################################
 def register(request):
+    username = request.POST.get('username', '')
+    email = request.POST.get('email', '')
+    conditions = request.POST.get('conditions', None)
+    error = ''
+    content = render_to_string('nexus/register.html', {}, request)
     if request.method == 'POST' and request.POST.get('create', False):
         if settings.MAINTENANCE or settings.REGISTER_DISABLED:
             error = settings.MAINTENANCE and "Les inscriptions sont temporairement désactivées pour maintenance" or "Les inscriptions sont temporairement désactivées"
@@ -268,7 +273,6 @@ def register(request):
     else:
         error = None
         user_id = request.session.get('user_id')
-        user = None
 
         if user_id:
             try:
@@ -277,12 +281,11 @@ def register(request):
                 pass
             else:
                 return HttpResponseRedirect(reverse('nexus:index'))
-        content = render_to_string('nexus/register.html', {}, request)
 
     context = {
         'logged': request.session.get('logged', False),
         'universes': Universes.objects.all(),
-        'content': content,
+        'content': render_to_string('nexus/register.html', {'username': username, 'email': email, 'conditions': conditions, 'error': error}, request),
         'error': error,
     }
     return render(request, 'nexus/master.html', context)
