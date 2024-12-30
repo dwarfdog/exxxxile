@@ -53,26 +53,11 @@ def run_periodic_command(command, interval):
             print(f"Attente de {interval} secondes avant la prochaine exécution.")
             time.sleep(interval)
 
-# Gestionnaire de signaux pour terminer tous les processus
-def terminate_processes(signal_received, frame):
-    print("Signal d'interruption reçu, fermeture des processus...")
-    for process in processes:
-        try:
-            process.terminate()
-            process.wait()
-        except Exception as e:
-            print(f"Erreur lors de la fermeture du processus : {e}")
-    exit(0)
-
 if __name__ == "__main__":
     # Vérification des privilèges administrateurs (Linux uniquement)
     if os.name != 'nt' and os.geteuid() != 0:
         print("Ce script doit être exécuté avec les droits administrateur.")
         exit(1)
-
-    # Attacher le gestionnaire de signaux
-    signal.signal(signal.SIGINT, terminate_processes)
-    signal.signal(signal.SIGTERM, terminate_processes)
 
     # Lancer les scripts exécutés une seule fois
     launch_scripts()
