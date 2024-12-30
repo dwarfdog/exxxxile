@@ -35,6 +35,8 @@ urlpatterns = [
     # Options utilisateur
     path('accountawards/', views.account_awards, name='accountawards'),
     path('accountoptions/', views.account_options, name='accountoptions'),
+    path('updateemail/', views.update_email, name='updateemail'),
+    path('updatepassword/', views.update_password, name='updatepassword'),
 
     # Pages spécifiques
     path('banners/', views.banners, name='banners'),
