@@ -12,10 +12,10 @@ select {
 }
 
 
-.checkbox, .radio { 
+.checkbox, .radio {
 	margin:0px 4px 0px 0px; padding:0;
 	border:0;
-	background-color: transparent;	
+	background-color: transparent;
 }
 
 input.email {
@@ -36,9 +36,23 @@ fieldset {
 	margin-top:5px; padding:10px 10px 5px 10px;
 }
 
-.login-label {
-    width: 5em;
+
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
-.logininput {
+.login-label {
+    width: auto;
+    min-width: max-content;
+    margin-right: 5%;
+    text-align: right;
+}
+
+.login-input {
+    flex: 1;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    max-width: 100%;
 }

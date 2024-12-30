@@ -62,21 +62,21 @@
                 <form action="{% url 'nexus:login' %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="login" value="1">
-                    <div>
+                    <div class="form-group">
                         <label for="universe" class="login-label">Univers :</label>
-                        <select id="universe" name="universe" onchange="changeUniverse(this)">
+                        <select id="universe" name="universe" class="login-input" onchange="changeUniverse(this)">
                             {% for universe in universes %}
                             <option value="{{ universe.id }}">{{ universe.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div>
-                        <label for="username">Nom d'utilisateur :</label>
-                        <input type="text" class="logininput" id="username" name="username" maxlength="32">
+                    <div class="form-group">
+                        <label for="username" class="login-label">Nom d'utilisateur :</label>
+                        <input type="text" class="login-input" id="username" name="username" maxlength="32">
                     </div>
-                    <div>
-                        <label for="password">Mot de passe :</label>
-                        <input type="password" class="logininput" id="password" name="password" maxlength="32">
+                    <div class="form-group">
+                        <label for="password" class="login-label">Mot de passe :</label>
+                        <input type="password" class="login-input" id="password" name="password" maxlength="32">
                     </div>
                     <div>
                         <a href="{% url 'nexus:lostpassword' %}" class="lostpassword">Mot de passe oublié ?</a>
